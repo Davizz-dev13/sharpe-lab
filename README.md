@@ -4,7 +4,7 @@
 ![Datos](https://img.shields.io/badge/datos-yfinance-green)
 ![Dashboard](https://img.shields.io/badge/dashboard-GitHub%20Pages-orange)
 
-Un terminal cuantitativo personal: descarga datos diarios, calcula métricas y señales de trading sistemático, manda alertas a Telegram y lleva el seguimiento de cada estrategia en un dashboard público que se actualiza solo cada noche.
+Descarga datos diarios, calcula métricas y señales de trading sistemático, manda alertas a Telegram y lleva el seguimiento de cada estrategia en un dashboard que se actualiza cada noche.
 
 **[Ver el dashboard en vivo](https://davizz-dev13.github.io/sharpe-lab/)**
 
@@ -13,10 +13,10 @@ Un terminal cuantitativo personal: descarga datos diarios, calcula métricas y s
 
 - **Señales diarias** sobre un universo de ETFs, futuros, semiconductores y Bitcoin: SPY, QQQ, GLD, GC=F, CL=F, TLT, AMD, TSM, ASML, AVGO y BTC-USD.
 - **Alertas a Telegram** solo cuando algo cambia de verdad: si una estrategia entra en largo o sale de un activo, llega un mensaje. Si no hay cambio de régimen, no hay ruido.
-- **Backtesting honesto**: las señales se ejecutan desde la vela siguiente, con costes de transacción y remuneración del cash (configurables en `config/settings.yaml`), para no inflar los resultados.
+- **Backtesting**: las señales se ejecutan desde la vela siguiente, con costes de transacción y remuneración del cash (configurables en `config/settings.yaml`), para no inflar los resultados.
 - **Dashboard autoactualizado**: curvas de rentabilidad por estrategia vs buy & hold, ganancias YTD, Sharpe y drawdown. Se regenera cada día laborable tras el cierre de EE.UU. con una GitHub Action.
 
-## Estrategias
+## Estrategias/ideas iniciales
 
 Tres estrategias de régimen (largo / fuera) en el panel principal:
 
@@ -40,7 +40,7 @@ streamlit run app/streamlit_app.py
 ### Alertas de Telegram
 
 1. Crea un bot con [@BotFather](https://t.me/BotFather) y copia el token y tu chat id en `.env` (plantilla en `.env.example`).
-2. Prueba en seco: `python run_alerts.py --dry-run` (imprime las alertas sin enviar nada).
+2. Prueba: `python run_alerts.py --dry-run` (imprime las alertas sin enviar nada).
 3. En vivo: `python run_alerts.py`. Programa una ejecución diaria tras el cierre con cron o el Programador de tareas.
 
 Las alertas ya enviadas se deduplican en `data/alert_state.json` y cada corrida revisa las últimas sesiones, así que un día perdido no pierde una señal reciente.
