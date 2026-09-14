@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sharpe Lab - Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#0d1117; --card:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --live:#3fb950; }
+  :root { --bg:#f4ecd8; --card:#faf5e7; --border:#d8cdb2; --text:#2a170f; --muted:#7a6a58; --accent:#d96b2a; --live:#2e7d50; }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; }
   header { padding:28px 24px 8px; max-width:1200px; margin:0 auto; }
@@ -14,15 +16,15 @@
   .sub { color:var(--muted); font-size:13px; margin-top:6px; }
   main { max-width:1200px; margin:0 auto; padding:16px 24px 60px; }
   .tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.5px; padding:2px 8px; border-radius:10px; vertical-align:middle; margin-left:8px; }
-  .tag.bt { background:rgba(210,153,34,.18); color:#d29922; }
-  .tag.lv { background:rgba(63,185,80,.15); color:var(--live); }
-  .tag.wf { background:rgba(88,166,255,.15); color:var(--accent); }
+  .tag.bt { background:rgba(217,107,42,.12); color:#c98a12; }
+  .tag.lv { background:rgba(46,125,80,.12); color:var(--live); }
+  .tag.wf { background:rgba(47,111,208,.1); color:var(--accent); }
   .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin:18px 0 26px; }
   .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; }
   .card h3 { margin:0 0 8px; font-size:14px; }
   .card .big { font-size:20px; font-weight:600; }
   .card .row { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:4px; }
-  .pos { color:#3fb950; } .neg { color:#f85149; }
+  .pos { color:#35855a; } .neg { color:#d9402f; }
   .panel { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; margin-bottom:26px; }
   .sect { font-size:17px; margin:30px 0 10px; padding-top:22px; border-top:1px solid var(--border); }
   .kpis { display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin:8px 0 14px; }
@@ -35,7 +37,7 @@
   .live-list li { margin:3px 0; }
   .live-list b { color:var(--text); font-weight:600; }
   .controls { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; align-items:center; }
-  .controls button, .controls select { background:#21262d; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:13px; cursor:pointer; }
+  .controls button, .controls select { background:#e8dfc8; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:13px; cursor:pointer; }
   .controls button.active { background:var(--accent); color:#0d1117; border-color:var(--accent); font-weight:600; }
   .chart-wrap { position:relative; height:380px; }
   .chart-wrap.short { height:280px; }
@@ -43,12 +45,30 @@
   th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); }
   th { color:var(--muted); font-weight:600; }
   tr.fold-head { cursor:pointer; }
-  tr.fold-head:hover { background:#21262d; }
+  tr.fold-head:hover { background:#e8dfc8; }
   .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:12px; font-weight:600; }
-  .badge.long { background:rgba(63,185,80,.15); color:#3fb950; }
-  .badge.exit { background:rgba(248,81,73,.15); color:#f85149; }
+  .badge.long { background:rgba(46,125,80,.12); color:#35855a; }
+  .badge.exit { background:rgba(217,64,47,.1); color:#d9402f; }
   .empty { color:var(--muted); font-size:14px; padding:30px 0; text-align:center; }
   footer { text-align:center; color:var(--muted); font-size:12px; padding:20px; max-width:900px; margin:0 auto; }
+
+  /* Restyle */
+  body{font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,sans-serif;}
+  h1,.panel h2,.card h3,.sect{font-family:'Bungee',sans-serif;font-weight:400;letter-spacing:.02em;}
+  .sect{border-top:3px solid var(--text);font-size:19px;}
+  .panel,.card{border:3px solid var(--text);border-radius:0;}
+  .controls button,.controls select{background:var(--card);color:var(--text);border:2px solid var(--text);border-radius:0;font-family:'DM Sans',sans-serif;}
+  .controls button.active{background:var(--accent);color:var(--bg);border-color:var(--text);}
+  .tag{border-radius:0;border:2px solid var(--text);}
+  .tag.bt{background:var(--yellow,#eab619);color:var(--text);}
+  .tag.lv{background:#35858a;color:var(--bg);}
+  .tag.wf{background:var(--card);color:var(--text);}
+  .badge{border-radius:0;}
+  th{background:var(--text);color:var(--bg);font-family:'Bungee',sans-serif;font-weight:400;font-size:10.5px;letter-spacing:.03em;}
+  th,td{border-bottom:2px solid var(--border);}
+  tr.fold-head:hover{background:#efe7cf;}
+  a{color:var(--accent);}
+
 </style>
 </head>
 <body>
@@ -141,7 +161,7 @@
 </main>
 <footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
 <script>
-const COLORS = ['#58a6ff','#3fb950','#f778ba','#d29922','#a5d6ff','#ff9b6a','#bc8cff','#7ee787'];
+const COLORS = ['#2f6fd0','#35855a','#c94f8d','#c98a12','#5b93c9','#e07b4e','#7c5cbf','#4ca372'];
 let DATA = null, SEMIS = null, MSCI = null, mainChart = null, ytdChart = null, liveChart = null, sectCharts = {}, tfSect = { semis: 'ALL', msci: 'ALL' };
 let state = { tf: 'ALL', asset: 'BTC-USD' };
 
@@ -158,10 +178,10 @@ const goLivePlugin = {
     const {top, bottom} = chart.chartArea;
     const ctx = chart.ctx;
     ctx.save();
-    ctx.strokeStyle = '#3fb950'; ctx.setLineDash([4,4]); ctx.lineWidth = 1.2;
+    ctx.strokeStyle = '#35855a'; ctx.setLineDash([4,4]); ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = '#3fb950'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillStyle = '#35855a'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
     ctx.fillText('EN VIVO →', x + 4, top + 12);
     ctx.restore();
   }
@@ -208,14 +228,14 @@ function renderLive() {
   const datasets = Object.entries(live.strategies).map(([name, eq], idx) => ({
     label: name, data: eq, borderColor: COLORS[idx % COLORS.length], borderWidth: 1.8, pointRadius: 0, tension: 0.15
   }));
-  datasets.push({ label: 'Buy & Hold', data: live.bh, borderColor: '#6e7681', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 });
+  datasets.push({ label: 'Buy & Hold', data: live.bh, borderColor: '#8a7a63', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 });
   if (liveChart) liveChart.destroy();
   liveChart = new Chart(document.getElementById('live-chart'), {
     type: 'line', data: { labels: live.dates, datasets },
     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { labels: { color: '#8b949e', boxWidth: 12 } } },
-      scales: { x: { ticks: { color: '#8b949e', maxTicksLimit: 10 }, grid: { color: '#21262d' } },
-                y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' }, title: { display: true, text: 'Crecimiento de 1€ desde el go-live', color: '#8b949e' } } } }
+      plugins: { legend: { labels: { color: '#7a6a58', boxWidth: 12 } } },
+      scales: { x: { ticks: { color: '#7a6a58', maxTicksLimit: 10 }, grid: { color: '#e3d9c0' } },
+                y: { ticks: { color: '#7a6a58' }, grid: { color: '#e3d9c0' }, title: { display: true, text: 'Crecimiento de 1€ desde el go-live', color: '#7a6a58' } } } }
   });
 }
 
@@ -234,7 +254,7 @@ function renderMain() {
         borderWidth: 1.6, pointRadius: 0, tension: 0.15 });
     });
     const bh = Object.values(DATA.strategies)[0];
-    if (bh) datasets.push({ label: 'Buy & Hold', data: renorm(bh.bh_equity, i0), borderColor: '#6e7681',
+    if (bh) datasets.push({ label: 'Buy & Hold', data: renorm(bh.bh_equity, i0), borderColor: '#8a7a63',
       borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 });
   } else {
     Object.keys(DATA.strategies).forEach((name, idx) => {
@@ -244,15 +264,15 @@ function renderMain() {
     });
     const anyS = DATA.per_asset[state.asset + '|' + Object.keys(DATA.strategies)[0]];
     if (anyS) datasets.push({ label: 'Buy & Hold ' + state.asset, data: renorm(anyS.bh_equity, i0),
-      borderColor: '#6e7681', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 });
+      borderColor: '#8a7a63', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 });
   }
   if (mainChart) mainChart.destroy();
   mainChart = new Chart(document.getElementById('main-chart'), {
     type: 'line', data: { labels, datasets }, plugins: [goLivePlugin],
     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { labels: { color: '#8b949e', boxWidth: 12 } } },
-      scales: { x: { ticks: { color: '#8b949e', maxTicksLimit: 10 }, grid: { color: '#21262d' } },
-                y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' }, title: { display: true, text: 'Crecimiento de 1€', color: '#8b949e' } } } }
+      plugins: { legend: { labels: { color: '#7a6a58', boxWidth: 12 } } },
+      scales: { x: { ticks: { color: '#7a6a58', maxTicksLimit: 10 }, grid: { color: '#e3d9c0' } },
+                y: { ticks: { color: '#7a6a58' }, grid: { color: '#e3d9c0' }, title: { display: true, text: 'Crecimiento de 1€', color: '#7a6a58' } } } }
   });
 }
 
@@ -263,20 +283,20 @@ function renderYtd() {
   ytdChart = new Chart(document.getElementById('ytd-chart'), {
     type: 'bar',
     data: { labels: names, datasets: [{ data: vals,
-      backgroundColor: vals.map((v,i) => i === vals.length-1 ? 'rgba(110,118,129,.55)' : (v >= 0 ? 'rgba(63,185,80,.55)' : 'rgba(248,81,73,.55)')),
-      borderColor: vals.map((v,i) => i === vals.length-1 ? '#6e7681' : (v >= 0 ? '#3fb950' : '#f85149')), borderWidth: 1 }] },
+      backgroundColor: vals.map((v,i) => i === vals.length-1 ? 'rgba(138,122,99,.5)' : (v >= 0 ? 'rgba(46,125,80,.5)' : 'rgba(217,64,47,.5)')),
+      borderColor: vals.map((v,i) => i === vals.length-1 ? '#8a7a63' : (v >= 0 ? '#35855a' : '#d9402f')), borderWidth: 1 }] },
     options: { responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
-      scales: { x: { ticks: { color: '#8b949e' }, grid: { display: false } },
-                y: { ticks: { color: '#8b949e', callback: v => v + '%' }, grid: { color: '#21262d' } } } }
+      scales: { x: { ticks: { color: '#7a6a58' }, grid: { display: false } },
+                y: { ticks: { color: '#7a6a58', callback: v => v + '%' }, grid: { color: '#e3d9c0' } } } }
   });
 }
 
 function eqOpts(title) {
   return { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-    plugins: { legend: { labels: { color: '#8b949e', boxWidth: 12 } } },
-    scales: { x: { ticks: { color: '#8b949e', maxTicksLimit: 10 }, grid: { color: '#21262d' } },
-              y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' }, title: { display: true, text: title, color: '#8b949e' } } } };
+    plugins: { legend: { labels: { color: '#7a6a58', boxWidth: 12 } } },
+    scales: { x: { ticks: { color: '#7a6a58', maxTicksLimit: 10 }, grid: { color: '#e3d9c0' } },
+              y: { ticks: { color: '#7a6a58' }, grid: { color: '#e3d9c0' }, title: { display: true, text: title, color: '#7a6a58' } } } };
 }
 function sliceDates(dates, tf) { const st = tfStart(tf); const i = dates.findIndex(d => d >= st); return i < 0 ? 0 : i; }
 
@@ -287,8 +307,8 @@ function renderSemisChart() {
   sectCharts.semis = new Chart(document.getElementById('semis-chart'), {
     type: 'line', plugins: [goLivePlugin],
     data: { labels: SEMIS.dates.slice(i0), datasets: [
-      { label: 'Rotación Semis-8 v1', data: renorm(SEMIS.equity, i0), borderColor: '#bc8cff', borderWidth: 1.8, pointRadius: 0, tension: 0.15 },
-      { label: 'Buy & Hold cesta semis', data: renorm(SEMIS.bh_equity, i0), borderColor: '#6e7681', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 }]},
+      { label: 'Rotación Semis-8 v1', data: renorm(SEMIS.equity, i0), borderColor: '#7c5cbf', borderWidth: 1.8, pointRadius: 0, tension: 0.15 },
+      { label: 'Buy & Hold cesta semis', data: renorm(SEMIS.bh_equity, i0), borderColor: '#8a7a63', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 }]},
     options: eqOpts('Crecimiento de 1€') });
   sectCharts.semis.$golive = SEMIS.go_live;
 }
@@ -300,8 +320,8 @@ function renderMsciChart() {
   sectCharts.msci = new Chart(document.getElementById('msci-chart'), {
     type: 'line', plugins: [goLivePlugin],
     data: { labels: MSCI.dates.slice(i0), datasets: [
-      { label: 'MomVol MSCI World', data: renorm(MSCI.equity, i0), borderColor: '#d29922', borderWidth: 1.8, pointRadius: 0, tension: 0.15 },
-      { label: 'Buy & Hold MSCI World (URTH)', data: renorm(MSCI.bh_equity, i0), borderColor: '#6e7681', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 }]},
+      { label: 'MomVol MSCI World', data: renorm(MSCI.equity, i0), borderColor: '#c98a12', borderWidth: 1.8, pointRadius: 0, tension: 0.15 },
+      { label: 'Buy & Hold MSCI World (URTH)', data: renorm(MSCI.bh_equity, i0), borderColor: '#8a7a63', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 }]},
     options: eqOpts('Crecimiento de 1€') });
   sectCharts.msci.$golive = MSCI.go_live;
 }
