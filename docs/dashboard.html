@@ -80,7 +80,7 @@
 </header>
 <main>
   <div class="panel">
-    <h2>Paper trading en vivo<span class="tag lv">TRACK RECORD REAL</span></h2>
+    <h2>Paper trading en vivo: Bitcoin<span class="tag lv">TRACK RECORD REAL</span></h2>
     <p class="note" id="live-note">Dinero ficticio siguiendo en tiempo real las señales que genera el motor cada noche. Nada de backtest ni simulación: cada día se registra la posición (largo o cash) y la rentabilidad acumulada desde el go-live, comparada con buy &amp; hold, y todo se reconcilia con la hoja "Quant Tracker". Es el único resultado que cuenta: real, fuera de muestra y sin retoques.</p>
     <p class="note" style="margin-bottom:6px"><b style="color:var(--text)">Estrategias en seguimiento ahora mismo:</b></p>
     <ul class="live-list">
@@ -228,7 +228,7 @@ function renderLive() {
   const datasets = Object.entries(live.strategies).map(([name, eq], idx) => ({
     label: name, data: eq, borderColor: COLORS[idx % COLORS.length], borderWidth: 1.8, pointRadius: 0, tension: 0.15
   }));
-  datasets.push({ label: 'Buy & Hold', data: live.bh, borderColor: '#8a7a63', borderWidth: 1.2, borderDash: [5,4], pointRadius: 0, tension: 0.15 });
+  datasets.unshift({ label: 'Buy & Hold BTC', data: live.bh, borderColor: '#b3a68b', borderWidth: 3.2, borderDash: [6,5], pointRadius: 0, tension: 0.15 });
   if (liveChart) liveChart.destroy();
   liveChart = new Chart(document.getElementById('live-chart'), {
     type: 'line', data: { labels: live.dates, datasets },
@@ -272,7 +272,7 @@ function renderMain() {
     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
       plugins: { legend: { labels: { color: '#7a6a58', boxWidth: 12 } } },
       scales: { x: { ticks: { color: '#7a6a58', maxTicksLimit: 10 }, grid: { color: '#e3d9c0' } },
-                y: { ticks: { color: '#7a6a58' }, grid: { color: '#e3d9c0' }, title: { display: true, text: 'Crecimiento de 1€', color: '#7a6a58' } } } }
+                y: { type: 'logarithmic', ticks: { color: '#7a6a58' }, grid: { color: '#e3d9c0' }, title: { display: true, text: 'Crecimiento de 1€ (escala log)', color: '#7a6a58' } } } }
   });
 }
 
@@ -296,7 +296,7 @@ function eqOpts(title) {
   return { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
     plugins: { legend: { labels: { color: '#7a6a58', boxWidth: 12 } } },
     scales: { x: { ticks: { color: '#7a6a58', maxTicksLimit: 10 }, grid: { color: '#e3d9c0' } },
-              y: { ticks: { color: '#7a6a58' }, grid: { color: '#e3d9c0' }, title: { display: true, text: title, color: '#7a6a58' } } } };
+              y: { type: 'logarithmic', ticks: { color: '#7a6a58' }, grid: { color: '#e3d9c0' }, title: { display: true, text: title + ' (escala log)', color: '#7a6a58' } } } };
 }
 function sliceDates(dates, tf) { const st = tfStart(tf); const i = dates.findIndex(d => d >= st); return i < 0 ? 0 : i; }
 
