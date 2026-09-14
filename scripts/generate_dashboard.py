@@ -70,7 +70,12 @@ def main():
         except Exception as e:
             errors.append(f"{t}: {e}")
 
+    # BTC cotiza tambien en fin de semana: las etiquetas deben ser la union de
+    # todos los calendarios; si no, las series (union) y las fechas (solo SPY)
+    # tienen longitudes distintas y la grafica desalinea todo.
     idx = closes[UNIVERSE[0]].index
+    for t in UNIVERSE[1:]:
+        idx = idx.union(closes[t].index)
     dates = [str(d.date()) for d in idx]
     year = idx[-1].year
 
@@ -80,10 +85,10 @@ def main():
            "strategies": {}, "per_asset": {}, "errors": errors}
 
     for s in STRATEGIES:
-        portfolio = pd.DataFrame({t: rets[(t, s)] for t in UNIVERSE if (t, s) in rets}).mean(axis=1)
-        eq = (1 + portfolio).cumprod()
-        bh = pd.DataFrame(bh_rets).mean(axis=1)
-        bh_eq = (1 + bh).cumprod()
+        portfolio = pd.DataFrame({t: rets[(t, s)] for t in UNIVERSE if (t, s) in rets}).reindex(idx).mean(axis=1)
+        eq = (1 + portfolio.fillna(0.0)).cumprod()
+        bh = pd.DataFrame(bh_rets).reindex(idx).mean(axis=1)
+        bh_eq = (1 + bh.fillna(0.0)).cumprod()
         out["strategies"][s] = {
             "equity": [round(float(v), 4) for v in eq],
             "bh_equity": [round(float(v), 4) for v in bh_eq],
@@ -92,8 +97,8 @@ def main():
         for t in UNIVERSE:
             if (t, s) not in rets:
                 continue
-            e = (1 + rets[(t, s)]).cumprod()
-            b = (1 + bh_rets[t]).cumprod()
+            e = (1 + rets[(t, s)].reindex(idx).fillna(0.0)).cumprod()
+            b = (1 + bh_rets[t].reindex(idx).fillna(0.0)).cumprod()
             out["per_asset"][f"{t}|{s}"] = {
                 "equity": [round(float(v), 4) for v in e],
                 "bh_equity": [round(float(v), 4) for v in b],
@@ -105,13 +110,18 @@ def main():
     live_idx = [i for i, d in enumerate(dates) if d > GO_LIVE]
     if live_idx:
         live["dates"] = [dates[i] for i in live_idx]
+        # El grafico de paper trading es BTC-USD (la seccion lo anuncia y hoy es
+        # el unico activo con estrategias rentables en vivo).
         for s in STRATEGIES:
-            portfolio = pd.DataFrame({t: rets[(t, s)] for t in UNIVERSE if (t, s) in rets}).mean(axis=1)
-            seg = portfolio.iloc[live_idx]
-            eq = (1 + seg.fillna(0.0)).cumprod()
+            r = rets.get(("BTC-USD", s))
+            if r is None:
+                continue
+            seg = r.reindex(idx).fillna(0.0).iloc[live_idx]
+            eq = (1 + seg).cumprod()
+            assert len(eq) == len(live["dates"])
             live["strategies"][s] = [round(float(v), 4) for v in eq]
-        bh = pd.DataFrame(bh_rets).mean(axis=1).iloc[live_idx]
-        bh_eq = (1 + bh.fillna(0.0)).cumprod()
+        bh = bh_rets["BTC-USD"].reindex(idx).fillna(0.0).iloc[live_idx]
+        bh_eq = (1 + bh).cumprod()
         live["bh"] = [round(float(v), 4) for v in bh_eq]
     out["live"] = live
 
