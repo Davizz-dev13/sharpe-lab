@@ -84,7 +84,7 @@
     <p class="note" id="live-note">Dinero ficticio siguiendo en tiempo real las señales que genera el motor cada noche. Nada de backtest ni simulación: cada día se registra la posición (largo o cash) y la rentabilidad acumulada desde el go-live, comparada con buy &amp; hold, y todo se reconcilia con la hoja "Quant Tracker". Es el único resultado que cuenta: real, fuera de muestra y sin retoques.</p>
     <p class="note" style="margin-bottom:6px"><b style="color:var(--text)">Estrategias en seguimiento ahora mismo:</b></p>
     <ul class="live-list">
-      <li><b>BTC-USD</b> - SMA200W+RSI, ROC60 y Donchian20 (el gráfico de abajo) · go-live 7 sep 2026</li>
+      <li><b>BTC-USD</b> - ROC60 y Donchian20 (el gráfico de abajo) · go-live 7 sep 2026</li>
       <li><b>Rotación Semis-8</b> sobre NVDA, AVGO, AMD, TSM y ASML (<a href="semis/">apartado completo</a>) · go-live 9 sep 2026</li>
       <li><b>SMA200W+RSI semanal Mag7</b> (<a href="mag7/">apartado completo</a>) · go-live 8 sep 2026</li>
       <li><b>MomVol MSCI World</b> sobre URTH (sección de abajo) · go-live 10 sep 2026</li>
@@ -225,7 +225,7 @@ function renderLive() {
     document.getElementById('live-empty').style.display = 'block';
     return;
   }
-  const datasets = Object.entries(live.strategies).map(([name, eq], idx) => ({
+  const datasets = Object.entries(live.strategies).filter(([name]) => name !== 'SMA200W+RSI').map(([name, eq], idx) => ({
     label: name, data: eq, borderColor: COLORS[idx % COLORS.length], borderWidth: 1.8, pointRadius: 0, tension: 0.15
   }));
   datasets.unshift({ label: 'Buy & Hold BTC', data: live.bh, borderColor: '#b3a68b', borderWidth: 3.2, borderDash: [6,5], pointRadius: 0, tension: 0.15 });
