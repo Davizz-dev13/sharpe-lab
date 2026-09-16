@@ -139,9 +139,9 @@
 <footer id="foot"></footer>
 <script>
 const COLORS = {"Cash":"#7a6a58","Gold":"#eab619","Commodities":"#2e7d50","S&P 500":"#2f6fd0","Bitcoin":"#f7931a","MSCI World":"#9467bd","Emerging":"#17a2b8","Silver":"#8f9ba8"};
-const DEFAULT_CUR = {"Cash":50,"Gold":12,"Commodities":10,"S&P 500":25,"Bitcoin":3,"MSCI World":0,"Emerging":0,"Silver":0};
-const DEFAULT_MAX = {"Cash":100,"Gold":30,"Commodities":30,"S&P 500":30,"Bitcoin":5,"MSCI World":30,"Emerging":30,"Silver":30};
-const DEFAULT_INC = {"Cash":true,"Gold":true,"Commodities":true,"S&P 500":true,"Bitcoin":true,"MSCI World":false,"Emerging":false,"Silver":false};
+const DEFAULT_CUR = {"Cash":0,"Gold":25,"Commodities":0,"S&P 500":0,"Bitcoin":15,"MSCI World":50,"Emerging":10,"Silver":0};
+const DEFAULT_MAX = {"Cash":100,"Gold":30,"Commodities":30,"S&P 500":30,"Bitcoin":15,"MSCI World":30,"Emerging":30,"Silver":30};
+const DEFAULT_INC = {"Cash":true,"Gold":true,"Commodities":true,"S&P 500":true,"Bitcoin":true,"MSCI World":true,"Emerging":true,"Silver":false};
 const PALETTE = ["#b87333","#627eea","#d9402f","#3b8bc2","#4a5a6a","#76b900","#e05194","#00a2ed","#f25c05","#8e44ad","#16a085","#c0392b","#7f8c8d","#2c3e50","#a0522d","#6b8e23","#4682b4","#daa520","#cd5c5c","#20b2aa"];
 const colorOf = s => { if(COLORS[s]) return COLORS[s]; let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))>>>0; return PALETTE[h%PALETTE.length]; };
 const DAYS_YR = 365;
@@ -253,7 +253,14 @@ function readCur(tickers){
   tickers.forEach(t=>{ const v=Math.max(0,parseFloat(document.getElementById('cur-'+t).value)||0); raw[t]=v; tot+=v; });
   if(tot<=0){ const w={}; tickers.forEach(t=>w[t]=1/tickers.length); return {w, note:'Weights normalized to equal parts (they summed 0).'}; }
   const w={}; tickers.forEach(t=>w[t]=raw[t]/tot);
-  return {w, note: Math.abs(tot-100)>0.5 ? 'Weights normalized (they summed '+tot.toFixed(0)+'%).' : ''};
+  let dropped=0;
+  DATA.assets.forEach(a=>{
+    if(tickers.includes(a.short)) return;
+    dropped += Math.max(0,parseFloat((document.getElementById('cur-'+a.short)||{}).value)||0);
+  });
+  let note = Math.abs(tot-100)>0.5 ? 'Weights normalized (they summed '+tot.toFixed(0)+'%).' : '';
+  if(dropped>0.5) note += (note?' ':'') + dropped.toFixed(0)+'% of your portfolio sits in assets without full history in this window; it was normalized over what remains.';
+  return {w, note};
 }
 function render(wCur, wOpt, wMax, wRec, tickers, alpha){
   document.getElementById('results').style.display='block';
