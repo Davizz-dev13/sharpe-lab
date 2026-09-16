@@ -356,7 +356,16 @@ function computeFrontier(tickers, maxW, alpha, onProgress, done){
   const w0=solveCVaR(tickers,maxW,alpha,350,0);
   if(!w0){ done(null); return; }
   const lo=annReturn(w0,tickers)/DAYS_YR;
-  const hi=greedyMaxReturn(tickers,maxW);
+  const gMax=greedyMaxReturn(tickers,maxW);
+  if(!(gMax>lo+0.00005)){ done(null); return; }
+  // trim the top of the sweep to what the solver actually satisfies, so a
+  // hard-to-reach edge does not wipe out the whole frontier
+  let fa=lo, fb=gMax;
+  for(let it=0; it<8; it++){
+    const mid=(fa+fb)/2;
+    if(solveCVaR(tickers,maxW,alpha,350,mid)) fa=mid; else fb=mid;
+  }
+  const hi=fa*0.999;
   if(!(hi>lo+0.00005)){ done(null); return; }
   const N=15, pts=[];
   let i=0;
@@ -578,8 +587,10 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         document.getElementById('cur-note').textContent=note;
         const retAn=Math.max(0,parseFloat(document.getElementById('ret-obj').value)||0)/100;
         const muReq=Math.pow(1+retAn,1/DAYS_YR)-1;
+        const gDaily=greedyMaxReturn(tickers,maxW);
         const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
-        if(!wOpt){ err.textContent='No solution: that target is too high for these assets, limits and window. Max reachable right now: ~'+(greedyMaxReturn(tickers,maxW)*365*100).toFixed(1)+'% yearly. Lower the target or raise a max.'; err.style.display='block'; return; }
+        if(!wOpt){ err.textContent='No solution: that target is too high for these assets, limits and window. Max reachable right now: ~'+(gDaily*365*100).toFixed(1)+'% yearly. Lower the target or raise a max.'; err.style.display='block'; return; }
+        if(muReq>0.85*gDaily){ const cn=document.getElementById('cur-note'); cn.textContent=(cn.textContent?cn.textContent+' ':'')+'Heads-up: this target is near the max reachable (~'+(gDaily*365*100).toFixed(1)+'% yearly), so Min CVaR is forced into an extreme mix to reach it.'; }
         const wMax=solveMaxCAGR(tickers,maxW);
         document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets · '+WINDOW+'Y window';
         const r0Daily=annReturn(wOpt,tickers)/DAYS_YR;
