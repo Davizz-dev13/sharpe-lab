@@ -72,7 +72,7 @@
         <label style="font-size:12px;color:var(--mut);display:block;margin-bottom:4px">Add your own ticker</label>
         <input type="text" id="custom-ticker" placeholder="e.g. DOGE, ETH, SOL" style="width:130px;padding:5px 8px;border:2px solid var(--fg);background:var(--panel);color:var(--fg);font-family:'DM Sans',sans-serif;font-size:13px;text-transform:uppercase">
         <button id="custom-add" style="padding:6px 14px;background:var(--yellow);border:3px solid var(--fg);font-family:'Bungee',sans-serif;font-size:11px;cursor:pointer">Add</button>
-        <div class="note" id="custom-status">Built-in universe covers the usual stocks, ETFs, commodities and crypto. Other crypto loads live here (CoinGecko); anything else can join the nightly data on request.</div>
+        <div class="note" id="custom-status">Built-in universe covers the usual stocks, ETFs, commodities and crypto. Other crypto loads live here (Coinbase USD pairs); anything else can join the nightly data on request.</div>
       </div>
       <div style="margin-top:12px;font-size:13px">
         Expected return target: <input type="number" id="ret-obj" min="0" max="50" step="0.5" value="5" style="width:58px"> % yearly
@@ -333,18 +333,23 @@ async function addCustom(symRaw){
   }
   st.textContent='Looking for '+sym+'...';
   try{
-    const sr=await fetch('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(sym)).then(r=>r.json());
-    const coins=(sr.coins||[]).filter(c=>(c.symbol||'').toUpperCase()===sym);
-    coins.sort((a,b)=>(a.market_cap_rank||9e9)-(b.market_cap_rank||9e9));
-    const coin=coins[0];
-    if(!coin || !coin.market_cap_rank || coin.market_cap_rank>100){
-      st.textContent=sym+' is not in the nightly universe and no major crypto matches it. Stocks and ETFs can join the nightly data on request.';
-      return;
-    }
-    st.textContent='Downloading '+coin.name+' ('+sym+') from CoinGecko...';
-    const mc=await fetch('https://api.coingecko.com/api/v3/coins/'+coin.id+'/market_chart?vs_currency=usd&days=1825').then(r=>r.json());
+    st.textContent='Downloading '+sym+'-USD daily history (Coinbase)...';
+    const DAY=86400000, now=Date.now();
     const px=new Map();
-    (mc.prices||[]).forEach(pt=>{ px.set(new Date(pt[0]).toISOString().slice(0,10), pt[1]); });
+    let cur=now-1826*DAY;
+    while(cur<now){
+      const chunkEnd=Math.min(cur+300*DAY, now);
+      const url='https://api.exchange.coinbase.com/products/'+sym+'-USD/candles?granularity=86400&start='+new Date(cur).toISOString()+'&end='+new Date(chunkEnd).toISOString();
+      const r=await fetch(url);
+      if(r.status===404){
+        st.textContent=sym+' is not in the nightly universe and has no USD pair on Coinbase. Stocks and ETFs can join the nightly data on request.';
+        return;
+      }
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const arr=await r.json();
+      arr.forEach(c=>{ px.set(new Date(c[0]*1000).toISOString().slice(0,10), c[4]); });
+      cur=chunkEnd;
+    }
     const n=DATA.dates.length;
     const closes=new Array(n); let last=null, covered=0;
     for(let i=0;i<n;i++){ const d=DATA.dates[i]; if(px.has(d)){ last=px.get(d); covered++; } closes[i]=last; }
@@ -353,14 +358,14 @@ async function addCustom(symRaw){
     if((new Date(DATA.dates[n-1])-new Date(lastCovered))/864e5 > 10){ st.textContent=sym+': data looks stale (last quote '+lastCovered+'). Skipped.'; return; }
     const rets=new Array(n).fill(0);
     for(let i=1;i<n;i++){ if(closes[i-1] && closes[i]) rets[i]=closes[i]/closes[i-1]-1; }
-    DATA.assets.push({ticker:sym, name:coin.name, short:sym});
+    DATA.assets.push({ticker:sym, name:sym, short:sym});
     TICK[sym]=sym;
     DATA.returns[sym]=rets;
     addAssetRow({short:sym});
     const cb=document.getElementById('inc-'+sym);
     if(cb){ cb.checked=true; cb.dispatchEvent(new Event('change')); }
     saveCustom(sym);
-    st.textContent=coin.name+' ('+sym+') added live from CoinGecko, '+covered+' days of history.';
+    st.textContent=sym+' added live from Coinbase, '+covered+' days of history.';
   }catch(e){
     st.textContent='Could not load '+sym+' ('+e.message+'). The optimizer keeps working with the loaded assets.';
   }

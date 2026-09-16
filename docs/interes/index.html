@@ -61,7 +61,13 @@
     <h2>Assumptions</h2>
     <div class="fields">
       <div class="field"><label>Initial capital (&euro;)</label><input type="number" id="f-p0" min="0" step="500" value="10000"></div>
-      <div class="field"><label>Monthly contribution (&euro;)</label><input type="number" id="f-pmt" min="0" step="50" value="300"></div>
+      <div class="field"><label id="f-pmt-label">Monthly contribution (&euro;)</label><input type="number" id="f-pmt" min="0" step="50" value="300"></div>
+      <div class="field"><label>Contribution frequency</label>
+        <select id="f-freq">
+          <option value="m" selected>Monthly</option>
+          <option value="w">Weekly</option>
+        </select>
+      </div>
       <div class="field"><label>Annual rate (%)</label><input type="number" id="f-r" min="0" max="50" step="0.5" value="7"></div>
       <div class="field"><label>Years</label><input type="number" id="f-y" min="1" max="60" step="1" value="20"></div>
       <div class="field"><label>Compounding</label>
@@ -69,6 +75,7 @@
           <option value="1">Yearly</option>
           <option value="4">Quarterly</option>
           <option value="12" selected>Monthly</option>
+          <option value="52">Weekly</option>
           <option value="365">Daily</option>
         </select>
       </div>
@@ -94,7 +101,7 @@
       <div class="full"><button class="addbtn" id="f-adj-add">Add adjustment</button></div>
     </div>
     <div id="adj-list"></div>
-    <div class="note">Contributions go in at the end of each month. The rate converts to monthly per the chosen compounding frequency. A specific-month adjustment wins over the bracket that month.</div>
+    <div class="note">Contributions go in at the end of each period (month or week). The rate converts to that period per the chosen compounding frequency. A specific-month adjustment wins over the bracket that month.</div>
   </div>
 
   <div class="panel">
@@ -121,8 +128,7 @@ const fmtEUR = v => '\u20ac'+v.toLocaleString('en-US',{maximumFractionDigits:0})
 const MONTHS=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 let ADJ=[];
 let chart=null;
-function contributionFor(m, base){
-  const y=Math.ceil(m/12), mo=((m-1)%12)+1;
+function contributionForYM(y, mo, base){
   let c=base, bestY=-1;
   ADJ.forEach(a=>{ if(a.type==='tramo' && a.year<=y && a.year>bestY){ bestY=a.year; c=a.amount; } });
   ADJ.forEach(a=>{ if(a.type==='puntual' && a.year===y && a.month===mo) c=a.amount; });
@@ -144,16 +150,20 @@ function calc(){
   const r=Math.max(0,parseFloat(document.getElementById('f-r').value)||0)/100;
   const Y=Math.min(60,Math.max(1,parseInt(document.getElementById('f-y').value)||1));
   const n=parseInt(document.getElementById('f-n').value);
-  const g=Math.pow(1+r/n, n/12)-1;
+  const freq=document.getElementById('f-freq').value;
+  const perYr = freq==='w' ? 52 : 12;
+  const g=Math.pow(1+r/n, n/perYr)-1;
   let bal=P0, aport=P0;
   const labels=[], sBal=[], sAport=[];
   const rows=[];
   labels.push('0'); sBal.push(bal); sAport.push(aport);
-  for(let m=1;m<=Y*12;m++){
-    const c=contributionFor(m,PMT);
+  const steps=Y*perYr;
+  for(let k=1;k<=steps;k++){
+    const y=Math.ceil(k/perYr);
+    const mo = freq==='w' ? Math.min(12, Math.floor(((k-1)%perYr)*12/perYr)+1) : ((k-1)%12)+1;
+    const c=contributionForYM(y,mo,PMT);
     bal=bal*(1+g)+c; aport+=c;
-    if(m%12===0){
-      const y=m/12;
+    if(k%perYr===0){
       labels.push(String(y)); sBal.push(bal); sAport.push(aport);
       rows.push({y, aport, ints:bal-aport, bal});
     }
@@ -181,7 +191,10 @@ function calc(){
       plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}},
         tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmtEUR(c.parsed.y)}}}}});
 }
-['f-p0','f-pmt','f-r','f-y','f-n'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+['f-p0','f-pmt','f-r','f-y','f-n','f-freq'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+document.getElementById('f-freq').addEventListener('change',e=>{
+  document.getElementById('f-pmt-label').textContent = e.target.value==='w' ? 'Weekly contribution (\u20ac)' : 'Monthly contribution (\u20ac)';
+});
 document.getElementById('f-adj-tipo').addEventListener('change',e=>{
   document.getElementById('f-adj-mes-wrap').classList.toggle('hidden', e.target.value!=='puntual');
 });
