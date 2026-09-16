@@ -105,7 +105,7 @@
     <div class="panel">
       <h2>Efficient frontier <span class="badge" id="ef-badge"></span></h2>
       <div class="chartbox tall"><canvas id="ef-chart"></canvas></div>
-      <div class="note">Each dot on the curve is the least risky portfolio the LP can build for one return target, with your selected assets and limits. The curve is the best achievable trade-off: risk on the horizontal axis (average loss of the worst days, lower is safer), expected yearly return on the vertical. The markers show where the three portfolios sit. Dots are solved on sampled days for speed, so the curve is a close sketch, not the exact LP of the main result.</div>
+      <div class="note">Each dot on the curve is the least risky portfolio the LP can build for one return target, with your selected assets and limits. The curve is the best achievable trade-off: risk on the horizontal axis (average loss of the worst days, lower is safer), expected yearly return on the vertical. The markers show where the three portfolios sit. Dots are solved on sampled days for speed, so the curve is a close sketch, not the exact LP of the main result. The max Sharpe marker is where a line drawn from the cash return would touch the curve at its steepest: the best historical return per unit of risk taken.</div>
     </div>
     <div class="panel">
       <h2>Growth of &euro;1</h2>
@@ -220,6 +220,27 @@ function solveMaxCAGR(tickers, maxW){
   tickers.forEach(t=>w[t]=(w[t]||0)/tot);
   return w;
 }
+function solveMaxSharpe(tickers, maxW, alpha, rfDaily){
+  // golden-section search over the return target: maximize (annReturn-rf)/dailyCVaR,
+  // i.e. the tangent point of the frontier seen from the cash return
+  const rfAn=rfDaily*DAYS_YR;
+  const score=w=>{
+    if(!w) return -1e9;
+    const m=metrics(portReturns(w,tickers),alpha);
+    if(m.cvar<1e-9) return -1e9;
+    return (annReturn(w,tickers)-rfAn)/m.cvar;
+  };
+  let a=0, b=greedyMaxReturn(tickers,maxW);
+  if(!(b>0)) return null;
+  const gr=(Math.sqrt(5)-1)/2;
+  let c=b-gr*(b-a), d=a+gr*(b-a);
+  let sc=score(solveCVaR(tickers,maxW,alpha,350,c)), sd=score(solveCVaR(tickers,maxW,alpha,350,d));
+  for(let i=0;i<16;i++){
+    if(sc<sd){ a=c; c=d; sc=sd; d=a+gr*(b-a); sd=score(solveCVaR(tickers,maxW,alpha,350,d)); }
+    else { b=d; d=c; sd=sc; c=b-gr*(b-a); sc=score(solveCVaR(tickers,maxW,alpha,350,c)); }
+  }
+  return solveCVaR(tickers,maxW,alpha,350,(a+b)/2);
+}
 
 function addAssetRow(a){
   const s=a.short;
@@ -246,12 +267,12 @@ function readCur(tickers){
   const w={}; tickers.forEach(t=>w[t]=raw[t]/tot);
   return {w, note: Math.abs(tot-100)>0.5 ? 'Weights normalized (they summed '+tot.toFixed(0)+'%).' : ''};
 }
-function render(wCur, wOpt, wVar, tickers, alpha){
+function render(wCur, wOpt, wMax, wTan, tickers, alpha){
   document.getElementById('results').style.display='block';
   charts.forEach(c=>c.destroy()); charts=[];
-  const names = ['Your portfolio','Min CVaR','Max CAGR'];
-  const sets = [wCur,wOpt,wVar];
-  const pc = ['#c98a12','#d96b2a','#2f6fd0'];
+  const names = ['Your portfolio','Min CVaR','Max CAGR','Max Sharpe'];
+  const sets = [wCur,wOpt,wMax,wTan];
+  const pc = ['#c98a12','#d96b2a','#2f6fd0','#2e7d50'];
 
   const wt=document.querySelector('#w-table tbody'); wt.innerHTML='';
   tickers.forEach(t=>{
@@ -332,7 +353,7 @@ function flashDataset(chart, idx){
   requestAnimationFrame(tick);
 }
 function renderFrontier(pts, markers){
-  const pc=['#c98a12','#d96b2a','#2f6fd0'];
+  const pc=['#c98a12','#d96b2a','#2f6fd0','#2e7d50'];
   let xMax=0; pts.forEach(p=>{if(p.x>xMax)xMax=p.x;}); markers.forEach(m=>{if(m.x>xMax)xMax=m.x;});
   xMax=Math.max(0.1, xMax*1.15);
   const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
@@ -437,15 +458,17 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
         if(!wOpt){ err.textContent='No solution: that target is too high for these assets and limits. Lower the target or raise a max.'; err.style.display='block'; return; }
         const wMax=solveMaxCAGR(tickers,maxW);
+        const rfDaily=(()=>{const r=DATA.returns[TICK['Cash']]; return r.reduce((a,b)=>a+b,0)/r.length;})();
+        const wTan=solveMaxSharpe(tickers,maxW,alpha,rfDaily) || wOpt;
         document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets';
-        render(wCur,wOpt,wMax,tickers,alpha);
+        render(wCur,wOpt,wMax,wTan,tickers,alpha);
         const efBadge=document.getElementById('ef-badge');
         efBadge.textContent='computing frontier...';
         const mk=(w,label)=>({x:metrics(portReturns(w,tickers),alpha).cvar*100, y:annReturn(w,tickers)*100, label});
         computeFrontier(tickers,maxW,alpha,(i,N)=>{efBadge.textContent='computing frontier '+i+'/'+N+'...';},pts=>{
           if(!pts||pts.length<3){ efBadge.textContent='frontier not available for this selection'; return; }
           efBadge.textContent='';
-          renderFrontier(pts,[mk(wCur,'Your portfolio'),mk(wOpt,'Min CVaR'),mk(wMax,'Max CAGR')]);
+          renderFrontier(pts,[mk(wCur,'Your portfolio'),mk(wOpt,'Min CVaR'),mk(wMax,'Max CAGR'),mk(wTan,'Max Sharpe')]);
         });
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
