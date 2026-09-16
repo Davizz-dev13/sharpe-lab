@@ -51,6 +51,8 @@
   a { color:var(--acc); }
   .back { display:inline-block; margin-top:18px; color:var(--mut); font-size:14px; text-decoration:none; }
   .back:hover { color:var(--fg); }
+  .winbtn{padding:4px 10px;border:2px solid var(--fg);background:var(--panel);color:var(--fg);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;margin-right:2px}
+  .winbtn.active{background:var(--yellow)}
 </style>
 </head>
 <body>
@@ -85,7 +87,14 @@
           <option value="0.01">99%</option>
         </select>
       </div>
-      <div class="note">With no target, minimum CVaR is always 100% cash: minimizing risk while asking nothing in return is not a strategy. Each asset's expected return is its 5-year historical mean.</div>
+      <div style="margin-top:10px;font-size:13px">
+        Backtest window:
+        <button class="winbtn active" data-win="5">5Y</button>
+        <button class="winbtn" data-win="10">10Y</button>
+        <button class="winbtn" data-win="20">20Y</button>
+      </div>
+      <div class="note" id="win-note" style="display:none"></div>
+      <div class="note" id="mean-note">With no target, minimum CVaR is always 100% cash: minimizing risk while asking nothing in return is not a strategy. Each asset's expected return is its 5-year historical mean.</div>
       <button class="bigbtn" id="solve-btn">Optimize</button>
       <span id="spinner">solving the LP&hellip;</span>
       <div class="err" id="err-box"></div>
@@ -99,7 +108,7 @@
       <div class="twrap"><table id="w-table"><thead><tr><th>Asset</th><th>Your portfolio</th><th>Min CVaR</th><th>Max CAGR</th><th>Recommended</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
-      <h2>Metrics (5 years, historical data) <span class="badge">past returns do not guarantee future results</span></h2>
+      <h2>Metrics (<span id="m-span">5 years</span>, historical data) <span class="badge">past returns do not guarantee future results</span></h2>
       <div class="twrap"><table id="m-table"><thead><tr><th>Portfolio</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Daily CVaR</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
@@ -120,10 +129,10 @@
   <div class="panel expl">
     <h2>How it works</h2>
     <p>Variance treats gains and losses the same, but nobody cries about gains. <b>CVaR</b> (Conditional Value at Risk) only looks at what hurts: the average loss of the worst days. At 95% confidence, it is the mean of the worst 5% of historical scenarios.</p>
-    <p>Minimizing CVaR looks like an impossible statistics problem, but Rockafellar and Uryasev proved it turns <b>exactly</b> into a linear program: each historical day is a scenario, each scenario adds one constraint, and the simplex finds the optimal corner. The weights that come out are the ones that would have best protected against the worst stretches of the last 5 years, within your limits.</p>
+    <p>Minimizing CVaR looks like an impossible statistics problem, but Rockafellar and Uryasev proved it turns <b>exactly</b> into a linear program: each historical day is a scenario, each scenario adds one constraint, and the simplex finds the optimal corner. The weights that come out are the ones that would have best protected against the worst stretches of the selected window, within your limits.</p>
     <p>The piece that makes it useful is the <b>return target</b>: without it, the mathematically correct answer is boring (100% cash, which almost never loses). By demanding a minimum expected return, the LP is forced to take risk, and the simplex finds the corner that does it with the least possible pain. It is the usual efficient frontier, just measuring risk on the side that matters.</p>
     <p>The four portfolios tell the story. <b>Your portfolio</b> is where you start. <b>Min CVaR</b> is the LP's safest way to reach your target. <b>Max CAGR</b> is the other extreme: fill the best historical performers up to their caps and ignore risk. <b>Recommended</b> sits between them, the point of the frontier with the best extra return per unit of extra risk above the safe portfolio. Comparing the four shows the difference between "doesn't move", "doesn't crash", and "chases return".</p>
-    <p class="note">Scenarios: historical days from the last 5 years (resampled so the LP stays fast on mobile). Cash is a US T-bill ETF (BIL). None of this is investment advice.</p>
+    <p class="note">Scenarios: historical days from the selected window (resampled so the LP stays fast on mobile). Cash is a US T-bill ETF (BIL). None of this is investment advice.</p>
   </div>
   <a class="back" href="../">&larr; Back to Sharpe Lab</a>
 </main>
@@ -443,11 +452,96 @@ async function addCustom(symRaw){
   }
 }
 
+let DATA5=null, LONG=null, WINDOW=5;
+function sliceLong(years){
+  const dates=LONG.dates, n=dates.length;
+  const cutoff = years>=20 ? dates[0]
+    : new Date(new Date(dates[n-1]+'T00:00:00Z').getTime()-Math.round(years*365.25)*864e5).toISOString().slice(0,10);
+  let i0=dates.findIndex(d=>d>=cutoff); if(i0<0)i0=0;
+  const rets={};
+  LONG.assets.forEach(a=>{ rets[a.ticker]=LONG.returns[a.ticker].slice(i0); });
+  return {generated_at:LONG.generated_at, assets:LONG.assets, dates:dates.slice(i0), returns:rets};
+}
+function eligibleMap(data){
+  const ok={};
+  data.assets.forEach(a=>{
+    const r=data.returns[a.ticker];
+    ok[a.short]=!!r && r.every(v=>v!==null);
+  });
+  return ok;
+}
+function saveInputs(){
+  const vals={};
+  document.querySelectorAll('#cur-table input, #lim-table input').forEach(el=>{
+    vals[el.id]= el.type==='checkbox' ? el.checked : el.value;
+  });
+  return vals;
+}
+function restoreInputs(vals){
+  Object.entries(vals).forEach(([id,v])=>{
+    const el=document.getElementById(id);
+    if(!el || el.disabled) return;
+    if(el.type==='checkbox') el.checked=v; else el.value=v;
+  });
+}
+function applyEligibility(ok){
+  DATA.assets.forEach(a=>{
+    if(ok[a.short]) return;
+    ['inc-','max-','cur-'].forEach(pfx=>{
+      const el=document.getElementById(pfx+a.short);
+      if(!el) return;
+      el.disabled=true;
+      if(el.type==='checkbox') el.checked=false;
+      const row=el.closest('tr'); if(row){ row.style.opacity='0.4'; row.title='No full history in this window'; }
+    });
+  });
+}
+async function switchWindow(w){
+  w=+w;
+  if(w===WINDOW) return;
+  const note=document.getElementById('win-note');
+  document.querySelectorAll('.winbtn').forEach(b=>b.classList.toggle('active', +b.dataset.win===w));
+  const vals=saveInputs();
+  try{
+    if(w>5 && !LONG){
+      note.style.display='block'; note.textContent='Downloading '+w+' years of daily history...';
+      LONG=await (await fetch('optimizador-long.json')).json();
+    }
+    DATA = w===5 ? DATA5 : sliceLong(w);
+    WINDOW=w;
+    TICK={}; DATA.assets.forEach(a=>TICK[a.short]=a.ticker);
+    document.querySelector('#cur-table tbody').innerHTML='';
+    document.querySelector('#lim-table tbody').innerHTML='';
+    buildTables();
+    const ok = w===5 ? null : eligibleMap(DATA);
+    if(ok) applyEligibility(ok);
+    restoreInputs(vals);
+    document.getElementById('results').style.display='none';
+    document.getElementById('foot').textContent='Data: '+DATA.assets.map(a=>a.ticker).join(', ')+' · '+DATA.dates.length+' days · Generated: '+DATA.generated_at;
+    document.getElementById('m-span').textContent=w+' years';
+    document.getElementById('mean-note').textContent='With no target, minimum CVaR is always 100% cash: minimizing risk while asking nothing in return is not a strategy. Each asset\'s expected return is its '+w+'-year historical mean.';
+    if(w===5){ note.style.display='none'; note.textContent=''; }
+    else{
+      const excl=DATA.assets.filter(a=>!ok[a.short]).map(a=>a.short);
+      let customs=[]; try{ customs=JSON.parse(localStorage.getItem('opt-custom')||'[]'); }catch(e){}
+      let txt=w+'Y window: assets without the full '+w+' years are excluded: '+(excl.join(', ')||'none')+'.';
+      if(w>=20) txt+=' Commodities is the DBC broad basket here, and Cash before May 2007 accrues the 3-month T-bill rate (BIL did not exist yet).';
+      else txt+=' Commodities is the DBC broad basket in this window.';
+      if(customs.length) txt+=' Your added tickers ('+customs.join(', ')+') are only available in the 5Y window.';
+      txt+=' No invented backfill.';
+      note.textContent=txt;
+    }
+  }catch(e){
+    note.style.display='block'; note.textContent='Could not load the '+w+'Y data ('+e.message+').';
+  }
+}
+
 fetch('optimizador.json').then(r=>r.json()).then(d=>{
-  DATA=d;
+  DATA=d; DATA5=d;
   d.assets.forEach(a=>TICK[a.short]=a.ticker);
   document.getElementById('foot').textContent='Data: '+d.assets.map(a=>a.ticker).join(', ')+' · '+d.dates.length+' days · Generated: '+d.generated_at;
   buildTables();
+  document.querySelectorAll('.winbtn').forEach(b=>b.addEventListener('click',()=>switchWindow(b.dataset.win)));
   document.getElementById('custom-add').addEventListener('click',()=>addCustom(document.getElementById('custom-ticker').value));
   document.getElementById('custom-ticker').addEventListener('keydown',e=>{ if(e.key==='Enter') addCustom(e.target.value); });
   (async()=>{
@@ -457,7 +551,7 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
   const btn=document.getElementById('solve-btn');
   btn.addEventListener('click',()=>{
     const err=document.getElementById('err-box'); err.style.display='none';
-    const tickers=d.assets.map(a=>a.short).filter(t=>document.getElementById('inc-'+t).checked);
+    const tickers=DATA.assets.map(a=>a.short).filter(t=>document.getElementById('inc-'+t).checked);
     if(tickers.length<2){ err.textContent='Pick at least 2 assets.'; err.style.display='block'; return; }
     const maxW={}; tickers.forEach(t=>maxW[t]=Math.min(100,Math.max(1,parseFloat(document.getElementById('max-'+t).value)||100))/100);
     const capSum=Object.values(maxW).reduce((a,b)=>a+b,0);
@@ -473,7 +567,7 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
         if(!wOpt){ err.textContent='No solution: that target is too high for these assets and limits. Lower the target or raise a max.'; err.style.display='block'; return; }
         const wMax=solveMaxCAGR(tickers,maxW);
-        document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets';
+        document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets · '+WINDOW+'Y window';
         const r0Daily=annReturn(wOpt,tickers)/DAYS_YR;
         const wRec=solveRecommended(tickers,maxW,alpha,r0Daily)||wOpt;
         render(wCur,wOpt,wMax,wRec,tickers,alpha);

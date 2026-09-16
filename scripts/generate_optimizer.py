@@ -43,6 +43,10 @@ ASSETS = [
     {"ticker": "ASTS",    "name": "AST SpaceMobile",    "short": "ASTS"},
 ]
 PERIOD = "5y"
+LONG_PERIOD = "20y"
+# Long-window overrides: same asset, different source where the 5y one lacks history.
+LONG_TICKER = {"PDBC": "DBC"}  # Commodities: DBC covers the full 20y window
+LONG_NAME = {"PDBC": "Commodities (DBC)"}
 
 
 def main():
@@ -73,5 +77,61 @@ def main():
     print(f"optimizador.json: {len(dates)} dias x {len(ASSETS)} activos, {dest/'optimizador.json'}")
 
 
-if __name__ == "__main__":
+def main_long():
+    """optimizador-long.json: 20y daily returns. Assets without full history
+    keep leading nulls (no invented backfill); the page excludes them per window."""
+    closes = {}
+    assets = []
+    for a in ASSETS:
+        o = dict(a)
+        if a["ticker"] in LONG_TICKER:
+            o["ticker"] = LONG_TICKER[a["ticker"]]
+            o["name"] = LONG_NAME[a["ticker"]]
+        assets.append(o)
+        df = history(o["ticker"], LONG_PERIOD, "1d", refresh=True)
+        closes[o["ticker"]] = df["Close"]
+
+    cal = pd.Index(sorted(set().union(*[s.index for s in closes.values()])))
+    px = pd.DataFrame({t: s.reindex(cal).ffill() for t, s in closes.items()})
+
+    rets = px.pct_change(fill_method=None)
+
+    # Cash splice: before BIL inception (2007-05), accrue the 3M T-bill yield (^IRX).
+    irx = history("^IRX", LONG_PERIOD, "1d", refresh=True)["Close"].reindex(cal).ffill()
+    bil_start = px["BIL"].first_valid_index()
+    cash_ret = rets["BIL"].copy()
+    pre = cal <= bil_start
+    cash_ret[pre] = irx[pre] / 100.0 / 365.0
+    rets["BIL"] = cash_ret
+
+    rets = rets.iloc[1:]
+    dates = [d.strftime("%Y-%m-%d") for d in rets.index]
+    starts = {}
+    for t in rets.columns:
+        fv = rets[t].first_valid_index()
+        starts[t] = fv.strftime("%Y-%m-%d") if fv is not None else None
+    out = {
+        "generated_at": pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+        "period": LONG_PERIOD,
+        "assets": assets,
+        "dates": dates,
+        "returns": {t: [None if pd.isna(x) else round(float(x), 6) for x in rets[t].values] for t in rets.columns},
+        "starts": starts,
+        "notes": {
+            "BIL": "Cash: BIL (T-bill ETF); before 2007-05 it accrues the 3-month T-bill yield (^IRX).",
+            "DBC": "Commodities: DBC broad basket (the 5y window uses PDBC).",
+        },
+    }
+    dest = ROOT / "docs" / "optimizador"
+    with open(dest / "optimizador-long.json", "w") as f:
+        json.dump(out, f, separators=(",", ":"))
+    print(f"optimizador-long.json: {len(dates)} dias x {len(assets)} activos")
+
+
+def run_all():
     main()
+    main_long()
+
+
+if __name__ == "__main__":
+    run_all()
