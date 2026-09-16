@@ -26,6 +26,8 @@
   .expl p { margin:0 0 12px; }
   .expl p:last-child { margin:0; }
   .expl .muted { color:var(--muted); font-size:12.5px; }
+  .expl h3 { font-family:'Bungee',sans-serif; font-weight:400; font-size:14px; margin:18px 0 8px; }
+  .expl h3:first-child { margin-top:0; }
   footer { color:var(--muted); font-size:11.5px; margin-top:34px; text-align:center; }
   .view { display:none; }
   .view.active { display:block; }
@@ -54,10 +56,25 @@
 
   <div class="view" id="v-expl">
     <div class="expl">
-      <p>Sharpe Lab es mi laboratorio personal de estrategias cuantitativas.</p>
-      <p>El objetivo: encontrar Sharpes muy altos sin sacrificar mucho CAGR y, sobre todo, evitando los drawdowns gordos.</p>
-      <p>Cada idea se testea fuera de muestra, con costes de transacción realistas y ventanas de 10 años. Las que pasan el filtro se siguen en paper trading en tiempo real (dinero ficticio, señales reales cada noche) antes de confiar un euro en ellas.</p>
-      <p class="muted">Nada de esto es consejo de inversión.</p>
+      <h3>What is this</h3>
+      <p>Sharpe Lab is my personal quantitative finance lab. The goal: very high Sharpes without giving up much CAGR and, above all, without the ugly drawdowns.</p>
+      <p>Every idea is tested out of sample, with realistic transaction costs and 10-year windows. The ones that pass get tracked in paper trading in real time (fake money, real signals every night) before a single euro trusts them.</p>
+
+      <h3>The strategies</h3>
+      <p>The Strats menu holds the live dashboards: Bitcoin, MSCI, semiconductors and the Mag7. Each strategy computes its signal every night from public data and the site tracks its paper P&amp;L day by day, so you can see exactly what it would have done, not what a backtest claims it would have done.</p>
+
+      <h3>The CVaR optimizer</h3>
+      <p>You pick the assets, a max weight for each and a yearly return target. The optimizer builds the portfolio with the lowest possible risk for that target, solving a linear program in your browser.</p>
+      <p>Risk here is not volatility. Variance punishes good days and bad days the same, and nobody cries about good days. <b>CVaR</b> only looks at what hurts: the average loss of the worst stretch of days. At 95% confidence, that is the mean of the worst 5% of historical days.</p>
+      <p>Why does it ask for a return target? Because "the ideal portfolio" does not exist in the abstract. Risk and return pull in opposite directions, and the math will not choose between them for you. Minimizing risk with no target has one perfect answer: 100% cash. The target turns the question into something useful: the least risky portfolio that still earns at least what you asked for.</p>
+      <p>The efficient frontier chart shows exactly that trade-off: every dot on the curve is the least risky portfolio for one return target. Your portfolio, the min CVaR solution and the min variance one are marked on top, so you can see at a glance whether your money sits on the curve or below it.</p>
+      <p>One honest caveat: the expected return of each asset comes from its 5-year historical mean. It is the most fragile input in the whole model, so treat the numbers as a map, not a promise. You can also add your own crypto ticker and the page downloads its history on the spot.</p>
+
+      <h3>The compound interest calculator</h3>
+      <p>The most boring and most powerful force in finance: interest earning interest. You set the starting capital, a monthly or weekly contribution, the yearly rate and the years, and it shows the final capital split into what you put in and what the interest put in, with the growth curve and the year-by-year table.</p>
+      <p>The adjustments are the realistic part: real life is not a fixed contribution forever. You can add a step ("from year 5 on, 1300 instead of 1000") or a one-off month ("this December, 1400"), as many as you want, and the math respects them.</p>
+
+      <p class="muted">None of this is investment advice.</p>
     </div>
     <button class="back" onclick="show('v-home')">&larr; Back</button>
   </div>
