@@ -192,7 +192,7 @@ function calc(){
         tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmtEUR(c.parsed.y)}}}}});
 }
 ['f-p0','f-pmt','f-r','f-y','f-n','f-freq'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
-document.getElementById('f-freq').addEventListener('change',e=>{
+document.getElementById('f-freq').addEventListener('input',e=>{
   document.getElementById('f-pmt-label').textContent = e.target.value==='w' ? 'Weekly contribution (\u20ac)' : 'Monthly contribution (\u20ac)';
 });
 document.getElementById('f-adj-tipo').addEventListener('change',e=>{
