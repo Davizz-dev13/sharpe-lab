@@ -20,6 +20,9 @@ ASSETS = [
     {"ticker": "PDBC",    "name": "Commodities",     "short": "Commodities"},
     {"ticker": "SPY",     "name": "S&P 500",         "short": "S&P 500"},
     {"ticker": "BTC-USD", "name": "Bitcoin",         "short": "Bitcoin"},
+    {"ticker": "URTH",    "name": "MSCI World",      "short": "MSCI World"},
+    {"ticker": "EEM",     "name": "Emergentes",      "short": "Emergentes"},
+    {"ticker": "SLV",     "name": "Plata",           "short": "Plata"},
 ]
 PERIOD = "5y"
 

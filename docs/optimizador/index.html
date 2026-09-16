@@ -115,9 +115,10 @@
 </main>
 <footer id="foot"></footer>
 <script>
-const COLORS = {"Cash":"#7a6a58","Oro":"#eab619","Commodities":"#2e7d50","S&P 500":"#2f6fd0","Bitcoin":"#f7931a"};
-const DEFAULT_CUR = {"Cash":50,"Oro":12,"Commodities":10,"S&P 500":25,"Bitcoin":3};
-const DEFAULT_MAX = {"Cash":100,"Oro":30,"Commodities":30,"S&P 500":30,"Bitcoin":5};
+const COLORS = {"Cash":"#7a6a58","Oro":"#eab619","Commodities":"#2e7d50","S&P 500":"#2f6fd0","Bitcoin":"#f7931a","MSCI World":"#9467bd","Emergentes":"#17a2b8","Plata":"#8f9ba8"};
+const DEFAULT_CUR = {"Cash":50,"Oro":12,"Commodities":10,"S&P 500":25,"Bitcoin":3,"MSCI World":0,"Emergentes":0,"Plata":0};
+const DEFAULT_MAX = {"Cash":100,"Oro":30,"Commodities":30,"S&P 500":30,"Bitcoin":5,"MSCI World":30,"Emergentes":30,"Plata":30};
+const DEFAULT_INC = {"Cash":true,"Oro":true,"Commodities":true,"S&P 500":true,"Bitcoin":true,"MSCI World":false,"Emergentes":false,"Plata":false};
 const DAYS_YR = 365;
 let DATA = null;
 let TICK = {};
@@ -196,7 +197,7 @@ function solveMinVar(tickers){
   // covarianza de los retornos diarios, w proporcional a inv(cov)*1, solo largo
   let act = tickers.slice();
   const n = DATA.dates.length;
-  for(let iter=0; iter<act.length+1; iter++){
+  for(let iter=0; iter<20 && act.length; iter++){
     const m = act.length;
     const means = act.map(t=>DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n);
     const cov = Array.from({length:m},()=>new Float64Array(m));
@@ -205,11 +206,15 @@ function solveMinVar(tickers){
       let s=0; for(let k=0;k<n;k++) s+=(ri[k]-means[i])*(rj[k]-means[j]);
       cov[i][j]=cov[j][i]=s/(n-1);
     }
+    // ridge pequeño en la diagonal: activos muy correlados (SPY/MSCI World) hacen la covarianza casi singular
+    let tr=0; for(let i=0;i<m;i++) tr+=cov[i][i];
+    const ridge = tr/m*1e-4 + 1e-12;
+    for(let i=0;i<m;i++) cov[i][i]+=ridge;
     // resolver cov * x = 1 por Gauss-Jordan
     const A = cov.map((row,i)=>[...row, ...Array.from({length:m},(_,j)=>i===j?1:0)]);
     for(let col=0;col<m;col++){
       let piv=col; for(let r=col+1;r<m;r++) if(Math.abs(A[r][col])>Math.abs(A[piv][col])) piv=r;
-      if(Math.abs(A[piv][col])<1e-15) return null;
+      if(Math.abs(A[piv][col])<1e-18) return null;
       [A[col],A[piv]]=[A[piv],A[col]];
       const d=A[col][col]; for(let c=0;c<2*m;c++) A[col][c]/=d;
       for(let r=0;r<m;r++){ if(r===col)continue; const f=A[r][col]; for(let c=0;c<2*m;c++) A[r][c]-=f*A[col][c]; }
@@ -240,7 +245,8 @@ function buildTables(){
     tr1.innerHTML='<td><span class="dot" style="background:'+COLORS[s]+'"></span>'+s+'</td><td><input type="number" min="0" max="100" step="1" value="'+DEFAULT_CUR[s]+'" id="cur-'+s+'"></td>';
     curT.appendChild(tr1);
     const tr2=document.createElement('tr');
-    tr2.innerHTML='<td><span class="dot" style="background:'+COLORS[s]+'"></span>'+s+'</td><td><input type="checkbox" id="inc-'+s+'" checked></td><td><input type="number" min="1" max="100" step="1" value="'+DEFAULT_MAX[s]+'" id="max-'+s+'"></td>';
+    const inc = DEFAULT_INC[s]!==false;
+    tr2.innerHTML='<td><span class="dot" style="background:'+COLORS[s]+'"></span>'+s+'</td><td><input type="checkbox" id="inc-'+s+'"'+(inc?' checked':'')+'></td><td><input type="number" min="1" max="100" step="1" value="'+DEFAULT_MAX[s]+'" id="max-'+s+'"'+(inc?'':' disabled')+'></td>';
     limT.appendChild(tr2);
     tr2.querySelector('#inc-'+CSS.escape(s)).addEventListener('change',e=>{
       tr2.querySelector('#max-'+CSS.escape(s)).disabled = !e.target.checked;
