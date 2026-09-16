@@ -56,7 +56,7 @@
 <body>
 <header>
   <h1>Portfolio optimizer &middot; min CVaR</h1>
-  <div class="sub">Pick assets, limits and a return target. The optimizer minimizes the average loss of the worst stretch of historical days (CVaR) for that target, solving a linear program. It compares against your portfolio and minimum variance.</div>
+  <div class="sub">Pick assets, limits and a return target. The optimizer minimizes the average loss of the worst stretch of historical days (CVaR) for that target, solving a linear program. It compares against your portfolio and the max-CAGR corner.</div>
 </header>
 <main>
   <div class="grid2">
@@ -96,7 +96,7 @@
     <div class="panel">
       <h2>Optimal weights <span class="badge" id="res-badge"></span></h2>
       <div class="chartbox"><canvas id="alloc-chart"></canvas></div>
-      <div class="twrap"><table id="w-table"><thead><tr><th>Asset</th><th>Your portfolio</th><th>Min CVaR</th><th>Min variance</th></tr></thead><tbody></tbody></table></div>
+      <div class="twrap"><table id="w-table"><thead><tr><th>Asset</th><th>Your portfolio</th><th>Min CVaR</th><th>Max CAGR</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
       <h2>Metrics (5 years, historical data) <span class="badge">past returns do not guarantee future results</span></h2>
@@ -209,45 +209,16 @@ function solveCVaR(tickers, maxW, alpha, maxS, muReq){
   tickers.forEach(t=>w[t]/=tot);
   return w;
 }
-function solveMinVar(tickers){
-  // long-only min variance: w proportional to inv(cov)*1, dropping negative weights
-  let act = tickers.slice();
-  const n = DATA.dates.length;
-  for(let iter=0; iter<40 && act.length; iter++){
-    const m = act.length;
-    const means = act.map(t=>DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n);
-    const cov = Array.from({length:m},()=>new Float64Array(m));
-    for(let i=0;i<m;i++)for(let j=i;j<m;j++){
-      const ri=DATA.returns[TICK[act[i]]], rj=DATA.returns[TICK[act[j]]];
-      let s=0; for(let k=0;k<n;k++) s+=(ri[k]-means[i])*(rj[k]-means[j]);
-      cov[i][j]=cov[j][i]=s/(n-1);
-    }
-    // small ridge on the diagonal: highly correlated assets (SPY/MSCI World) make cov near-singular
-    let tr=0; for(let i=0;i<m;i++) tr+=cov[i][i];
-    const ridge = tr/m*1e-4 + 1e-12;
-    for(let i=0;i<m;i++) cov[i][i]+=ridge;
-    const A = cov.map((row,i)=>[...row, ...Array.from({length:m},(_,j)=>i===j?1:0)]);
-    for(let col=0;col<m;col++){
-      let piv=col; for(let r=col+1;r<m;r++) if(Math.abs(A[r][col])>Math.abs(A[piv][col])) piv=r;
-      if(Math.abs(A[piv][col])<1e-18) return null;
-      [A[col],A[piv]]=[A[piv],A[col]];
-      const d=A[col][col]; for(let c=0;c<2*m;c++) A[col][c]/=d;
-      for(let r=0;r<m;r++){ if(r===col)continue; const f=A[r][col]; for(let c=0;c<2*m;c++) A[r][c]-=f*A[col][c]; }
-    }
-    const inv = A.map(row=>row.slice(m));
-    const x = inv.map(row=>row.reduce((a,b)=>a+b,0));
-    const sx = x.reduce((a,b)=>a+b,0);
-    const w = x.map(v=>v/sx);
-    const neg = w.findIndex(v=>v<-1e-9);
-    if(neg<0){
-      const out={}; act.forEach((t,i)=>out[t]=Math.max(0,w[i]));
-      const tot=Object.values(out).reduce((a,b)=>a+b,0)||1;
-      act.forEach(t=>out[t]/=tot);
-      return out;
-    }
-    act.splice(neg,1);
-  }
-  return null;
+function solveMaxCAGR(tickers, maxW){
+  // exact for max expected return with long-only caps: fill from highest mean down
+  const n=DATA.dates.length;
+  const mus=tickers.map(t=>({t, mu:DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n, cap:maxW[t]}));
+  mus.sort((a,b)=>b.mu-a.mu);
+  let rem=1; const w={};
+  mus.forEach(a=>{ const x=Math.max(0,Math.min(a.cap,rem)); w[a.t]=x; rem-=x; });
+  const tot=Object.values(w).reduce((a,b)=>a+b,0)||1;
+  tickers.forEach(t=>w[t]=(w[t]||0)/tot);
+  return w;
 }
 
 function addAssetRow(a){
@@ -278,7 +249,7 @@ function readCur(tickers){
 function render(wCur, wOpt, wVar, tickers, alpha){
   document.getElementById('results').style.display='block';
   charts.forEach(c=>c.destroy()); charts=[];
-  const names = ['Your portfolio','Min CVaR','Min variance'];
+  const names = ['Your portfolio','Min CVaR','Max CAGR'];
   const sets = [wCur,wOpt,wVar];
   const pc = ['#c98a12','#d96b2a','#2f6fd0'];
 
@@ -323,12 +294,7 @@ function annReturn(weights, tickers){
   return m*DAYS_YR;
 }
 function greedyMaxReturn(tickers, maxW){
-  const n=DATA.dates.length;
-  const mus=tickers.map(t=>({mu:DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n, cap:maxW[t]}));
-  mus.sort((a,b)=>b.mu-a.mu);
-  let rem=1, ret=0;
-  mus.forEach(a=>{ const w=Math.min(a.cap,rem); ret+=w*a.mu; rem-=w; });
-  return ret;
+  return annReturn(solveMaxCAGR(tickers,maxW),tickers)/DAYS_YR;
 }
 function computeFrontier(tickers, maxW, alpha, onProgress, done){
   const w0=solveCVaR(tickers,maxW,alpha,350,0);
@@ -350,22 +316,36 @@ function computeFrontier(tickers, maxW, alpha, onProgress, done){
   }
   step();
 }
+function flashDataset(chart, idx){
+  const ds=chart.data.datasets[idx];
+  const isLine=(ds.type==='line');
+  if(isLine){ if(ds._baseW==null)ds._baseW=ds.borderWidth; } else { if(ds._baseR==null)ds._baseR=ds.pointRadius; }
+  const base=isLine?ds._baseW:ds._baseR, t0=performance.now(), dur=900;
+  function tick(t){
+    const p=(t-t0)/dur;
+    if(p>=1){ if(isLine)ds.borderWidth=base; else ds.pointRadius=base; chart.update('none'); return; }
+    const f=Math.abs(Math.sin(p*Math.PI*3));
+    if(isLine) ds.borderWidth=base*(1+f*1.5); else ds.pointRadius=base*(0.5+f*1.1);
+    chart.update('none');
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
 function renderFrontier(pts, markers){
   const pc=['#c98a12','#d96b2a','#2f6fd0'];
   let xMax=0; pts.forEach(p=>{if(p.x>xMax)xMax=p.x;}); markers.forEach(m=>{if(m.x>xMax)xMax=m.x;});
   xMax=Math.max(0.1, xMax*1.15);
   const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
-  const shapes=['circle','rectRot','triangle'];
   markers.forEach((m,i)=>{
     // sticker halo: bigger cream disc behind the colored marker
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#2a170f',borderWidth:2.5,pointRadius:8,pointStyle:shapes[i],pointHoverRadius:10});
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#2a170f',borderWidth:2,pointRadius:13,pointStyle:shapes[i],showLine:false,_halo:true});
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#2a170f',borderWidth:2.5,pointRadius:8,pointStyle:'circle',pointHoverRadius:10});
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#2a170f',borderWidth:2,pointRadius:13,pointStyle:'circle',showLine:false,_halo:true});
   });
   charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},
     options:{maintainAspectRatio:false,
     scales:{x:{type:'linear',min:0,suggestedMax:xMax,title:{display:true,text:'Daily CVaR % (avg loss of worst days, lower = safer)',color:'#7a6a58',font:{size:10}},ticks:{color:'#7a6a58',callback:v=>(Math.round(v*10)/10)+'%'},grid:{color:'#e3d9c0'}},
             y:{title:{display:true,text:'Expected yearly return %',color:'#7a6a58',font:{size:10}},ticks:{color:'#7a6a58',callback:v=>v+'%'},grid:{color:'#e3d9c0'}}},
-    plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10},filter:(it,ch)=>!ch.datasets[it.datasetIndex]._halo}},
+    plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'#7a6a58',boxWidth:10,font:{size:10},filter:(it,ch)=>!ch.datasets[it.datasetIndex]._halo}},
       tooltip:{filter:c=>!c.dataset._halo,callbacks:{label:c=>c.dataset.label+': return '+c.parsed.y.toFixed(1)+'% / daily CVaR '+c.parsed.x.toFixed(2)+'%'}}}}}));
 }
 function saveCustom(sym){
@@ -456,16 +436,16 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const muReq=Math.pow(1+retAn,1/DAYS_YR)-1;
         const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
         if(!wOpt){ err.textContent='No solution: that target is too high for these assets and limits. Lower the target or raise a max.'; err.style.display='block'; return; }
-        const wVar=solveMinVar(tickers) || wCur;
+        const wMax=solveMaxCAGR(tickers,maxW);
         document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets';
-        render(wCur,wOpt,wVar,tickers,alpha);
+        render(wCur,wOpt,wMax,tickers,alpha);
         const efBadge=document.getElementById('ef-badge');
         efBadge.textContent='computing frontier...';
         const mk=(w,label)=>({x:metrics(portReturns(w,tickers),alpha).cvar*100, y:annReturn(w,tickers)*100, label});
         computeFrontier(tickers,maxW,alpha,(i,N)=>{efBadge.textContent='computing frontier '+i+'/'+N+'...';},pts=>{
           if(!pts||pts.length<3){ efBadge.textContent='frontier not available for this selection'; return; }
           efBadge.textContent='';
-          renderFrontier(pts,[mk(wCur,'Your portfolio'),mk(wOpt,'Min CVaR'),mk(wVar,'Min variance')]);
+          renderFrontier(pts,[mk(wCur,'Your portfolio'),mk(wOpt,'Min CVaR'),mk(wMax,'Max CAGR')]);
         });
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
