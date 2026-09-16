@@ -354,16 +354,19 @@ function renderFrontier(pts, markers){
   const pc=['#c98a12','#d96b2a','#2f6fd0'];
   let xMax=0; pts.forEach(p=>{if(p.x>xMax)xMax=p.x;}); markers.forEach(m=>{if(m.x>xMax)xMax=m.x;});
   xMax=Math.max(0.1, xMax*1.15);
-  const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:3,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
+  const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
+  const shapes=['circle','rectRot','triangle'];
   markers.forEach((m,i)=>{
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#2a170f',borderWidth:1,pointRadius:6,pointStyle:i===1?'rectRot':(i===2?'triangle':'circle')});
+    // sticker halo: bigger cream disc behind the colored marker
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#2a170f',borderWidth:2,pointRadius:13,pointStyle:shapes[i],showLine:false,_halo:true});
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#2a170f',borderWidth:2.5,pointRadius:8,pointStyle:shapes[i],pointHoverRadius:10});
   });
   charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},
     options:{maintainAspectRatio:false,
     scales:{x:{type:'linear',min:0,suggestedMax:xMax,title:{display:true,text:'Daily CVaR % (avg loss of worst days, lower = safer)',color:'#7a6a58',font:{size:10}},ticks:{color:'#7a6a58',callback:v=>(Math.round(v*10)/10)+'%'},grid:{color:'#e3d9c0'}},
             y:{title:{display:true,text:'Expected yearly return %',color:'#7a6a58',font:{size:10}},ticks:{color:'#7a6a58',callback:v=>v+'%'},grid:{color:'#e3d9c0'}}},
-    plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}},
-      tooltip:{callbacks:{label:c=>c.dataset.label+': return '+c.parsed.y.toFixed(1)+'% / daily CVaR '+c.parsed.x.toFixed(2)+'%'}}}}}));
+    plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10},filter:(it,ch)=>!ch.datasets[it.datasetIndex]._halo}},
+      tooltip:{filter:c=>!c.dataset._halo,callbacks:{label:c=>c.dataset.label+': return '+c.parsed.y.toFixed(1)+'% / daily CVaR '+c.parsed.x.toFixed(2)+'%'}}}}}));
 }
 function saveCustom(sym){
   try{
