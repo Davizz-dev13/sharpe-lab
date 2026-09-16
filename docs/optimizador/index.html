@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Optimizador de cartera &middot; min CVaR</title>
+<title>Portfolio optimizer &middot; min CVaR</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
@@ -49,53 +49,55 @@
   .twrap { overflow-x:auto; }
   @media (max-width:860px){ th,td { padding:5px 5px; font-size:11.5px; } th { font-size:9px; } }
   a { color:var(--acc); }
+  .back { display:inline-block; margin-top:18px; color:var(--mut); font-size:14px; text-decoration:none; }
+  .back:hover { color:var(--fg); }
 </style>
 </head>
 <body>
 <header>
-  <h1>Optimizador de cartera &middot; m&iacute;nimo CVaR</h1>
-  <div class="sub">Elige activos, l&iacute;mites y un objetivo de rentabilidad. El optimizador minimiza la p&eacute;rdida media del peor tramo de d&iacute;as hist&oacute;ricos (CVaR) para ese objetivo, resolviendo un problema de programaci&oacute;n lineal. Compara con tu cartera y con la de m&iacute;nima varianza.</div>
+  <h1>Portfolio optimizer &middot; min CVaR</h1>
+  <div class="sub">Pick assets, limits and a return target. The optimizer minimizes the average loss of the worst stretch of historical days (CVaR) for that target, solving a linear program. It compares against your portfolio and minimum variance.</div>
 </header>
 <main>
   <div class="grid2">
     <div class="panel">
-      <h2>1 &middot; Tu cartera actual</h2>
-      <table class="ctab" id="cur-table"><thead><tr><th>Activo</th><th>Peso %</th></tr></thead><tbody></tbody></table>
+      <h2>1 &middot; Your current portfolio</h2>
+      <div class="twrap"><table class="ctab" id="cur-table"><thead><tr><th>Asset</th><th>Weight %</th></tr></thead><tbody></tbody></table></div>
       <div class="note" id="cur-note"></div>
     </div>
     <div class="panel">
-      <h2>2 &middot; Universo y l&iacute;mites</h2>
-      <table class="ctab" id="lim-table"><thead><tr><th>Activo</th><th>Incluir</th><th>M&aacute;x %</th></tr></thead><tbody></tbody></table>
+      <h2>2 &middot; Universe and limits</h2>
+      <div class="twrap"><table class="ctab" id="lim-table"><thead><tr><th>Asset</th><th>Include</th><th>Max %</th></tr></thead><tbody></tbody></table></div>
       <div style="margin-top:12px;font-size:13px">
-        Objetivo de rentabilidad esperada: <input type="number" id="ret-obj" min="0" max="50" step="0.5" value="5" style="width:58px"> % anual
+        Expected return target: <input type="number" id="ret-obj" min="0" max="50" step="0.5" value="5" style="width:58px"> % yearly
       </div>
       <div style="margin-top:10px;font-size:13px">
-        Confianza CVaR:
+        CVaR confidence:
         <select id="alpha-sel">
           <option value="0.10">90%</option>
           <option value="0.05" selected>95%</option>
           <option value="0.01">99%</option>
         </select>
       </div>
-      <div class="note">Sin objetivo, el m&iacute;nimo CVaR es siempre 100% cash: minimizar riesgo sin pedir nada a cambio no es una estrategia. La rentabilidad esperada de cada activo es su media hist&oacute;rica de los &uacute;ltimos 5 a&ntilde;os.</div>
-      <button class="bigbtn" id="solve-btn">Optimizar</button>
-      <span id="spinner">resolviendo el LP&hellip;</span>
+      <div class="note">With no target, minimum CVaR is always 100% cash: minimizing risk while asking nothing in return is not a strategy. Each asset's expected return is its 5-year historical mean.</div>
+      <button class="bigbtn" id="solve-btn">Optimize</button>
+      <span id="spinner">solving the LP&hellip;</span>
       <div class="err" id="err-box"></div>
     </div>
   </div>
 
   <div id="results" style="display:none">
     <div class="panel">
-      <h2>Pesos &oacute;ptimos <span class="badge" id="res-badge"></span></h2>
+      <h2>Optimal weights <span class="badge" id="res-badge"></span></h2>
       <div class="chartbox"><canvas id="alloc-chart"></canvas></div>
-      <div class="twrap"><table id="w-table"><thead><tr><th>Activo</th><th>Tu cartera</th><th>M&iacute;n CVaR</th><th>M&iacute;n varianza</th></tr></thead><tbody></tbody></table></div>
+      <div class="twrap"><table id="w-table"><thead><tr><th>Asset</th><th>Your portfolio</th><th>Min CVaR</th><th>Min variance</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
-      <h2>M&eacute;tricas (5 a&ntilde;os, datos hist&oacute;ricos) <span class="badge">rentabilidades pasadas no garantizan resultados futuros</span></h2>
-      <div class="twrap"><table id="m-table"><thead><tr><th>Cartera</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>CVaR diario</th></tr></thead><tbody></tbody></table></div>
+      <h2>Metrics (5 years, historical data) <span class="badge">past returns do not guarantee future results</span></h2>
+      <div class="twrap"><table id="m-table"><thead><tr><th>Portfolio</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Daily CVaR</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
-      <h2>Crecimiento de 1&euro;</h2>
+      <h2>Growth of &euro;1</h2>
       <div class="chartbox tall"><canvas id="eq-chart"></canvas></div>
     </div>
     <div class="panel">
@@ -105,20 +107,21 @@
   </div>
 
   <div class="panel expl">
-    <h2>C&oacute;mo funciona</h2>
-    <p>La varianza trata igual las subidas que las bajadas, pero a nadie le duelen las subidas. El <b>CVaR</b> (Conditional Value at Risk) mira solo lo que duele: la p&eacute;rdida media de los peores d&iacute;as. Con confianza al 95%, es la media del 5% peor de los escenarios hist&oacute;ricos.</p>
-    <p>Minimizar el CVaR parece un problema estad&iacute;stico imposible, pero Rockafellar y Uryasev demostraron que se convierte <b>exactamente</b> en un problema de programaci&oacute;n lineal: cada d&iacute;a hist&oacute;rico es un escenario, cada escenario aporta una restricci&oacute;n, y el simplex encuentra el v&eacute;rtice &oacute;ptimo. Los pesos que salen son los que mejor habr&iacute;an protegido contra los peores tramos de los &uacute;ltimos 5 a&ntilde;os, respetando tus l&iacute;mites.</p>
-    <p>La condici&oacute;n que le da sentido es el <b>objetivo de rentabilidad</b>: sin &eacute;l, la respuesta matem&aacute;ticamente correcta es aburrida (100% cash, que casi nunca pierde). Pidiendo una rentabilidad media m&iacute;nima, el LP se ve forzado a arriesgar, y el simplex encuentra la esquina que lo hace con el menor dolor posible. Es la frontera eficiente de siempre, solo que midiendo el riesgo por el lado que importa.</p>
-    <p>La cartera de <b>m&iacute;nima varianza</b> es la referencia cl&aacute;sica (Markowitz sin mirar rendimientos): minimiza la volatilidad total y, como no pide rentabilidad, tambi&eacute;n se refugia en cash. Comparar las tres ense&ntilde;a la diferencia entre "que no se mueva" y "que no se desplome persiguiendo un objetivo".</p>
-    <p class="note">Escenarios: d&iacute;as hist&oacute;ricos de los &uacute;ltimos 5 a&ntilde;os (remuestreados para que el LP sea r&aacute;pido en el m&oacute;vil). El cash es un ETF de letras del Tesoro de EE.UU. (BIL). Nada de esto es consejo de inversi&oacute;n.</p>
+    <h2>How it works</h2>
+    <p>Variance treats gains and losses the same, but nobody cries about gains. <b>CVaR</b> (Conditional Value at Risk) only looks at what hurts: the average loss of the worst days. At 95% confidence, it is the mean of the worst 5% of historical scenarios.</p>
+    <p>Minimizing CVaR looks like an impossible statistics problem, but Rockafellar and Uryasev proved it turns <b>exactly</b> into a linear program: each historical day is a scenario, each scenario adds one constraint, and the simplex finds the optimal corner. The weights that come out are the ones that would have best protected against the worst stretches of the last 5 years, within your limits.</p>
+    <p>The piece that makes it useful is the <b>return target</b>: without it, the mathematically correct answer is boring (100% cash, which almost never loses). By demanding a minimum expected return, the LP is forced to take risk, and the simplex finds the corner that does it with the least possible pain. It is the usual efficient frontier, just measuring risk on the side that matters.</p>
+    <p>The <b>minimum variance</b> portfolio is the classic reference (Markowitz without looking at returns): it minimizes total volatility and, since it asks for no return, it also hides in cash. Comparing the three shows the difference between "doesn't move" and "doesn't crash while chasing a target".</p>
+    <p class="note">Scenarios: historical days from the last 5 years (resampled so the LP stays fast on mobile). Cash is a US T-bill ETF (BIL). None of this is investment advice.</p>
   </div>
+  <a class="back" href="../">&larr; Back to Sharpe Lab</a>
 </main>
 <footer id="foot"></footer>
 <script>
-const COLORS = {"Cash":"#7a6a58","Oro":"#eab619","Commodities":"#2e7d50","S&P 500":"#2f6fd0","Bitcoin":"#f7931a","MSCI World":"#9467bd","Emergentes":"#17a2b8","Plata":"#8f9ba8"};
-const DEFAULT_CUR = {"Cash":50,"Oro":12,"Commodities":10,"S&P 500":25,"Bitcoin":3,"MSCI World":0,"Emergentes":0,"Plata":0};
-const DEFAULT_MAX = {"Cash":100,"Oro":30,"Commodities":30,"S&P 500":30,"Bitcoin":5,"MSCI World":30,"Emergentes":30,"Plata":30};
-const DEFAULT_INC = {"Cash":true,"Oro":true,"Commodities":true,"S&P 500":true,"Bitcoin":true,"MSCI World":false,"Emergentes":false,"Plata":false};
+const COLORS = {"Cash":"#7a6a58","Gold":"#eab619","Commodities":"#2e7d50","S&P 500":"#2f6fd0","Bitcoin":"#f7931a","MSCI World":"#9467bd","Emerging":"#17a2b8","Silver":"#8f9ba8"};
+const DEFAULT_CUR = {"Cash":50,"Gold":12,"Commodities":10,"S&P 500":25,"Bitcoin":3,"MSCI World":0,"Emerging":0,"Silver":0};
+const DEFAULT_MAX = {"Cash":100,"Gold":30,"Commodities":30,"S&P 500":30,"Bitcoin":5,"MSCI World":30,"Emerging":30,"Silver":30};
+const DEFAULT_INC = {"Cash":true,"Gold":true,"Commodities":true,"S&P 500":true,"Bitcoin":true,"MSCI World":false,"Emerging":false,"Silver":false};
 const DAYS_YR = 365;
 let DATA = null;
 let TICK = {};
@@ -194,7 +197,7 @@ function solveCVaR(tickers, maxW, alpha, maxS, muReq){
   return w;
 }
 function solveMinVar(tickers){
-  // covarianza de los retornos diarios, w proporcional a inv(cov)*1, solo largo
+  // long-only min variance: w proportional to inv(cov)*1, dropping negative weights
   let act = tickers.slice();
   const n = DATA.dates.length;
   for(let iter=0; iter<20 && act.length; iter++){
@@ -206,11 +209,10 @@ function solveMinVar(tickers){
       let s=0; for(let k=0;k<n;k++) s+=(ri[k]-means[i])*(rj[k]-means[j]);
       cov[i][j]=cov[j][i]=s/(n-1);
     }
-    // ridge pequeño en la diagonal: activos muy correlados (SPY/MSCI World) hacen la covarianza casi singular
+    // small ridge on the diagonal: highly correlated assets (SPY/MSCI World) make cov near-singular
     let tr=0; for(let i=0;i<m;i++) tr+=cov[i][i];
     const ridge = tr/m*1e-4 + 1e-12;
     for(let i=0;i<m;i++) cov[i][i]+=ridge;
-    // resolver cov * x = 1 por Gauss-Jordan
     const A = cov.map((row,i)=>[...row, ...Array.from({length:m},(_,j)=>i===j?1:0)]);
     for(let col=0;col<m;col++){
       let piv=col; for(let r=col+1;r<m;r++) if(Math.abs(A[r][col])>Math.abs(A[piv][col])) piv=r;
@@ -231,7 +233,6 @@ function solveMinVar(tickers){
       return out;
     }
     act.splice(neg,1);
-    if(!act.length) return null;
   }
   return null;
 }
@@ -256,14 +257,14 @@ function buildTables(){
 function readCur(tickers){
   let raw={}, tot=0;
   tickers.forEach(t=>{ const v=Math.max(0,parseFloat(document.getElementById('cur-'+t).value)||0); raw[t]=v; tot+=v; });
-  if(tot<=0){ const w={}; tickers.forEach(t=>w[t]=1/tickers.length); return {w, note:'Pesos normalizados a partes iguales (la suma era 0).'}; }
+  if(tot<=0){ const w={}; tickers.forEach(t=>w[t]=1/tickers.length); return {w, note:'Weights normalized to equal parts (they summed 0).'}; }
   const w={}; tickers.forEach(t=>w[t]=raw[t]/tot);
-  return {w, note: Math.abs(tot-100)>0.5 ? 'Pesos normalizados (sumaban '+tot.toFixed(0)+'%).' : ''};
+  return {w, note: Math.abs(tot-100)>0.5 ? 'Weights normalized (they summed '+tot.toFixed(0)+'%).' : ''};
 }
 function render(wCur, wOpt, wVar, tickers, alpha){
   document.getElementById('results').style.display='block';
   charts.forEach(c=>c.destroy()); charts=[];
-  const names = ['Tu cartera','Mín CVaR','Mín varianza'];
+  const names = ['Your portfolio','Min CVaR','Min variance'];
   const sets = [wCur,wOpt,wVar];
   const pc = ['#c98a12','#d96b2a','#2f6fd0'];
 
@@ -278,7 +279,7 @@ function render(wCur, wOpt, wVar, tickers, alpha){
   const mets = sets.map(w=>metrics(portReturns(w,tickers),alpha));
   sets.forEach((w,i)=>{
     const m=mets[i], tr=document.createElement('tr');
-    tr.innerHTML='<td>'+names[i]+'</td><td class="'+(m.cagr>=0?'pos':'neg')+'">'+fmtPct(m.cagr)+'</td><td>'+(m.sharpe==null?'-':m.sharpe.toFixed(2))+'</td><td class="neg">'+fmtPct(m.mdd)+'</td><td class="neg">-'+ (m.cvar*100).toFixed(2)+'%</td>';
+    tr.innerHTML='<td>'+names[i]+'</td><td class="'+(m.cagr>=0?'pos':'neg')+'">'+fmtPct(m.cagr)+'</td><td>'+(m.sharpe==null?'-':m.sharpe.toFixed(2))+'</td><td class="neg">'+fmtPct(m.mdd)+'</td><td class="neg">-'+(m.cvar*100).toFixed(2)+'%</td>';
     mt.appendChild(tr);
   });
 
@@ -305,16 +306,16 @@ function render(wCur, wOpt, wVar, tickers, alpha){
 fetch('optimizador.json').then(r=>r.json()).then(d=>{
   DATA=d;
   d.assets.forEach(a=>TICK[a.short]=a.ticker);
-  document.getElementById('foot').textContent='Datos: '+d.assets.map(a=>a.ticker).join(', ')+' · '+d.dates.length+' días · Generado: '+d.generated_at;
+  document.getElementById('foot').textContent='Data: '+d.assets.map(a=>a.ticker).join(', ')+' · '+d.dates.length+' days · Generated: '+d.generated_at;
   buildTables();
   const btn=document.getElementById('solve-btn');
   btn.addEventListener('click',()=>{
     const err=document.getElementById('err-box'); err.style.display='none';
     const tickers=d.assets.map(a=>a.short).filter(t=>document.getElementById('inc-'+t).checked);
-    if(tickers.length<2){ err.textContent='Elige al menos 2 activos.'; err.style.display='block'; return; }
+    if(tickers.length<2){ err.textContent='Pick at least 2 assets.'; err.style.display='block'; return; }
     const maxW={}; tickers.forEach(t=>maxW[t]=Math.min(100,Math.max(1,parseFloat(document.getElementById('max-'+t).value)||100))/100);
     const capSum=Object.values(maxW).reduce((a,b)=>a+b,0);
-    if(capSum<0.999){ err.textContent='Los máximos suman '+(capSum*100).toFixed(0)+'%: no se puede llegar al 100% invertido. Sube algún límite.'; err.style.display='block'; return; }
+    if(capSum<0.999){ err.textContent='Max limits sum '+(capSum*100).toFixed(0)+'%: cannot reach 100% invested. Raise some limit.'; err.style.display='block'; return; }
     const alpha=parseFloat(document.getElementById('alpha-sel').value);
     btn.disabled=true; document.getElementById('spinner').style.display='inline';
     setTimeout(()=>{
@@ -324,13 +325,13 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const retAn=Math.max(0,parseFloat(document.getElementById('ret-obj').value)||0)/100;
         const muReq=Math.pow(1+retAn,1/DAYS_YR)-1;
         const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
-        if(!wOpt){ err.textContent='No hay solución: ese objetivo es demasiado alto para estos activos y límites. Baja el objetivo o sube algún máximo.'; err.style.display='block'; return; }
+        if(!wOpt){ err.textContent='No solution: that target is too high for these assets and limits. Lower the target or raise a max.'; err.style.display='block'; return; }
         const wVar=solveMinVar(tickers) || wCur;
-        document.getElementById('res-badge').textContent='objetivo '+(retAn*100).toFixed(1)+'% anual · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' activos';
+        document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets';
         render(wCur,wOpt,wVar,tickers,alpha);
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
-        err.textContent='Error resolviendo: '+e.message; err.style.display='block';
+        err.textContent='Solver error: '+e.message; err.style.display='block';
       }finally{
         btn.disabled=false; document.getElementById('spinner').style.display='none';
       }

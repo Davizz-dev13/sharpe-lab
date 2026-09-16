@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Regenerate docs/optimizador/optimizador.json: 5y daily returns for the
-portfolio-optimizer universe (cash, gold, commodities, S&P 500, Bitcoin).
-Runs nightly via GitHub Actions alongside the dashboard."""
+portfolio-optimizer universe. Runs nightly via GitHub Actions."""
 from __future__ import annotations
 import json
 import sys
@@ -15,14 +14,14 @@ sys.path.insert(0, str(ROOT))
 from core.data import history
 
 ASSETS = [
-    {"ticker": "BIL",     "name": "Cash remunerado", "short": "Cash"},
-    {"ticker": "GLD",     "name": "Oro",             "short": "Oro"},
-    {"ticker": "PDBC",    "name": "Commodities",     "short": "Commodities"},
-    {"ticker": "SPY",     "name": "S&P 500",         "short": "S&P 500"},
-    {"ticker": "BTC-USD", "name": "Bitcoin",         "short": "Bitcoin"},
-    {"ticker": "URTH",    "name": "MSCI World",      "short": "MSCI World"},
-    {"ticker": "EEM",     "name": "Emergentes",      "short": "Emergentes"},
-    {"ticker": "SLV",     "name": "Plata",           "short": "Plata"},
+    {"ticker": "BIL",     "name": "Cash (T-bill ETF)",  "short": "Cash"},
+    {"ticker": "GLD",     "name": "Gold",               "short": "Gold"},
+    {"ticker": "PDBC",    "name": "Commodities",        "short": "Commodities"},
+    {"ticker": "SPY",     "name": "S&P 500",            "short": "S&P 500"},
+    {"ticker": "BTC-USD", "name": "Bitcoin",            "short": "Bitcoin"},
+    {"ticker": "URTH",    "name": "MSCI World",         "short": "MSCI World"},
+    {"ticker": "EEM",     "name": "Emerging Markets",   "short": "Emerging"},
+    {"ticker": "SLV",     "name": "Silver",             "short": "Silver"},
 ]
 PERIOD = "5y"
 

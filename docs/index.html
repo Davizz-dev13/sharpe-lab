@@ -43,13 +43,13 @@
 <body>
 <main>
   <h1>Sharpe Lab</h1>
-  <div class="sub">estrategias cuantitativas, seguidas en vivo</div>
+  <div class="sub">quantitative strategies, tracked live</div>
 
   <div class="view active" id="v-home">
     <button class="mbtn" onclick="show('v-expl')">Explanation</button>
-    <a class="mbtn primary" href="optimizador/">Optimizador CVaR</a>
+    <a class="mbtn primary" href="optimizador/">CVaR Optimizer</a>
     <button class="mbtn" onclick="show('v-strats')">Strats</button>
-    <a class="mbtn" href="interes/">Inter&eacute;s compuesto</a>
+    <a class="mbtn" href="interes/">Compound Interest</a>
   </div>
 
   <div class="view" id="v-expl">
@@ -59,19 +59,19 @@
       <p>Cada idea se testea fuera de muestra, con costes de transacción realistas y ventanas de 10 años. Las que pasan el filtro se siguen en paper trading en tiempo real (dinero ficticio, señales reales cada noche) antes de confiar un euro en ellas.</p>
       <p class="muted">Nada de esto es consejo de inversión.</p>
     </div>
-    <button class="back" onclick="show('v-home')">&larr; Volver</button>
+    <button class="back" onclick="show('v-home')">&larr; Back</button>
   </div>
 
   <div class="view" id="v-strats">
-    <a class="mbtn" href="optimizador/">Optimizador CVaR<span class="arrow">&rarr;</span></a>
+    <a class="mbtn" href="optimizador/">CVaR Optimizer<span class="arrow">&rarr;</span></a>
     <a class="mbtn" href="semis/">Semiconductors<span class="arrow">&rarr;</span></a>
     <a class="mbtn" href="dashboard.html#btc">Bitcoin<span class="arrow">&rarr;</span></a>
     <a class="mbtn" href="dashboard.html#msci">MSCI<span class="arrow">&rarr;</span></a>
     <a class="mbtn" href="mag7/">Mag7<span class="arrow">&rarr;</span></a>
-    <button class="back" onclick="show('v-home')">&larr; Volver</button>
+    <button class="back" onclick="show('v-home')">&larr; Back</button>
   </div>
 
-  <footer>Paper trading en vivo y backtests con costes. Rentabilidades pasadas no garantizan resultados futuros.</footer>
+  <footer>Live paper trading and backtests with costs. Past returns do not guarantee future results.</footer>
 </main>
 <script>
 function show(id){

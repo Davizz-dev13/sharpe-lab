@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Calculadora de inter&eacute;s compuesto</title>
+<title>Compound interest calculator</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
@@ -21,6 +21,18 @@
   @media (max-width:560px){ .fields { grid-template-columns:1fr; } }
   .field label { display:block; font-size:12px; color:var(--mut); margin-bottom:4px; }
   .field input, .field select { width:100%; padding:8px 10px; border:2px solid var(--fg); background:var(--panel); color:var(--fg); font-family:'DM Sans',sans-serif; font-size:15px; }
+  .adj-form { display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; margin-top:14px; padding-top:12px; border-top:2px solid var(--border); }
+  @media (max-width:560px){ .adj-form { grid-template-columns:1fr; } }
+  .adj-form .full { grid-column:1 / -1; }
+  .adj-form label { display:block; font-size:12px; color:var(--mut); margin-bottom:4px; }
+  .adj-form input, .adj-form select { width:100%; padding:7px 9px; border:2px solid var(--fg); background:var(--panel); color:var(--fg); font-family:'DM Sans',sans-serif; font-size:14px; }
+  .adj-title { font-size:12.5px; font-weight:700; margin:14px 0 0; }
+  .chip { display:flex; align-items:center; justify-content:space-between; gap:8px; border:2px solid var(--fg); background:var(--bg); padding:6px 10px; margin-top:8px; font-size:13px; }
+  .chip button { background:none; border:none; color:var(--mut); font-size:16px; cursor:pointer; padding:0 2px; line-height:1; }
+  .chip button:hover { color:var(--fg); }
+  .addbtn { padding:8px 14px; background:var(--yellow); border:3px solid var(--fg); font-family:'Bungee',sans-serif; font-size:12px; cursor:pointer; }
+  .addbtn:active { transform:scale(.98); }
+  .hidden { display:none !important; }
   .kpis { display:flex; gap:18px; flex-wrap:wrap; margin:4px 0 6px; }
   .kpi b { font-size:20px; display:block; }
   .kpi span { font-size:12px; color:var(--mut); }
@@ -41,51 +53,91 @@
 </head>
 <body>
 <header>
-  <h1>Inter&eacute;s compuesto</h1>
-  <div class="sub">La fuerza m&aacute;s aburrida y m&aacute;s poderosa de las finanzas: los intereses generando intereses. Juega con los n&uacute;meros.</div>
+  <h1>Compound interest</h1>
+  <div class="sub">The most boring and most powerful force in finance: interest earning interest. Play with the numbers.</div>
 </header>
 <main>
   <div class="panel">
-    <h2>Supuestos</h2>
+    <h2>Assumptions</h2>
     <div class="fields">
-      <div class="field"><label>Capital inicial (&euro;)</label><input type="number" id="f-p0" min="0" step="500" value="10000"></div>
-      <div class="field"><label>Aportaci&oacute;n mensual (&euro;)</label><input type="number" id="f-pmt" min="0" step="50" value="300"></div>
-      <div class="field"><label>Tipo anual (%)</label><input type="number" id="f-r" min="0" max="50" step="0.5" value="7"></div>
-      <div class="field"><label>A&ntilde;os</label><input type="number" id="f-y" min="1" max="60" step="1" value="20"></div>
-      <div class="field"><label>Capitalizaci&oacute;n</label>
+      <div class="field"><label>Initial capital (&euro;)</label><input type="number" id="f-p0" min="0" step="500" value="10000"></div>
+      <div class="field"><label>Monthly contribution (&euro;)</label><input type="number" id="f-pmt" min="0" step="50" value="300"></div>
+      <div class="field"><label>Annual rate (%)</label><input type="number" id="f-r" min="0" max="50" step="0.5" value="7"></div>
+      <div class="field"><label>Years</label><input type="number" id="f-y" min="1" max="60" step="1" value="20"></div>
+      <div class="field"><label>Compounding</label>
         <select id="f-n">
-          <option value="1">Anual</option>
-          <option value="4">Trimestral</option>
-          <option value="12" selected>Mensual</option>
-          <option value="365">Diaria</option>
+          <option value="1">Yearly</option>
+          <option value="4">Quarterly</option>
+          <option value="12" selected>Monthly</option>
+          <option value="365">Daily</option>
         </select>
       </div>
     </div>
-    <div class="note">Las aportaciones entran a final de cada mes. El tipo se convierte a mensual seg&uacute;n la frecuencia de capitalizaci&oacute;n elegida.</div>
+    <div class="adj-title">Contribution adjustments</div>
+    <div class="adj-form">
+      <div><label>Adjustment type</label>
+        <select id="f-adj-tipo">
+          <option value="tramo">From a year onwards</option>
+          <option value="puntual">One specific month</option>
+        </select>
+      </div>
+      <div><label>Year</label><input type="number" id="f-adj-ano" min="1" max="60" step="1" value="5"></div>
+      <div id="f-adj-mes-wrap" class="hidden"><label>Month</label>
+        <select id="f-adj-mes">
+          <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+          <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+          <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+          <option value="10">October</option><option value="11">November</option><option value="12" selected>December</option>
+        </select>
+      </div>
+      <div><label>New contribution (&euro;/month)</label><input type="number" id="f-adj-cant" min="0" step="50" value="1300"></div>
+      <div class="full"><button class="addbtn" id="f-adj-add">Add adjustment</button></div>
+    </div>
+    <div id="adj-list"></div>
+    <div class="note">Contributions go in at the end of each month. The rate converts to monthly per the chosen compounding frequency. A specific-month adjustment wins over the bracket that month.</div>
   </div>
 
   <div class="panel">
-    <h2>Resultado</h2>
+    <h2>Result</h2>
     <div class="kpis">
-      <div class="kpi"><b id="k-final"></b><span>capital final</span></div>
-      <div class="kpi"><b id="k-aport"></b><span>total aportado</span></div>
-      <div class="kpi gain"><b id="k-int"></b><span>intereses ganados</span></div>
-      <div class="kpi"><b id="k-mult"></b><span>multiplicador</span></div>
+      <div class="kpi"><b id="k-final"></b><span>final capital</span></div>
+      <div class="kpi"><b id="k-aport"></b><span>total contributed</span></div>
+      <div class="kpi gain"><b id="k-int"></b><span>interest earned</span></div>
+      <div class="kpi"><b id="k-mult"></b><span>multiplier</span></div>
     </div>
     <div class="chartbox"><canvas id="chart"></canvas></div>
   </div>
 
   <div class="panel">
-    <h2>A&ntilde;o a a&ntilde;o</h2>
-    <div class="twrap"><table><thead><tr><th>A&ntilde;o</th><th>Aportado</th><th>Intereses</th><th>Saldo</th><th>% intereses</th></tr></thead><tbody id="y-table"></tbody></table></div>
+    <h2>Year by year</h2>
+    <div class="twrap"><table><thead><tr><th>Year</th><th>Contributed</th><th>Interest</th><th>Balance</th><th>% interest</th></tr></thead><tbody id="y-table"></tbody></table></div>
   </div>
 
-  <a class="back" href="../">&larr; Volver a Sharpe Lab</a>
+  <a class="back" href="../">&larr; Back to Sharpe Lab</a>
 </main>
-<footer>Simulaci&oacute;n con tipo constante: la realidad no sube en l&iacute;nea recta. Nada de esto es consejo de inversi&oacute;n.</footer>
+<footer>Simulation with a constant rate: reality does not move in a straight line. None of this is investment advice.</footer>
 <script>
-const fmtEUR = v => v.toLocaleString('es-ES',{maximumFractionDigits:0})+'\u00a0€';
+const fmtEUR = v => '\u20ac'+v.toLocaleString('en-US',{maximumFractionDigits:0});
+const MONTHS=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+let ADJ=[];
 let chart=null;
+function contributionFor(m, base){
+  const y=Math.ceil(m/12), mo=((m-1)%12)+1;
+  let c=base, bestY=-1;
+  ADJ.forEach(a=>{ if(a.type==='tramo' && a.year<=y && a.year>bestY){ bestY=a.year; c=a.amount; } });
+  ADJ.forEach(a=>{ if(a.type==='puntual' && a.year===y && a.month===mo) c=a.amount; });
+  return c;
+}
+function renderAdj(){
+  const box=document.getElementById('adj-list'); box.innerHTML='';
+  ADJ.forEach((a,i)=>{
+    const d=document.createElement('div'); d.className='chip';
+    const txt = a.type==='tramo' ? 'From year '+a.year+': '+fmtEUR(a.amount)+'/month' : MONTHS[a.month]+' of year '+a.year+': '+fmtEUR(a.amount);
+    d.innerHTML='<span>'+txt+'</span><button data-i="'+i+'">&times;</button>';
+    d.querySelector('button').addEventListener('click',e=>{ ADJ.splice(i,1); renderAdj(); calc(); });
+    box.appendChild(d);
+  });
+}
 function calc(){
   const P0=Math.max(0,parseFloat(document.getElementById('f-p0').value)||0);
   const PMT=Math.max(0,parseFloat(document.getElementById('f-pmt').value)||0);
@@ -98,12 +150,12 @@ function calc(){
   const rows=[];
   labels.push('0'); sBal.push(bal); sAport.push(aport);
   for(let m=1;m<=Y*12;m++){
-    bal=bal*(1+g)+PMT; aport+=PMT;
+    const c=contributionFor(m,PMT);
+    bal=bal*(1+g)+c; aport+=c;
     if(m%12===0){
       const y=m/12;
       labels.push(String(y)); sBal.push(bal); sAport.push(aport);
-      const ints=bal-aport;
-      rows.push({y, aport, ints, bal});
+      rows.push({y, aport, ints:bal-aport, bal});
     }
   }
   const fin=bal, ints=fin-aport;
@@ -120,16 +172,31 @@ function calc(){
   if(chart) chart.destroy();
   chart=new Chart(document.getElementById('chart'),{type:'line',
     data:{labels, datasets:[
-      {label:'Intereses', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#eab619', borderColor:'#2a170f', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
-      {label:'Aportado', data:sAport, backgroundColor:'#7a6a58', borderColor:'#2a170f', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Interest', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#eab619', borderColor:'#2a170f', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Contributed', data:sAport, backgroundColor:'#7a6a58', borderColor:'#2a170f', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
     ]},
     options:{maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
-      scales:{x:{title:{display:true,text:'Años',color:'#7a6a58'},ticks:{color:'#7a6a58',maxTicksLimit:12},grid:{color:'#e3d9c0'},stacked:true},
+      scales:{x:{title:{display:true,text:'Years',color:'#7a6a58'},ticks:{color:'#7a6a58',maxTicksLimit:12},grid:{color:'#e3d9c0'},stacked:true},
               y:{ticks:{color:'#7a6a58',callback:v=>(v/1000)+'k'},grid:{color:'#e3d9c0'},stacked:true}},
       plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}},
         tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmtEUR(c.parsed.y)}}}}});
 }
 ['f-p0','f-pmt','f-r','f-y','f-n'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+document.getElementById('f-adj-tipo').addEventListener('change',e=>{
+  document.getElementById('f-adj-mes-wrap').classList.toggle('hidden', e.target.value!=='puntual');
+});
+document.getElementById('f-adj-add').addEventListener('click',()=>{
+  const type=document.getElementById('f-adj-tipo').value;
+  const year=Math.max(1,parseInt(document.getElementById('f-adj-ano').value)||1);
+  const amount=Math.max(0,parseFloat(document.getElementById('f-adj-cant').value)||0);
+  const a={type, year, amount};
+  if(type==='puntual') a.month=parseInt(document.getElementById('f-adj-mes').value);
+  if(type==='tramo') ADJ=ADJ.filter(x=>!(x.type==='tramo'&&x.year===year));
+  else ADJ=ADJ.filter(x=>!(x.type==='puntual'&&x.year===year&&x.month===a.month));
+  ADJ.push(a); ADJ.sort((x,y)=>(x.year-y.year));
+  renderAdj(); calc();
+});
+renderAdj();
 calc();
 </script>
 </body>
