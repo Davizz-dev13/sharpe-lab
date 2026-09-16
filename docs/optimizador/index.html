@@ -69,6 +69,12 @@
       <h2>2 &middot; Universe and limits</h2>
       <div class="twrap"><table class="ctab" id="lim-table"><thead><tr><th>Asset</th><th>Include</th><th>Max %</th></tr></thead><tbody></tbody></table></div>
       <div style="margin-top:12px;font-size:13px">
+        <label style="font-size:12px;color:var(--mut);display:block;margin-bottom:4px">Add your own ticker</label>
+        <input type="text" id="custom-ticker" placeholder="e.g. DOGE, ETH, SOL" style="width:130px;padding:5px 8px;border:2px solid var(--fg);background:var(--panel);color:var(--fg);font-family:'DM Sans',sans-serif;font-size:13px;text-transform:uppercase">
+        <button id="custom-add" style="padding:6px 14px;background:var(--yellow);border:3px solid var(--fg);font-family:'Bungee',sans-serif;font-size:11px;cursor:pointer">Add</button>
+        <div class="note" id="custom-status">Built-in universe covers the usual stocks, ETFs, commodities and crypto. Other crypto loads live here (CoinGecko); anything else can join the nightly data on request.</div>
+      </div>
+      <div style="margin-top:12px;font-size:13px">
         Expected return target: <input type="number" id="ret-obj" min="0" max="50" step="0.5" value="5" style="width:58px"> % yearly
       </div>
       <div style="margin-top:10px;font-size:13px">
@@ -122,6 +128,8 @@ const COLORS = {"Cash":"#7a6a58","Gold":"#eab619","Commodities":"#2e7d50","S&P 5
 const DEFAULT_CUR = {"Cash":50,"Gold":12,"Commodities":10,"S&P 500":25,"Bitcoin":3,"MSCI World":0,"Emerging":0,"Silver":0};
 const DEFAULT_MAX = {"Cash":100,"Gold":30,"Commodities":30,"S&P 500":30,"Bitcoin":5,"MSCI World":30,"Emerging":30,"Silver":30};
 const DEFAULT_INC = {"Cash":true,"Gold":true,"Commodities":true,"S&P 500":true,"Bitcoin":true,"MSCI World":false,"Emerging":false,"Silver":false};
+const PALETTE = ["#b87333","#627eea","#d9402f","#3b8bc2","#4a5a6a","#76b900","#e05194","#00a2ed","#f25c05","#8e44ad","#16a085","#c0392b","#7f8c8d","#2c3e50","#a0522d","#6b8e23","#4682b4","#daa520","#cd5c5c","#20b2aa"];
+const colorOf = s => { if(COLORS[s]) return COLORS[s]; let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))>>>0; return PALETTE[h%PALETTE.length]; };
 const DAYS_YR = 365;
 let DATA = null;
 let TICK = {};
@@ -200,7 +208,7 @@ function solveMinVar(tickers){
   // long-only min variance: w proportional to inv(cov)*1, dropping negative weights
   let act = tickers.slice();
   const n = DATA.dates.length;
-  for(let iter=0; iter<20 && act.length; iter++){
+  for(let iter=0; iter<40 && act.length; iter++){
     const m = act.length;
     const means = act.map(t=>DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n);
     const cov = Array.from({length:m},()=>new Float64Array(m));
@@ -237,22 +245,23 @@ function solveMinVar(tickers){
   return null;
 }
 
-function buildTables(){
+function addAssetRow(a){
+  const s=a.short;
   const curT = document.querySelector('#cur-table tbody');
   const limT = document.querySelector('#lim-table tbody');
-  DATA.assets.forEach(a=>{
-    const s=a.short;
-    const tr1=document.createElement('tr');
-    tr1.innerHTML='<td><span class="dot" style="background:'+COLORS[s]+'"></span>'+s+'</td><td><input type="number" min="0" max="100" step="1" value="'+DEFAULT_CUR[s]+'" id="cur-'+s+'"></td>';
-    curT.appendChild(tr1);
-    const tr2=document.createElement('tr');
-    const inc = DEFAULT_INC[s]!==false;
-    tr2.innerHTML='<td><span class="dot" style="background:'+COLORS[s]+'"></span>'+s+'</td><td><input type="checkbox" id="inc-'+s+'"'+(inc?' checked':'')+'></td><td><input type="number" min="1" max="100" step="1" value="'+DEFAULT_MAX[s]+'" id="max-'+s+'"'+(inc?'':' disabled')+'></td>';
-    limT.appendChild(tr2);
-    tr2.querySelector('#inc-'+CSS.escape(s)).addEventListener('change',e=>{
-      tr2.querySelector('#max-'+CSS.escape(s)).disabled = !e.target.checked;
-    });
+  const tr1=document.createElement('tr');
+  tr1.innerHTML='<td><span class="dot" style="background:'+colorOf(s)+'"></span>'+s+'</td><td><input type="number" min="0" max="100" step="1" value="'+(DEFAULT_CUR[s]??0)+'" id="cur-'+s+'"></td>';
+  curT.appendChild(tr1);
+  const tr2=document.createElement('tr');
+  const inc = DEFAULT_INC[s]??false;
+  tr2.innerHTML='<td><span class="dot" style="background:'+colorOf(s)+'"></span>'+s+'</td><td><input type="checkbox" id="inc-'+s+'"'+(inc?' checked':'')+'></td><td><input type="number" min="1" max="100" step="1" value="'+(DEFAULT_MAX[s]??30)+'" id="max-'+s+'"'+(inc?'':' disabled')+'></td>';
+  limT.appendChild(tr2);
+  tr2.querySelector('#inc-'+CSS.escape(s)).addEventListener('change',e=>{
+    tr2.querySelector('#max-'+CSS.escape(s)).disabled = !e.target.checked;
   });
+}
+function buildTables(){
+  DATA.assets.forEach(addAssetRow);
 }
 function readCur(tickers){
   let raw={}, tot=0;
@@ -271,7 +280,7 @@ function render(wCur, wOpt, wVar, tickers, alpha){
   const wt=document.querySelector('#w-table tbody'); wt.innerHTML='';
   tickers.forEach(t=>{
     const tr=document.createElement('tr');
-    tr.innerHTML='<td><span class="dot" style="background:'+COLORS[t]+'"></span>'+t+'</td>'+sets.map(w=>'<td>'+fmtW(w[t]||0)+'</td>').join('');
+    tr.innerHTML='<td><span class="dot" style="background:'+colorOf(t)+'"></span>'+t+'</td>'+sets.map(w=>'<td>'+fmtW(w[t]||0)+'</td>').join('');
     wt.appendChild(tr);
   });
 
@@ -303,11 +312,71 @@ function render(wCur, wOpt, wVar, tickers, alpha){
     plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}}}}}));
 }
 
+function saveCustom(sym){
+  try{
+    const l=JSON.parse(localStorage.getItem('opt-custom')||'[]');
+    if(!l.includes(sym)){ l.push(sym); localStorage.setItem('opt-custom',JSON.stringify(l)); }
+  }catch(e){}
+}
+async function addCustom(symRaw){
+  const st=document.getElementById('custom-status');
+  const sym=(symRaw||'').trim().toUpperCase();
+  if(!sym) return;
+  if(!/^[A-Z0-9.\-]{1,12}$/.test(sym)){ st.textContent='That ticker does not look valid.'; return; }
+  const existing=DATA.assets.find(a=>a.short===sym || a.ticker===sym);
+  if(existing){
+    const cb=document.getElementById('inc-'+existing.short);
+    if(cb && !cb.checked){ cb.checked=true; cb.dispatchEvent(new Event('change')); }
+    st.textContent=existing.short+' is already in the universe: included.';
+    saveCustom(existing.short);
+    return;
+  }
+  st.textContent='Looking for '+sym+'...';
+  try{
+    const sr=await fetch('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(sym)).then(r=>r.json());
+    const coins=(sr.coins||[]).filter(c=>(c.symbol||'').toUpperCase()===sym);
+    coins.sort((a,b)=>(a.market_cap_rank||9e9)-(b.market_cap_rank||9e9));
+    const coin=coins[0];
+    if(!coin || !coin.market_cap_rank || coin.market_cap_rank>100){
+      st.textContent=sym+' is not in the nightly universe and no major crypto matches it. Stocks and ETFs can join the nightly data on request.';
+      return;
+    }
+    st.textContent='Downloading '+coin.name+' ('+sym+') from CoinGecko...';
+    const mc=await fetch('https://api.coingecko.com/api/v3/coins/'+coin.id+'/market_chart?vs_currency=usd&days=1825').then(r=>r.json());
+    const px=new Map();
+    (mc.prices||[]).forEach(pt=>{ px.set(new Date(pt[0]).toISOString().slice(0,10), pt[1]); });
+    const n=DATA.dates.length;
+    const closes=new Array(n); let last=null, covered=0;
+    for(let i=0;i<n;i++){ const d=DATA.dates[i]; if(px.has(d)){ last=px.get(d); covered++; } closes[i]=last; }
+    if(covered < n*0.6){ st.textContent=sym+': only '+covered+' days of history, too little for the optimizer.'; return; }
+    const lastCovered=[...px.keys()].sort().pop();
+    if((new Date(DATA.dates[n-1])-new Date(lastCovered))/864e5 > 10){ st.textContent=sym+': data looks stale (last quote '+lastCovered+'). Skipped.'; return; }
+    const rets=new Array(n).fill(0);
+    for(let i=1;i<n;i++){ if(closes[i-1] && closes[i]) rets[i]=closes[i]/closes[i-1]-1; }
+    DATA.assets.push({ticker:sym, name:coin.name, short:sym});
+    TICK[sym]=sym;
+    DATA.returns[sym]=rets;
+    addAssetRow({short:sym});
+    const cb=document.getElementById('inc-'+sym);
+    if(cb){ cb.checked=true; cb.dispatchEvent(new Event('change')); }
+    saveCustom(sym);
+    st.textContent=coin.name+' ('+sym+') added live from CoinGecko, '+covered+' days of history.';
+  }catch(e){
+    st.textContent='Could not load '+sym+' ('+e.message+'). The optimizer keeps working with the loaded assets.';
+  }
+}
+
 fetch('optimizador.json').then(r=>r.json()).then(d=>{
   DATA=d;
   d.assets.forEach(a=>TICK[a.short]=a.ticker);
   document.getElementById('foot').textContent='Data: '+d.assets.map(a=>a.ticker).join(', ')+' · '+d.dates.length+' days · Generated: '+d.generated_at;
   buildTables();
+  document.getElementById('custom-add').addEventListener('click',()=>addCustom(document.getElementById('custom-ticker').value));
+  document.getElementById('custom-ticker').addEventListener('keydown',e=>{ if(e.key==='Enter') addCustom(e.target.value); });
+  (async()=>{
+    let saved=[]; try{ saved=JSON.parse(localStorage.getItem('opt-custom')||'[]'); }catch(e){}
+    for(const sym of saved) await addCustom(sym);
+  })();
   const btn=document.getElementById('solve-btn');
   btn.addEventListener('click',()=>{
     const err=document.getElementById('err-box'); err.style.display='none';
