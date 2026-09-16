@@ -103,6 +103,11 @@
       <div class="twrap"><table id="m-table"><thead><tr><th>Portfolio</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Daily CVaR</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
+      <h2>Efficient frontier <span class="badge" id="ef-badge"></span></h2>
+      <div class="chartbox tall"><canvas id="ef-chart"></canvas></div>
+      <div class="note">Each dot on the curve is the least risky portfolio the LP can build for one return target, with your selected assets and limits. The curve is the best achievable trade-off: risk on the horizontal axis (average loss of the worst days, lower is safer), expected yearly return on the vertical. The markers show where the three portfolios sit. Dots are solved on sampled days for speed, so the curve is a close sketch, not the exact LP of the main result.</div>
+    </div>
+    <div class="panel">
       <h2>Growth of &euro;1</h2>
       <div class="chartbox tall"><canvas id="eq-chart"></canvas></div>
     </div>
@@ -312,6 +317,52 @@ function render(wCur, wOpt, wVar, tickers, alpha){
     plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}}}}}));
 }
 
+function annReturn(weights, tickers){
+  const n=DATA.dates.length; let m=0;
+  tickers.forEach(t=>{ const w=weights[t]||0; if(!w)return; m+=w*DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n; });
+  return m*DAYS_YR;
+}
+function greedyMaxReturn(tickers, maxW){
+  const n=DATA.dates.length;
+  const mus=tickers.map(t=>({mu:DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n, cap:maxW[t]}));
+  mus.sort((a,b)=>b.mu-a.mu);
+  let rem=1, ret=0;
+  mus.forEach(a=>{ const w=Math.min(a.cap,rem); ret+=w*a.mu; rem-=w; });
+  return ret;
+}
+function computeFrontier(tickers, maxW, alpha, onProgress, done){
+  const w0=solveCVaR(tickers,maxW,alpha,350,0);
+  if(!w0){ done(null); return; }
+  const lo=annReturn(w0,tickers)/DAYS_YR;
+  const hi=greedyMaxReturn(tickers,maxW);
+  if(!(hi>lo+0.0003)){ done(null); return; }
+  const N=15, pts=[];
+  let i=0;
+  function step(){
+    const mu=lo+(hi-lo)*i/(N-1);
+    const w=solveCVaR(tickers,maxW,alpha,350,mu);
+    if(w){
+      pts.push({x:metrics(portReturns(w,tickers),alpha).cvar*100, y:annReturn(w,tickers)*100});
+    }
+    i++;
+    if(i<N){ onProgress(i,N); setTimeout(step,10); }
+    else done(pts);
+  }
+  step();
+}
+function renderFrontier(pts, markers){
+  const pc=['#c98a12','#d96b2a','#2f6fd0'];
+  const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:3,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
+  markers.forEach((m,i)=>{
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#2a170f',borderWidth:1,pointRadius:6,pointStyle:i===1?'rectRot':(i===2?'triangle':'circle')});
+  });
+  charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},
+    options:{maintainAspectRatio:false,
+    scales:{x:{title:{display:true,text:'Daily CVaR % (avg loss of worst days, lower = safer)',color:'#7a6a58',font:{size:10}},ticks:{color:'#7a6a58',callback:v=>v+'%'},grid:{color:'#e3d9c0'}},
+            y:{title:{display:true,text:'Expected yearly return %',color:'#7a6a58',font:{size:10}},ticks:{color:'#7a6a58',callback:v=>v+'%'},grid:{color:'#e3d9c0'}}},
+    plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}},
+      tooltip:{callbacks:{label:c=>c.dataset.label+': return '+c.parsed.y.toFixed(1)+'% / daily CVaR '+c.parsed.x.toFixed(2)+'%'}}}}}));
+}
 function saveCustom(sym){
   try{
     const l=JSON.parse(localStorage.getItem('opt-custom')||'[]');
@@ -403,6 +454,14 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const wVar=solveMinVar(tickers) || wCur;
         document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets';
         render(wCur,wOpt,wVar,tickers,alpha);
+        const efBadge=document.getElementById('ef-badge');
+        efBadge.textContent='computing frontier...';
+        const mk=(w,label)=>({x:metrics(portReturns(w,tickers),alpha).cvar*100, y:annReturn(w,tickers)*100, label});
+        computeFrontier(tickers,maxW,alpha,(i,N)=>{efBadge.textContent='computing frontier '+i+'/'+N+'...';},pts=>{
+          if(!pts||pts.length<3){ efBadge.textContent='frontier not available for this selection'; return; }
+          efBadge.textContent='';
+          renderFrontier(pts,[mk(wCur,'Your portfolio'),mk(wOpt,'Min CVaR'),mk(wVar,'Min variance')]);
+        });
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
         err.textContent='Solver error: '+e.message; err.style.display='block';
