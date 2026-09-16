@@ -216,6 +216,13 @@ function solveCVaR(tickers, maxW, alpha, maxS, muReq){
   tickers.forEach((t,i)=>{ w[t]=Math.max(0,res['w_'+i]||0); });
   const tot = Object.values(w).reduce((a,b)=>a+b,0)||1;
   tickers.forEach(t=>w[t]/=tot);
+  if(muReq>0){
+    // the daily-return constraint has tiny coefficients and the solver's
+    // feasibility tolerance can silently violate it: verify it explicitly
+    let m=0;
+    tickers.forEach(t=>{ const wgt=w[t]||0; if(!wgt) return; m+=wgt*DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n; });
+    if(m < muReq*0.999) return null;
+  }
   return w;
 }
 function solveMaxCAGR(tickers, maxW){
@@ -572,7 +579,7 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const retAn=Math.max(0,parseFloat(document.getElementById('ret-obj').value)||0)/100;
         const muReq=Math.pow(1+retAn,1/DAYS_YR)-1;
         const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
-        if(!wOpt){ err.textContent='No solution: that target is too high for these assets and limits. Lower the target or raise a max.'; err.style.display='block'; return; }
+        if(!wOpt){ err.textContent='No solution: that target is too high for these assets, limits and window. Max reachable right now: ~'+(greedyMaxReturn(tickers,maxW)*365*100).toFixed(1)+'% yearly. Lower the target or raise a max.'; err.style.display='block'; return; }
         const wMax=solveMaxCAGR(tickers,maxW);
         document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets · '+WINDOW+'Y window';
         const r0Daily=annReturn(wOpt,tickers)/DAYS_YR;
