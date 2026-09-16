@@ -96,7 +96,7 @@
     <div class="panel">
       <h2>Optimal weights <span class="badge" id="res-badge"></span></h2>
       <div class="chartbox"><canvas id="alloc-chart"></canvas></div>
-      <div class="twrap"><table id="w-table"><thead><tr><th>Asset</th><th>Your portfolio</th><th>Min CVaR</th><th>Max CAGR</th></tr></thead><tbody></tbody></table></div>
+      <div class="twrap"><table id="w-table"><thead><tr><th>Asset</th><th>Your portfolio</th><th>Min CVaR</th><th>Max CAGR</th><th>Max Sharpe</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
       <h2>Metrics (5 years, historical data) <span class="badge">past returns do not guarantee future results</span></h2>
@@ -105,7 +105,7 @@
     <div class="panel">
       <h2>Efficient frontier <span class="badge" id="ef-badge"></span></h2>
       <div class="chartbox tall"><canvas id="ef-chart"></canvas></div>
-      <div class="note">Each dot on the curve is the least risky portfolio the LP can build for one return target, with your selected assets and limits. The curve is the best achievable trade-off: risk on the horizontal axis (average loss of the worst days, lower is safer), expected yearly return on the vertical. The markers show where the three portfolios sit. Dots are solved on sampled days for speed, so the curve is a close sketch, not the exact LP of the main result. The max Sharpe marker is where a line drawn from the cash return would touch the curve at its steepest: the best historical return per unit of risk taken.</div>
+      <div class="note">Each dot on the curve is the least risky portfolio the LP can build for one return target, with your selected assets and limits. The curve is the best achievable trade-off: risk on the horizontal axis (average loss of the worst days, lower is safer), expected yearly return on the vertical. The markers show where the four portfolios sit. Dots are solved on sampled days for speed, so the curve is a close sketch, not the exact LP of the main result. The max Sharpe marker is where a line drawn from the cash return would touch the curve at its steepest: the best historical return per unit of risk taken.</div>
     </div>
     <div class="panel">
       <h2>Growth of &euro;1</h2>
