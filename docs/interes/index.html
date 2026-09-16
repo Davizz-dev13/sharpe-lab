@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de inter&eacute;s compuesto</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#2a170f; --mut:#7a6a58; --acc:#d96b2a; --green:#2e7d50; --yellow:#eab619; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'DM Sans',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
+  header { padding:24px 28px 8px; }
+  h1 { margin:0 0 4px; font-size:22px; font-family:'Bungee',sans-serif; font-weight:400; letter-spacing:.02em; }
+  .sub { color:var(--mut); font-size:13px; line-height:1.5; max-width:900px; }
+  main { padding:8px 28px 40px; max-width:1200px; }
+  .panel { background:var(--panel); border:3px solid var(--fg); border-radius:0; padding:16px 18px; margin-top:18px; }
+  .panel h2 { margin:0 0 10px; font-size:15px; font-family:'Bungee',sans-serif; font-weight:400; letter-spacing:.02em; }
+  .fields { display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; }
+  @media (max-width:560px){ .fields { grid-template-columns:1fr; } }
+  .field label { display:block; font-size:12px; color:var(--mut); margin-bottom:4px; }
+  .field input, .field select { width:100%; padding:8px 10px; border:2px solid var(--fg); background:var(--panel); color:var(--fg); font-family:'DM Sans',sans-serif; font-size:15px; }
+  .kpis { display:flex; gap:18px; flex-wrap:wrap; margin:4px 0 6px; }
+  .kpi b { font-size:20px; display:block; }
+  .kpi span { font-size:12px; color:var(--mut); }
+  .kpi.gain b { color:var(--green); }
+  .chartbox { height:300px; }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  th, td { padding:5px 6px; text-align:right; border-bottom:2px solid var(--border); white-space:nowrap; }
+  th { background:var(--fg); color:var(--bg); font-family:'Bungee',sans-serif; font-weight:400; font-size:9.5px; letter-spacing:.03em; }
+  th:first-child, td:first-child { text-align:left; }
+  .twrap { overflow-x:auto; }
+  .note { color:var(--mut); font-size:12px; margin-top:8px; line-height:1.5; }
+  a { color:var(--acc); }
+  footer { color:var(--mut); font-size:11.5px; padding:20px 28px 40px; }
+  .back { display:inline-block; margin-top:18px; color:var(--mut); font-size:14px; text-decoration:none; }
+  .back:hover { color:var(--fg); }
+  @media (max-width:860px){ main { padding:8px 14px 40px; } header { padding:20px 16px 6px; } footer { padding:20px 16px 40px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Inter&eacute;s compuesto</h1>
+  <div class="sub">La fuerza m&aacute;s aburrida y m&aacute;s poderosa de las finanzas: los intereses generando intereses. Juega con los n&uacute;meros.</div>
+</header>
+<main>
+  <div class="panel">
+    <h2>Supuestos</h2>
+    <div class="fields">
+      <div class="field"><label>Capital inicial (&euro;)</label><input type="number" id="f-p0" min="0" step="500" value="10000"></div>
+      <div class="field"><label>Aportaci&oacute;n mensual (&euro;)</label><input type="number" id="f-pmt" min="0" step="50" value="300"></div>
+      <div class="field"><label>Tipo anual (%)</label><input type="number" id="f-r" min="0" max="50" step="0.5" value="7"></div>
+      <div class="field"><label>A&ntilde;os</label><input type="number" id="f-y" min="1" max="60" step="1" value="20"></div>
+      <div class="field"><label>Capitalizaci&oacute;n</label>
+        <select id="f-n">
+          <option value="1">Anual</option>
+          <option value="4">Trimestral</option>
+          <option value="12" selected>Mensual</option>
+          <option value="365">Diaria</option>
+        </select>
+      </div>
+    </div>
+    <div class="note">Las aportaciones entran a final de cada mes. El tipo se convierte a mensual seg&uacute;n la frecuencia de capitalizaci&oacute;n elegida.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Resultado</h2>
+    <div class="kpis">
+      <div class="kpi"><b id="k-final"></b><span>capital final</span></div>
+      <div class="kpi"><b id="k-aport"></b><span>total aportado</span></div>
+      <div class="kpi gain"><b id="k-int"></b><span>intereses ganados</span></div>
+      <div class="kpi"><b id="k-mult"></b><span>multiplicador</span></div>
+    </div>
+    <div class="chartbox"><canvas id="chart"></canvas></div>
+  </div>
+
+  <div class="panel">
+    <h2>A&ntilde;o a a&ntilde;o</h2>
+    <div class="twrap"><table><thead><tr><th>A&ntilde;o</th><th>Aportado</th><th>Intereses</th><th>Saldo</th><th>% intereses</th></tr></thead><tbody id="y-table"></tbody></table></div>
+  </div>
+
+  <a class="back" href="../">&larr; Volver a Sharpe Lab</a>
+</main>
+<footer>Simulaci&oacute;n con tipo constante: la realidad no sube en l&iacute;nea recta. Nada de esto es consejo de inversi&oacute;n.</footer>
+<script>
+const fmtEUR = v => v.toLocaleString('es-ES',{maximumFractionDigits:0})+'\u00a0€';
+let chart=null;
+function calc(){
+  const P0=Math.max(0,parseFloat(document.getElementById('f-p0').value)||0);
+  const PMT=Math.max(0,parseFloat(document.getElementById('f-pmt').value)||0);
+  const r=Math.max(0,parseFloat(document.getElementById('f-r').value)||0)/100;
+  const Y=Math.min(60,Math.max(1,parseInt(document.getElementById('f-y').value)||1));
+  const n=parseInt(document.getElementById('f-n').value);
+  const g=Math.pow(1+r/n, n/12)-1;
+  let bal=P0, aport=P0;
+  const labels=[], sBal=[], sAport=[];
+  const rows=[];
+  labels.push('0'); sBal.push(bal); sAport.push(aport);
+  for(let m=1;m<=Y*12;m++){
+    bal=bal*(1+g)+PMT; aport+=PMT;
+    if(m%12===0){
+      const y=m/12;
+      labels.push(String(y)); sBal.push(bal); sAport.push(aport);
+      const ints=bal-aport;
+      rows.push({y, aport, ints, bal});
+    }
+  }
+  const fin=bal, ints=fin-aport;
+  document.getElementById('k-final').textContent=fmtEUR(fin);
+  document.getElementById('k-aport').textContent=fmtEUR(aport);
+  document.getElementById('k-int').textContent=fmtEUR(ints);
+  document.getElementById('k-mult').textContent=aport>0?('x'+(fin/aport).toFixed(2)):'-';
+  const tb=document.getElementById('y-table'); tb.innerHTML='';
+  rows.forEach(w=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+w.y+'</td><td>'+fmtEUR(w.aport)+'</td><td>'+fmtEUR(w.ints)+'</td><td><b>'+fmtEUR(w.bal)+'</b></td><td>'+(w.bal>0?(w.ints/w.bal*100).toFixed(0):0)+'%</td>';
+    tb.appendChild(tr);
+  });
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById('chart'),{type:'line',
+    data:{labels, datasets:[
+      {label:'Intereses', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#eab619', borderColor:'#2a170f', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Aportado', data:sAport, backgroundColor:'#7a6a58', borderColor:'#2a170f', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+    ]},
+    options:{maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+      scales:{x:{title:{display:true,text:'Años',color:'#7a6a58'},ticks:{color:'#7a6a58',maxTicksLimit:12},grid:{color:'#e3d9c0'},stacked:true},
+              y:{ticks:{color:'#7a6a58',callback:v=>(v/1000)+'k'},grid:{color:'#e3d9c0'},stacked:true}},
+      plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmtEUR(c.parsed.y)}}}}});
+}
+['f-p0','f-pmt','f-r','f-y','f-n'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>
