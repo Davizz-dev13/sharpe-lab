@@ -351,8 +351,7 @@ function renderFrontier(pts, markers){
     if(Math.abs(dx)>1e-9){
       const m=(pts[i2].y-pts[i1].y)/dx;
       const yAt=x=>a0.y+m*(x-a0.x);
-      let x1=0, y1=yAt(0); const yLo=Math.min(...pts.map(p=>p.y))-1;
-      if(y1<yLo){ x1=a0.x+(yLo-a0.y)/m; y1=yLo; }
+      const x1=a0.x, y1=a0.y;
       const x2=xMax, y2=yAt(x2);
       sets.push({type:'line',label:'Tangent at Min CVaR',data:[{x:x1,y:y1},{x:x2,y:y2}],borderColor:'#2e7d50',borderWidth:2,pointRadius:0,fill:false});
     }
