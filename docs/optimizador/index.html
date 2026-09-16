@@ -358,8 +358,8 @@ function renderFrontier(pts, markers){
   const shapes=['circle','rectRot','triangle'];
   markers.forEach((m,i)=>{
     // sticker halo: bigger cream disc behind the colored marker
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#2a170f',borderWidth:2,pointRadius:13,pointStyle:shapes[i],showLine:false,_halo:true});
     sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#2a170f',borderWidth:2.5,pointRadius:8,pointStyle:shapes[i],pointHoverRadius:10});
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#2a170f',borderWidth:2,pointRadius:13,pointStyle:shapes[i],showLine:false,_halo:true});
   });
   charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},
     options:{maintainAspectRatio:false,
