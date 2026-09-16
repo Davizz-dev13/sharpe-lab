@@ -42,10 +42,16 @@
   a{color:var(--acc);}
   button,select{border:2px solid var(--fg)!important;border-radius:0!important;background:var(--panel);color:var(--fg);font-family:'DM Sans',sans-serif;}
 
+
+  .stratnav { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px; }
+  .stratnav a { font-size:12.5px; font-weight:600; text-decoration:none; color:var(--mut); border:1px solid var(--border); border-radius:14px; padding:4px 12px; background:var(--panel); }
+  .stratnav a.on { color:var(--acc); border-color:var(--acc); }
 </style>
 </head>
 <body>
 <header>
+  <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
+  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/" class="on">Semiconductors</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a></nav>
   <h1>Rotaci&oacute;n Semis &middot; roc126 top2 vol-escalada</h1>
   <div class="sub" id="ruletext"></div>
 </header>
