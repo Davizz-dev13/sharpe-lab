@@ -46,6 +46,8 @@
   .expl p { margin:0 0 12px; font-size:14px; line-height:1.6; }
   .expl p:last-child { margin:0; }
   .expl code { background:var(--bg); padding:1px 5px; font-size:12.5px; }
+  .twrap { overflow-x:auto; }
+  @media (max-width:860px){ th,td { padding:5px 5px; font-size:11.5px; } th { font-size:9px; } }
   a { color:var(--acc); }
 </style>
 </head>
@@ -86,11 +88,11 @@
     <div class="panel">
       <h2>Pesos &oacute;ptimos <span class="badge" id="res-badge"></span></h2>
       <div class="chartbox"><canvas id="alloc-chart"></canvas></div>
-      <table id="w-table"><thead><tr><th>Activo</th><th>Tu cartera</th><th>M&iacute;n CVaR</th><th>M&iacute;n varianza</th></tr></thead><tbody></tbody></table>
+      <div class="twrap"><table id="w-table"><thead><tr><th>Activo</th><th>Tu cartera</th><th>M&iacute;n CVaR</th><th>M&iacute;n varianza</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
       <h2>M&eacute;tricas (5 a&ntilde;os, datos hist&oacute;ricos) <span class="badge">rentabilidades pasadas no garantizan resultados futuros</span></h2>
-      <table id="m-table"><thead><tr><th>Cartera</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>CVaR diario</th></tr></thead><tbody></tbody></table>
+      <div class="twrap"><table id="m-table"><thead><tr><th>Cartera</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>CVaR diario</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
       <h2>Crecimiento de 1&euro;</h2>
