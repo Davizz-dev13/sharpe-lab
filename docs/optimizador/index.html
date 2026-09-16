@@ -343,7 +343,7 @@ function computeFrontier(tickers, maxW, alpha, onProgress, done){
   if(!w0){ done(null); return; }
   const lo=annReturn(w0,tickers)/DAYS_YR;
   const hi=greedyMaxReturn(tickers,maxW);
-  if(!(hi>lo+0.0003)){ done(null); return; }
+  if(!(hi>lo+0.00005)){ done(null); return; }
   const N=15, pts=[];
   let i=0;
   function step(){
