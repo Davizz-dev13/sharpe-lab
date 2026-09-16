@@ -105,7 +105,7 @@
     <div class="panel">
       <h2>Efficient frontier <span class="badge" id="ef-badge"></span></h2>
       <div class="chartbox tall"><canvas id="ef-chart"></canvas></div>
-      <div class="note">Each dot on the curve is the least risky portfolio the LP can build for one return target, with your selected assets and limits. The curve is the best achievable trade-off: risk on the horizontal axis (average loss of the worst days, lower is safer), expected yearly return on the vertical. The markers show where the three portfolios sit. Dots are solved on sampled days for speed, so the curve is a close sketch, not the exact LP of the main result.</div>
+      <div class="note">Each dot on the curve is the least risky portfolio the LP can build for one return target, with your selected assets and limits. The curve is the best achievable trade-off: risk on the horizontal axis (average loss of the worst days, lower is safer), expected yearly return on the vertical. The markers show where the three portfolios sit. The ringed Recommended point is where a line drawn from the Min CVaR return level would touch the curve at its steepest: the best extra return per unit of extra risk above the safe portfolio. Dots are solved on sampled days for speed, so the curve is a close sketch, not the exact LP of the main result.</div>
     </div>
     <div class="panel">
       <h2>Growth of &euro;1</h2>
@@ -293,6 +293,39 @@ function annReturn(weights, tickers){
   tickers.forEach(t=>{ const w=weights[t]||0; if(!w)return; m+=w*DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n; });
   return m*DAYS_YR;
 }
+function solveRecommended(tickers, maxW, alpha, r0Daily){
+  // tangency of the frontier seen from (0, r0): maximize (annReturn-r0)/CVaR,
+  // floored at the Min CVaR return level. Scored on the LP's own sampled scenarios.
+  const r0An=r0Daily*DAYS_YR;
+  const scen=scenarioSample(tickers,350), S=scen.length;
+  const score=w=>{
+    if(!w) return -1e9;
+    const rets=scen.map(row=>tickers.reduce((s2,t,i)=>s2+(w[t]||0)*row[i],0));
+    rets.sort((x,y)=>x-y);
+    const k=Math.max(1,Math.floor(S*alpha));
+    let cv=0; for(let i=0;i<k;i++) cv+=rets[i]; cv/=k;
+    if(-cv<1e-9) return -1e9;
+    return (rets.reduce((a,b)=>a+b,0)/S*DAYS_YR - r0An)/(-cv);
+  };
+  const solve=mu=>solveCVaR(tickers,maxW,alpha,350,mu);
+  const lo=r0Daily, hi=greedyMaxReturn(tickers,maxW);
+  if(!(hi>lo)) return null;
+  const N=12, step=(hi-lo)/N;
+  let bestMu=lo, bestS=-1e9;
+  for(let i=0;i<=N;i++){
+    const mu=lo+step*i, sc=score(solve(mu));
+    if(sc>bestS){ bestS=sc; bestMu=mu; }
+  }
+  let a=Math.max(lo,bestMu-step), b=Math.min(hi,bestMu+step);
+  const gr=(Math.sqrt(5)-1)/2;
+  let c=b-gr*(b-a), d=a+gr*(b-a);
+  let sc=score(solve(c)), sd=score(solve(d));
+  for(let i=0;i<10;i++){
+    if(sc<sd){ a=c; c=d; sc=sd; d=a+gr*(b-a); sd=score(solve(d)); }
+    else { b=d; d=c; sd=sc; c=b-gr*(b-a); sc=score(solve(c)); }
+  }
+  return solve((a+b)/2);
+}
 function greedyMaxReturn(tickers, maxW){
   return annReturn(solveMaxCAGR(tickers,maxW),tickers)/DAYS_YR;
 }
@@ -332,7 +365,7 @@ function flashDataset(chart, idx){
   requestAnimationFrame(tick);
 }
 function renderFrontier(pts, markers){
-  const pc=['#c98a12','#d96b2a','#2f6fd0'];
+  const pc=['#c98a12','#d96b2a','#2f6fd0','#2e7d50'];
   let xMax=0; pts.forEach(p=>{if(p.x>xMax)xMax=p.x;}); markers.forEach(m=>{if(m.x>xMax)xMax=m.x;});
   xMax=Math.max(0.1, xMax*1.15);
   const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
@@ -340,8 +373,8 @@ function renderFrontier(pts, markers){
     // sticker halo: bigger cream disc behind the colored marker
     sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#2a170f',borderWidth:2.5,pointRadius:8,pointStyle:'circle',pointHoverRadius:10});
     sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#2a170f',borderWidth:2,pointRadius:13,pointStyle:'circle',showLine:false,_halo:true});
-    if(i===1){ // recommended: outer ring in its color
-      sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'rgba(0,0,0,0)',borderColor:pc[i],borderWidth:2.5,pointRadius:16,pointStyle:'circle',showLine:false,_halo:true});
+    if(i===3){ // recommended: outer orange ring
+      sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'rgba(0,0,0,0)',borderColor:'#d96b2a',borderWidth:2.5,pointRadius:16,pointStyle:'circle',showLine:false,_halo:true});
     }
   });
   charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},
@@ -448,7 +481,9 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         computeFrontier(tickers,maxW,alpha,(i,N)=>{efBadge.textContent='computing frontier '+i+'/'+N+'...';},pts=>{
           if(!pts||pts.length<3){ efBadge.textContent='frontier not available for this selection'; return; }
           efBadge.textContent='';
-          renderFrontier(pts,[mk(wCur,'Your portfolio'),mk(wOpt,'Recommended (Min CVaR)'),mk(wMax,'Max CAGR')]);
+          const r0Daily=annReturn(wOpt,tickers)/DAYS_YR;
+          const wRec=solveRecommended(tickers,maxW,alpha,r0Daily)||wOpt;
+          renderFrontier(pts,[mk(wCur,'Your portfolio'),mk(wOpt,'Min CVaR'),mk(wMax,'Max CAGR'),mk(wRec,'Recommended')]);
         });
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
