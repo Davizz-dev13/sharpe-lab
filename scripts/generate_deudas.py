@@ -54,5 +54,16 @@ for i in range(DAYS):
             break
     rows.append({"date": (d + timedelta(days=1)).isoformat(), "low": lo, "high": hi, "paid": paid, "paid_at": paid_at, "side": side})
 rows.reverse()
-json.dump({"updated": now.strftime("%Y-%m-%dT%H:%MZ"), "rows": rows}, open("docs/deudas/deudas.json", "w"), indent=1)
+# Agregar las velas de 5 minutos a velas horarias para el gráfico, sin otra fuente.
+hourly = {}
+for t in ts:
+    h = t // 3600 * 3600
+    lo, hi, op, cl = data[t]
+    if h not in hourly:
+        hourly[h] = [h, lo, hi, op, cl]
+    else:
+        hourly[h][1] = min(hourly[h][1], lo)
+        hourly[h][2] = max(hourly[h][2], hi)
+        hourly[h][4] = cl
+json.dump({"candles": list(hourly.values()), "updated": now.strftime("%Y-%m-%dT%H:%MZ"), "rows": rows}, open("docs/deudas/deudas.json", "w"), indent=1)
 print(len(rows), rows[:3])
