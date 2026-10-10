@@ -2,8 +2,8 @@ name: Actualizar dashboard
 
 on:
   schedule:
-    # 21:30 UTC, de lunes a viernes: despues del cierre de EE.UU. todo el año
-    - cron: '30 21 * * 1-5'
+    # 21:17 UTC todos los días
+    - cron: '17 21 * * *'
   workflow_dispatch:
 
 permissions:
