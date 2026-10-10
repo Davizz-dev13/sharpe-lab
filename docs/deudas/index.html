@@ -39,6 +39,25 @@
   .note { color:var(--mut); font-size:12px; margin-top:10px; line-height:1.5; }
   .g { color:var(--green); font-weight:700; } .r { color:var(--red); font-weight:700; }
   @media (max-width:860px){ main { padding:8px 14px 40px; } header { padding:12px 16px 6px; } .top { padding:16px 16px 0; } }
+
+  #price-chart { width:100%; height:440px; display:block; touch-action:pan-y; }
+  .chart-wrap { border:2px solid var(--fg); background:#fffaf0; position:relative; }
+  .legend { display:flex; gap:12px; flex-wrap:wrap; font-size:12px; margin:12px 0; }
+  .legend span:before { content:''; display:inline-block; width:18px; height:9px; margin-right:5px; background:var(--swatch); border:1px solid currentColor; }
+  #chart-info { min-height:38px; font-size:13px; line-height:1.5; margin:10px 0; }
+  .chart-btn { min-height:44px; }
+  tr[data-date], .card { cursor:pointer; }
+  tr.selected { background:#f7d98c; }
+  .chart-controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  @media(max-width:600px){
+    .panel { padding:12px 10px; } .cards { grid-template-columns:minmax(0,1fr); }
+    .card .rng { font-size:18px; } #price-chart { height:390px; }
+    table, tbody, tr, td { display:block; } thead { display:none; }
+    tr { border-bottom:2px solid var(--border); padding:8px 0; }
+    td { border:0; white-space:normal; text-align:left; padding:3px 4px; display:flex; gap:10px; justify-content:space-between; }
+    td:before { content:attr(data-label); color:var(--mut); font-weight:400; }
+    .twrap { overflow:visible; }
+  }
 </style>
 </head>
 <body>
@@ -48,6 +67,15 @@
   <div class="sub">Zonas que el precio todavía no ha cruzado. La diaria se calcula cada día con la vela de 5 minutos de las 23:55 a las 00:00 (hora de Nueva York) del BTC-USD spot de Coinbase. Semanal, mensual y acumulación se actualizan a mano.</div>
 </header>
 <main>
+  <div class="panel">
+    <h2>BTC · Precio y deudas</h2>
+    <div class="chart-controls"><button class="btn chart-btn on" data-days="40">40 días</button><button class="btn chart-btn" data-days="14">14 días</button><button class="btn chart-btn" data-days="3">3 días</button><button class="btn chart-btn" id="reset-chart">Ver todas las zonas</button></div>
+    <div class="legend"><span style="--swatch:#f0b9a3">Por pagar</span><span style="--swatch:#cee0d2">Pagada</span><span style="--swatch:#b8c8eb">Mensual</span><span style="--swatch:#ead093">Acumulación</span><span style="--swatch:#e3cced">Provisional · discontinua</span></div>
+    <div class="chart-wrap"><svg id="price-chart" role="img" aria-label="Precio BTC en dólares con velas de una hora y zonas de deuda"></svg></div>
+    <div id="chart-info">Cargando precio…</div>
+    <div class="note" id="chart-fresh"></div>
+    <div class="note">Toca una banda, una tarjeta o una fila para enfocarla. Las deudas diarias empiezan en la vela de origen (23:55 NY); las pagadas acaban en su hora de pago. Las zonas manuales se muestran como niveles de referencia, sin atribuirles fecha de origen. La provisional 78.100 es una línea, no una banda confirmada.</div>
+  </div>
   <div class="panel">
     <h2>Zonas vivas</h2>
     <div class="cards" id="vivas"></div>
@@ -62,14 +90,14 @@
 </main>
 <script>
 const f = n => n == null ? '' : Number(n).toLocaleString('es-ES', {maximumFractionDigits: 2});
-let rows = [];
+let rows = [], manual = [], prices = [], selected = null, windowDays = 40, focusZone = false;
 function pintaFilas(soloAbiertas) {
   document.getElementById('rows').innerHTML = rows.filter(r => !soloAbiertas || !r.paid).map(r =>
-    `<tr><td>${r.date}</td><td>${f(r.low)}</td><td>${f(r.high)}</td><td class="${r.paid ? 'g' : 'r'}">${r.paid ? 'Pagada' : 'Por pagar'}</td><td>${r.paid_at ? r.paid_at.replace('T', ' ').replace('Z', ' UTC') : ''}</td></tr>`).join('');
+    `<tr data-date="${r.date}" class="${selected && selected.date === r.date ? 'selected' : ''}"><td data-label="Día">${r.date}</td><td data-label="Mínimo">${f(r.low)}</td><td data-label="Máximo">${f(r.high)}</td><td data-label="Estado" class="${r.paid ? 'g' : 'r'}">${r.paid ? 'Pagada' : 'Por pagar'}</td><td data-label="Pagada">${r.paid_at ? r.paid_at.replace('T', ' ').replace('Z', ' UTC') : ''}</td></tr>`).join('');
 }
 async function carga() {
   const [d, n] = await Promise.all([fetch('deudas.json?' + Date.now()).then(r => r.json()), fetch('niveles.json?' + Date.now()).then(r => r.json())]);
-  rows = d.rows;
+  rows = d.rows; manual = n.niveles; prices = d.candles || [];
   const hoy = rows.find(r => !r.paid);
   let html = '';
   const tarjeta = (tf, lo, hi, paid, nota, extra) => `<div class="card"><div class="tf">${tf}<span class="tag ${paid ? 'ok' : 'no'}">${paid ? 'PAGADA' : 'POR PAGAR'}</span>${extra || ''}</div><div class="rng">${f(lo)}${hi ? ' - ' + f(hi) : ''}</div><div class="st">${nota || ''}</div></div>`;
@@ -77,13 +105,68 @@ async function carga() {
   if (ult) html += tarjeta('Diaria ' + ult.date, ult.low, ult.high, ult.paid, ult.paid ? 'Pagada ' + ult.paid_at.replace('T', ' ').replace('Z', ' UTC') : 'Pendiente');
   n.niveles.forEach(x => html += tarjeta(x.tf + (x.label ? ' ' + x.label : ''), x.low, x.high, x.paid, x.note, x.provisional ? '<span class="tag">PROVISIONAL</span>' : ''));
   document.getElementById('vivas').innerHTML = html;
+  document.querySelectorAll('.card').forEach((el,i) => el.onclick = () => selectZone(i === 0 ? rows[0] : manual[i-1]));
   pintaFilas(false);
+  document.getElementById('chart-fresh').textContent = 'BTC-USD spot Coinbase · velas de 1 hora (UTC) · instantánea: ' + d.updated + '. Se actualiza con el dashboard; no es tiempo real.';
+  drawChart();
   document.getElementById('upd').textContent = 'Diaria actualizada: ' + d.updated + '. Niveles manuales: ' + n.updated + '.';
 }
 document.getElementById('b-all').onclick = () => { b('b-all'); pintaFilas(false); };
 document.getElementById('b-open').onclick = () => { b('b-open'); pintaFilas(true); };
 function b(id) { ['b-all', 'b-open'].forEach(i => document.getElementById(i).classList.toggle('on', i === id)); }
-carga();
+
+function origin(r) {
+  // Nueva York cambia de UTC-4 a UTC-5. Resolver la medianoche local sin fijar el offset.
+  const base = Date.parse(r.date + 'T00:00:00Z');
+  for(let h=3;h<=6;h++){
+    const t = base + h*3600000;
+    const parts = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'2-digit',hourCycle:'h23',minute:'2-digit'}).formatToParts(t);
+    if(parts.find(p=>p.type==='hour').value === '00') return t/1000 - 300;
+  }
+  return base/1000+4*3600-300;
+}
+function selectZone(z) { selected=z; focusZone=true; drawChart(); pintaFilas(document.getElementById('b-open').classList.contains('on')); }
+document.getElementById('rows').onclick = e => { const tr=e.target.closest('tr[data-date]'); if(tr) selectZone(rows.find(r=>r.date===tr.dataset.date)); };
+document.querySelectorAll('[data-days]').forEach(el=>el.onclick=()=>{windowDays=Number(el.dataset.days);focusZone=false;selected=null;document.querySelectorAll('[data-days]').forEach(b=>b.classList.toggle('on',b===el));drawChart();});
+document.getElementById('reset-chart').onclick=()=>{windowDays=40;selected=null;focusZone=false;document.querySelectorAll('[data-days]').forEach(b=>b.classList.toggle('on',b.dataset.days==='40'));drawChart();pintaFilas(false);b('b-all');};
+function drawChart(){
+ const svg=document.getElementById('price-chart'), info=document.getElementById('chart-info');
+ if(!prices.length){info.textContent='No hay velas disponibles en la instantánea. Las zonas y la tabla siguen disponibles.';return;}
+ const W=svg.clientWidth,H=svg.clientHeight,L=8,R=W<500?57:70,T=22,B=28,PW=W-L-R,PH=H-T-B;
+ svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ const end=prices.at(-1)[0]+3600;
+ let start=Math.max(prices[0][0],end-windowDays*86400), stop=end;
+ if(focusZone && selected?.date){const a=origin(selected), b=selected.paid_at?Date.parse(selected.paid_at)/1000:end;start=Math.max(prices[0][0],a-86400);stop=Math.min(end,Math.max(a+2*86400,b+86400));}
+ const candles=prices.filter(c=>c[0]>=start&&c[0]<=stop);
+ const zones=[...rows,...manual];
+ let lo=Math.min(...candles.map(c=>c[1])),hi=Math.max(...candles.map(c=>c[2]));
+ if(!focusZone){for(const z of zones){if(z.date&&(origin(z)>stop || (z.paid_at && Date.parse(z.paid_at)/1000<start)))continue;lo=Math.min(lo,z.low);hi=Math.max(hi,z.high||z.low);}}
+ else {lo=Math.min(lo,selected.low);hi=Math.max(hi,selected.high||selected.low);}
+ const pad=Math.max(200,(hi-lo)*.07);lo-=pad;hi+=pad;
+ const x=t=>L+(t-start)/(stop-start)*PW,y=v=>T+(hi-v)/(hi-lo)*PH;
+ const name=z=>z.date?'Diaria '+z.date:z.tf+(z.label?' '+z.label:'');
+ const color=z=>z.provisional?'#8758a1':z.paid?'#6a9478':z.tf==='Mensual'?'#4f6b9e':z.tf==='Acumulación'?'#a67d2a':'#bd542e';
+ let out=`<defs><clipPath id="plot"><rect x="${L}" y="${T}" width="${PW}" height="${PH}"/></clipPath></defs>`;
+ for(let i=0;i<=5;i++){const v=lo+(hi-lo)*i/5,Y=y(v);out+=`<path d="M${L},${Y} H${L+PW}" stroke="#ded5c1"/><text x="${L+PW+7}" y="${Y+4}" font-size="11" fill="#7a6a58">${f(Math.round(v))}</text>`;}
+ for(let i=0;i<4;i++){const t=start+(stop-start)*i/3,X=x(t);out+=`<text x="${X}" y="${H-7}" text-anchor="${i===0?'start':i===3?'end':'middle'}" font-size="11" fill="#7a6a58">${new Date(t*1000).toLocaleDateString('es-ES',{day:'numeric',month:'short',timeZone:'UTC'})}</text>`;}
+ out+='<g clip-path="url(#plot)">';
+ zones.forEach((z,i)=>{const a=z.date?origin(z):start, b=z.date&&z.paid_at?Date.parse(z.paid_at)/1000:stop;if(a>stop||b<start)return;const X=x(Math.max(a,start)),width=Math.max(2,x(Math.min(b,stop))-X),Y=y(z.high||z.low),height=z.high?Math.max(2,y(z.low)-Y):0,C=color(z),active=selected===z;
+ if(z.high)out+=`<rect data-zone="${i}" x="${X}" y="${Y}" width="${width}" height="${height}" fill="${C}" fill-opacity="${active?.32:z.paid?.10:.17}" stroke="${C}" stroke-opacity="${z.paid&&!active?.4:1}" stroke-width="${active?2.5:1}" ${z.paid?'stroke-dasharray="3 3"':''}><title>${name(z)}: ${f(z.low)} - ${f(z.high)} · ${z.paid?'Pagada':'Por pagar'}</title></rect>`;
+ else out+=`<path data-zone="${i}" d="M${X},${Y} h${width}" stroke="${C}" stroke-width="2" stroke-dasharray="6 4"><title>${name(z)}: ${f(z.low)} · provisional</title></path>`;
+ });
+ const cw=Math.max(1,Math.min(9,PW/candles.length*.65));
+ candles.forEach(c=>{const [t,l,h,o,cl]=c,C=cl>=o?'#2e7d50':'#a84332',X=x(t+1800);out+=`<path d="M${X},${y(h)} V${y(l)}" stroke="${C}" stroke-width=".8"/><rect x="${X-cw/2}" y="${y(Math.max(o,cl))}" width="${cw}" height="${Math.max(1,Math.abs(y(o)-y(cl)))}" fill="${C}"><title>${new Date(t*1000).toISOString()} · O ${f(o)} H ${f(h)} L ${f(l)} C ${f(cl)}</title></rect>`;});
+ // Etiquetas de referencia con separación mínima, sin mover las bandas.
+ const labels=manual.map(z=>({z,Y:y(z.high?(z.high+z.low)/2:z.low)}));
+ if(rows[0]&&origin(rows[0])<=stop)labels.push({z:rows[0],Y:y((rows[0].high+rows[0].low)/2)});
+ labels.sort((a,b)=>a.Y-b.Y);let prev=-20;
+ for(const item of labels){const z=item.z;if(item.Y<T||item.Y>T+PH)continue;const Y=Math.max(T+12,Math.min(T+PH-8,Math.max(item.Y,prev+19)));prev=Y;const label=z.date?'Diaria '+f(z.low):z.provisional?'Provisional '+f(z.low):z.tf+' '+f(z.low);out+=`<rect x="${L+5}" y="${Y-12}" width="${Math.min(PW-10,label.length*6.3+12)}" height="17" fill="#fffaf0" fill-opacity=".94"/><text x="${L+10}" y="${Y}" font-size="11" font-weight="700" fill="${color(z)}">${label}</text>`;}
+ out+='</g>';svg.innerHTML=out;
+ svg.querySelectorAll('[data-zone]').forEach(el=>el.onclick=()=>selectZone(zones[Number(el.dataset.zone)]));
+ info.textContent=selected?`${name(selected)} · ${f(selected.low)}${selected.high?' - '+f(selected.high):''} USD · ${selected.provisional?'Provisional':selected.paid?'Pagada '+selected.paid_at.replace('T',' ').replace('Z',' UTC'):'Por pagar'}`:`Último cierre: ${f(prices.at(-1)[4])} USD · ${rows.length} deudas diarias + ${manual.length} niveles manuales. Toca una zona para ver el detalle.`;
+}
+new ResizeObserver(()=>drawChart()).observe(document.getElementById('price-chart'));
+carga().catch(e=>{document.getElementById('chart-info').textContent='No se pudieron cargar los datos. Recarga la página.';console.error(e);});
 </script>
 </body>
 </html>
