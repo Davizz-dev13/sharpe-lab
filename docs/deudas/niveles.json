@@ -1,0 +1,8 @@
+{
+ "updated": "2026-10-10",
+ "niveles": [
+  {"tf": "Acumulación", "low": 87512, "high": 88350, "approx": true, "paid": false, "note": "Sin pagar"},
+  {"tf": "Mensual", "label": "octubre", "low": 79670, "high": 81142, "approx": false, "paid": false, "note": "Se paga si pierde 79.670"},
+  {"tf": "Posible zona", "low": 78100, "high": null, "approx": true, "paid": false, "provisional": true, "note": "Provisional, confianza baja"}
+ ]
+}
