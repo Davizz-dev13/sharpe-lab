@@ -25,10 +25,11 @@ jobs:
       - run: python scripts/generate_semis8.py
       - run: python scripts/generate_msci.py
       - run: python scripts/generate_optimizer.py
+      - run: python scripts/generate_deudas.py
       - name: Commit datos del dashboard si hay cambios
         run: |
           git config user.name "Davizz-dev13"
           git config user.email "Davizz-dev13@users.noreply.github.com"
-          git add docs/data.json docs/walkforward.json docs/mag7/mag7.json docs/semis/semis.json docs/semis8/semis8.json docs/msci/msci.json docs/optimizador/optimizador.json docs/optimizador/optimizador-long.json
+          git add docs/data.json docs/walkforward.json docs/mag7/mag7.json docs/semis/semis.json docs/semis8/semis8.json docs/msci/msci.json docs/optimizador/optimizador.json docs/optimizador/optimizador-long.json docs/deudas/deudas.json
           git diff --cached --quiet || git commit -m "Datos del dashboard: $(date -u +%Y-%m-%d)"
           git push
