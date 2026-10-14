@@ -8,81 +8,135 @@
 <link rel="stylesheet" href="theme.css">
 <style>
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{margin:0}
-  .hero{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 24px;position:relative}
-  h1{margin:0 0 14px;font-size:clamp(52px,13vw,96px);line-height:1}
-  .sub{font-size:16px;max-width:30ch;line-height:1.45}
-  .down{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);width:42px;height:42px;display:grid;place-items:center;border-radius:999px;background:rgba(255,255,255,.12);color:var(--text);text-decoration:none;font-size:18px}
-  .step{min-height:80svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:72px 24px}
-  .step .tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
-  .step h2{margin:0 0 16px;font-size:clamp(34px,7vw,60px);line-height:1.05;max-width:16ch}
-  .step p{margin:0 0 28px;max-width:46ch;font-size:17px;line-height:1.55;color:rgba(243,241,237,.72)}
-  .pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px}
-  .pill{display:inline-flex;align-items:center;justify-content:center;height:42px;padding:0 20px;font-size:15px;text-decoration:none;cursor:pointer;border-radius:999px;background:rgba(255,255,255,.12);color:var(--text);transition:background .2s}
-  .pill:hover{background:rgba(255,255,255,.2)}
-  .pill.main{background:#f3f1ed;color:#131313}
-  .pill.main:hover{background:#fff}
-  .end{padding:80px 24px 56px;text-align:center}
-  .end p{font-size:12px;color:var(--muted);max-width:52ch;margin:0 auto}
-  .rv{opacity:0;filter:blur(8px);transform:translateY(18px);transition:opacity 1s ease,filter 1s ease,transform 1s ease}
+  body{margin:0;background:#131313;overflow-x:hidden}
+  .seq{position:relative;height:calc(var(--n)*125svh + 30svh);--n:15}
+  .pin{position:sticky;top:0;height:100svh;overflow:hidden;background:#131313}
+  .fr{position:absolute;inset:0;opacity:0}
+  .fr:first-child{opacity:1}
+  .fr>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(var(--s,1));will-change:transform}
+  .fr::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(rgba(19,19,19,0) 25%,rgba(19,19,19,calc(var(--qa,0)*.72)) 78%),radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(19,19,19,.55))}
+  .q{position:absolute;z-index:2;left:50%;bottom:10svh;width:min(880px,calc(100% - 48px));margin:0;transform:translateX(-50%);text-align:center;opacity:var(--qa,0);filter:blur(var(--qb,16px))}
+  .q p{margin:0 0 14px;font-family:var(--serif);font-size:clamp(22px,2.9vw,40px);line-height:1.2;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.8)}
+  .q cite{display:block;font-style:normal;font-size:13px;letter-spacing:.04em;color:var(--muted)}
+  .ttl{position:absolute;z-index:2;left:0;right:0;top:34%;text-align:center;padding:0 24px;opacity:var(--ta,1);filter:blur(calc((1 - var(--ta,1))*10px))}
+  .ttl h1{margin:0 0 12px;font-size:clamp(56px,12vw,120px);line-height:1;text-shadow:0 4px 40px rgba(0,0,0,.6)}
+  .ttl p{margin:0 auto;max-width:34ch;font-size:17px;color:rgba(243,241,237,.78)}
+  .hint{position:absolute;z-index:5;left:50%;bottom:26px;transform:translateX(-50%);width:42px;height:42px;display:grid;place-items:center;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);color:var(--text);font-size:18px;opacity:var(--ha,1);animation:bob 2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translate(-50%,6px)}}
+  .count{position:absolute;z-index:5;right:24px;top:22px;font-size:12px;letter-spacing:.14em;color:rgba(243,241,237,.5);font-variant-numeric:tabular-nums}
+  .bar{position:absolute;z-index:5;left:0;top:0;height:2px;width:calc(var(--g,0)*100%);background:rgba(243,241,237,.55)}
+  .tools{position:relative;padding:22vh 24px 10vh;z-index:0}
+  .tools-in{position:relative;z-index:2;max-width:1180px;margin:0 auto;text-align:center}
+  .tools .bg{position:absolute;inset:0;background:url(img/end.jpg) center/cover;opacity:.35}
+  .tools .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(#131313,rgba(19,19,19,.5) 30%,rgba(19,19,19,.6) 70%,#131313)}
+  .tools h2{margin:0 0 14px;font-size:clamp(40px,7vw,84px);line-height:1.04}
+  .tools .lede{margin:0 auto 48px;max-width:42ch;font-size:17px;color:rgba(243,241,237,.72)}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;text-align:left}
+  .card{display:flex;flex-direction:column;border:1px solid #3d3b35;border-radius:18px;overflow:hidden;background:rgba(27,26,24,.86);text-decoration:none;color:var(--text);transition:transform .3s,border-color .3s}
+  .card:hover{transform:translateY(-4px);border-color:#6b665c}
+  .card .th{display:block;aspect-ratio:16/10;overflow:hidden;border-bottom:1px solid #34312c}
+  .card .th img{width:100%;height:100%;object-fit:cover;object-position:50% 0;transition:object-position 1.6s ease}
+  .card:hover .th img{object-position:50% 100%}
+  .ct{padding:16px 18px 2px;font-family:var(--serif);font-size:24px}
+  .cd{padding:0 18px 18px;font-size:14px;color:var(--muted)}
+  .rv{opacity:0;filter:blur(10px);transform:translateY(26px);transition:opacity .9s ease var(--d,0s),filter .9s ease var(--d,0s),transform .9s ease var(--d,0s)}
   .rv.in{opacity:1;filter:none;transform:none}
-  .rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}
-  @media (prefers-reduced-motion:reduce){.rv{opacity:1;filter:none;transform:none;transition:none}html{scroll-behavior:auto}}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:36px}
+  .pill{display:inline-flex;align-items:center;height:42px;padding:0 20px;font-size:15px;text-decoration:none;border-radius:999px;background:rgba(255,255,255,.12);color:var(--text)}
+  .pill:hover{background:rgba(255,255,255,.2)}
+  .tools small{display:block;margin:64px auto 0;max-width:52ch;font-size:12px;color:var(--muted);line-height:1.5}
+  @media (max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:560px){
+    .grid{grid-template-columns:1fr}
+    .q{bottom:8svh}.q p{font-size:clamp(19px,5.6vw,26px)}
+    .ttl{top:30%}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .seq{height:auto}.pin{position:relative;height:auto;overflow:visible}
+    .fr{position:relative;height:70svh;opacity:1 !important}
+    .q{opacity:1 !important;filter:none !important}.fr::before{background:linear-gradient(rgba(19,19,19,0) 25%,rgba(19,19,19,.72) 78%)}
+    .hint,.count,.bar{display:none}.tools{margin-top:0}.rv{opacity:1;filter:none;transform:none;transition:none}
+  }
 </style>
 </head>
 <body>
-<header class="hero">
-  <h1 class="rv in">Sharpe Lab</h1>
-  <div class="sub muted rv in d1">Every strategy I study, tested out of sample and tracked live.</div>
-  <a class="down" href="#s1" aria-label="Scroll down">&darr;</a>
-</header>
-
-<section class="step" id="s1">
-  <div class="tag rv">01 / Strategies</div>
-  <h2 class="rv d1">Ideas that pass the test go live</h2>
-  <p class="rv d2">Each strategy is checked on 10-year windows with realistic costs. The survivors run in paper trading with real nightly signals and fake money.</p>
-  <div class="pills rv d3">
-    <a class="pill main" href="btc/">Bitcoin</a>
-    <a class="pill" href="semis/">Semiconductors</a>
-    <a class="pill" href="semis8/">Semis8</a>
-    <a class="pill" href="msci/">MSCI</a>
-    <a class="pill" href="mag7/">Mag7</a>
+<main class="seq" id="seq">
+  <div class="pin">
+    <div class="bar"></div><div class="count" aria-hidden="true"></div>
+    <div class="fr" style="z-index:1"><img src="img/hero.jpg" alt="" width="1672" height="941"><div class="ttl"><h1>Sharpe Lab</h1><p>Every strategy I study, tested out of sample and tracked live.</p></div>
+      <blockquote class="q"><p>Nothing, Lucilius, is ours, except time.</p><cite>Seneca, Letters to Lucilius 1.3, tr. Richard M. Gummere</cite></blockquote></div>
+    <div class="fr" style="z-index:2"><img src="img/f02.jpg" alt="" width="1672" height="941">
+      <blockquote class="q"><p>Time is a river, a violent torrent of things coming into being. Each one, as soon as it has appeared, is swept away: it is succeeded by another which is swept away in its turn.</p><cite>Marcus Aurelius, Meditations 4.43, Foulis translation (1742)</cite></blockquote></div>
+    <div class="fr" style="z-index:3"><img src="img/f03.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>There are more things, Lucilius, likely to frighten us than there are to crush us; we suffer more often in imagination than in reality.</p><cite>Seneca, Letters to Lucilius 13.4, tr. Richard M. Gummere</cite></blockquote></div>
+    <div class="fr" style="z-index:4"><img src="img/f04.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Be like a promontory against which the waves are always breaking. It stands fast, and stills the waters that rage around it.</p><cite>Marcus Aurelius, Meditations 4.49, Foulis translation (1742)</cite></blockquote></div>
+    <div class="fr" style="z-index:5"><img src="img/f05.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Above all, don’t lie to yourself. The man who lies to himself and listens to his own lie comes to such a pass that he cannot distinguish the truth within him, or around him, and so loses all respect for himself and for others.</p><cite>Fyodor Dostoevsky, The Brothers Karamazov, Book II, tr. Constance Garnett</cite></blockquote></div>
+    <div class="fr" style="z-index:6"><img src="img/f06.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>First of all, tragedy was introduced to remind us that certain events happen, and are fated to happen as they do; and to teach us that what entertains us on the stage should not grieve us on the greater stage of the world.</p><cite>Marcus Aurelius, Meditations 11.6, Foulis translation (1742)</cite></blockquote></div>
+    <div class="fr" style="z-index:7"><img src="img/f07.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>All things are for a day, both what remembers and what is remembered.</p><cite>Marcus Aurelius, Meditations 4.35, Foulis translation (1742)</cite></blockquote></div>
+    <div class="fr" style="z-index:8"><img src="img/f08.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Aye, the willing soul Fate leads, but the unwilling drags along.</p><cite>Seneca, Letters to Lucilius 107.11 (a verse he cites), tr. Gummere</cite></blockquote></div>
+    <div class="fr" style="z-index:9"><img src="img/f09.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Pain and suffering are always inevitable for a large intelligence and a deep heart.</p><cite>Fyodor Dostoevsky, Crime and Punishment, Part III, tr. Constance Garnett</cite></blockquote></div>
+    <div class="fr" style="z-index:10"><img src="img/f10.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Receive the gifts of fortune without pride; and part with them without reluctance.</p><cite>Marcus Aurelius, Meditations 8.33, Foulis translation (1742)</cite></blockquote></div>
+    <div class="fr" style="z-index:11"><img src="img/f11.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Lay hold of to-day’s task, and you will not need to depend so much upon to-morrow’s.</p><cite>Seneca, Letters to Lucilius 1.2, tr. Richard M. Gummere</cite></blockquote></div>
+    <div class="fr" style="z-index:12"><img src="img/f12.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>And then recollect that it is neither the past nor the future that can oppress you, but always the present only.</p><cite>Marcus Aurelius, Meditations 8.36, Foulis translation (1742)</cite></blockquote></div>
+    <div class="fr" style="z-index:13"><img src="img/f13.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Willingly resign yourself to Clotho, permitting her to spin her thread of what yarn she may.</p><cite>Marcus Aurelius, Meditations 4.34, Foulis translation (1742)</cite></blockquote></div>
+    <div class="fr" style="z-index:14"><img src="img/f14.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Let us live thus, and speak thus; let Fate find us ready and alert.</p><cite>Seneca, Letters to Lucilius 107.12, tr. Gummere</cite></blockquote></div>
+    <div class="fr" style="z-index:15"><img src="img/f15.jpg" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Observe continually that all things exist in change; and keep this thought ever with you, that Nature loves nothing more than changing what things now are, and making others like them.</p><cite>Marcus Aurelius, Meditations 4.36, Foulis translation (1742)</cite></blockquote></div>
+    <a class="hint" href="#tools" aria-label="Scroll down">&darr;</a>
+  </div>
+</main>
+<section class="tools" id="tools">
+  <div class="bg" aria-hidden="true"></div>
+  <div class="tools-in">
+    <h2 class="rv">The lab</h2>
+    <p class="lede rv" style="--d:.1s">Strategies, an optimizer and a few calculators, all built and tracked in the open.</p>
+    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Bitcoin</span><span class="cd">Paper trading on real nightly signals.</span></a><a class="card rv" style="--d:0.12s" href="semis8/"><span class="th"><img src="img/semis8.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Semis8</span><span class="cd">Eight chips, one leader at a time.</span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Mag7</span><span class="cd">Seven giants and one weekly rule.</span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">CVaR Optimizer</span><span class="cd">The least risky mix for the return you want.</span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Compound Interest</span><span class="cd">Interest earning interest.</span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">BTC Debts</span><span class="cd">Zones the price has yet to cross.</span></a></div>
+    <div class="pills rv"><a class="pill" href="semis/">Semiconductors</a><a class="pill" href="msci/">MSCI</a><a class="pill" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
+    <small class="rv">Live paper trading and backtests with costs. Past returns do not guarantee future results. None of this is investment advice.</small>
   </div>
 </section>
-
-<section class="step" id="s2">
-  <div class="tag rv">02 / Optimizer</div>
-  <h2 class="rv d1">The least risky portfolio for your target</h2>
-  <p class="rv d2">Pick the assets, a cap for each and a yearly return. A linear program in your browser minimizes CVaR, the average loss of the worst 5% of days, and draws the efficient frontier.</p>
-  <div class="pills rv d3"><a class="pill main" href="optimizador/">CVaR Optimizer</a></div>
-</section>
-
-<section class="step" id="s3">
-  <div class="tag rv">03 / Compounding</div>
-  <h2 class="rv d1">Interest earning interest</h2>
-  <p class="rv d2">Set the starting capital, the contribution and the rate. Add steps or one-off months and watch the curve split into what you put in and what the interest added.</p>
-  <div class="pills rv d3"><a class="pill main" href="interes/">Compound Interest</a></div>
-</section>
-
-<section class="step" id="s4">
-  <div class="tag rv">04 / Bitcoin levels</div>
-  <h2 class="rv d1">Zones the price has not crossed</h2>
-  <p class="rv d2">Daily, weekly and monthly debts on BTC, drawn over the price chart.</p>
-  <div class="pills rv d3"><a class="pill main" href="deudas/">BTC Debts</a></div>
-</section>
-
-<section class="step" id="s5">
-  <div class="tag rv">05 / Radar</div>
-  <h2 class="rv d1">Small caps before the catalyst</h2>
-  <p class="rv d2">A pre-catalyst radar that lives in its own project.</p>
-  <div class="pills rv d3"><a class="pill main" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
-</section>
-
-<footer class="end rv"><p>Live paper trading and backtests with costs. Past returns do not guarantee future results. None of this is investment advice.</p></footer>
 <script>
-var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.25});
-document.querySelectorAll('.rv:not(.in)').forEach(function(el){io.observe(el)});
+(function(){
+  var seq=document.getElementById('seq'), fr=[].slice.call(document.querySelectorAll('.fr')), N=fr.length;
+  var count=document.querySelector('.count'), pin=document.querySelector('.pin');
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, raf=0;
+  function cl(v){return Math.min(1,Math.max(0,v))}
+  function run(){
+    raf=0; if(reduce) return;
+    var r=seq.getBoundingClientRect(), span=r.height-innerHeight;
+    var g=cl(-r.top/span), t=g*N, cur=Math.min(N-1,Math.floor(t));
+    pin.style.setProperty('--g',g.toFixed(4));
+    pin.style.setProperty('--ha',(1-cl(t*4)).toFixed(3));
+    count.textContent=(cur+1<10?'0':'')+(cur+1)+' / '+N;
+    for(var k=0;k<N;k++){
+      var f=fr[k], u=t-k;
+      var a = k===0 ? 1 : cl((u+.18)/.3);
+      if(u>1.2||u<-.3){ f.style.opacity=u>1.2&&k<N-1?0:(k===0?1:0); if(u>1.2){f.style.display='none';continue} }
+      f.style.display='';
+      f.style.opacity=a.toFixed(3);
+      f.style.setProperty('--s',(1+.09*cl(u+.2)).toFixed(4));
+      var qin=cl((u-.28)/.5), qout=k===N-1?1:1-cl((u-.9)/.12);
+      f.style.setProperty('--qa',(Math.min(.12+qin*.88,1)*qout*(u>.2?1:cl(u/.2))).toFixed(3));
+      f.style.setProperty('--qb',((1-qin)*16).toFixed(2)+'px');
+      if(k===0) f.style.setProperty('--ta',(1-cl(u/.3)).toFixed(3));
+    }
+  }
+  function req(){if(!raf)raf=requestAnimationFrame(run)}
+  addEventListener('scroll',req,{passive:true});addEventListener('resize',req);run();
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.2});
+  document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
+})();
 </script>
 </body>
 </html>
