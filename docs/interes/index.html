@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#142330; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#b6bc86; --yellow:#e3a46b; }
+  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1f1913; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#b6bc86; --yellow:#d4a85a; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:'Hanken Grotesk',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
   header { padding:24px 28px 8px; }
@@ -184,8 +184,8 @@ function calc(){
   if(chart) chart.destroy();
   chart=new Chart(document.getElementById('chart'),{type:'line',
     data:{labels, datasets:[
-      {label:'Interest', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#e3a46b', borderColor:'#142330', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
-      {label:'Contributed', data:sAport, backgroundColor:'rgba(255,255,255,.28)', borderColor:'#142330', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Interest', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#d4a85a', borderColor:'#1f1913', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Contributed', data:sAport, backgroundColor:'rgba(255,255,255,.28)', borderColor:'#1f1913', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
     ]},
     options:{maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
       scales:{x:{title:{display:true,text:'Years',color:'rgba(255,255,255,.56)'},ticks:{color:'rgba(255,255,255,.56)',maxTicksLimit:12},grid:{color:'rgba(255,255,255,.08)'},stacked:true},
