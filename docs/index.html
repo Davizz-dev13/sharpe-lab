@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,7 +22,6 @@
   .ttl p{margin:0 auto;max-width:34ch;font-size:17px;color:rgba(243,241,237,.78)}
   .hint{position:absolute;z-index:5;left:50%;bottom:26px;transform:translateX(-50%);width:42px;height:42px;display:grid;place-items:center;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);color:var(--text);font-size:18px;opacity:var(--ha,1);animation:bob 2s ease-in-out infinite}
   @keyframes bob{50%{transform:translate(-50%,6px)}}
-  .count{position:absolute;z-index:5;right:24px;top:22px;font-size:12px;letter-spacing:.14em;color:rgba(243,241,237,.5);font-variant-numeric:tabular-nums}
   .bar{position:absolute;z-index:5;left:0;top:0;height:2px;width:calc(var(--g,0)*100%);background:rgba(243,241,237,.55)}
   .tools{position:relative;padding:22vh 24px 10vh;z-index:0}
   .tools-in{position:relative;z-index:2;max-width:1180px;margin:0 auto;text-align:center}
@@ -54,45 +53,45 @@
     .seq{height:auto}.pin{position:relative;height:auto;overflow:visible}
     .fr{position:relative;height:70svh;opacity:1 !important}
     .q{opacity:1 !important;filter:none !important}.fr::before{background:linear-gradient(rgba(21,17,13,0) 25%,rgba(21,17,13,.72) 78%)}
-    .hint,.count,.bar{display:none}.tools{margin-top:0}.rv{opacity:1;filter:none;transform:none;transition:none}
+    .hint,.bar{display:none}.tools{margin-top:0}.rv{opacity:1;filter:none;transform:none;transition:none}
   }
 </style>
 </head>
 <body>
 <main class="seq" id="seq">
   <div class="pin">
-    <div class="bar"></div><div class="count" aria-hidden="true"></div>
-    <div class="fr" style="z-index:1"><img src="img/s01.webp" alt="" width="1672" height="941"><div class="ttl"><h1>Sharpe Lab</h1><p>Every strategy I study, tested out of sample and tracked live.</p></div>
-      <blockquote class="q"><p>Nothing, Lucilius, is ours, except time.</p></blockquote></div>
+    <div class="bar"></div>
+    <div class="fr" style="z-index:1"><img src="img/s01.webp" alt="" width="1672" height="941"><div class="ttl"><h1>Sharpe Lab</h1><p>Cada estrategia que estudio, probada fuera de muestra y seguida en vivo.</p></div>
+      <blockquote class="q"><p>Nada es nuestro, Lucilio, salvo el tiempo.</p></blockquote></div>
     <div class="fr" style="z-index:2"><img src="img/s02.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Be like a promontory against which the waves are always breaking. It stands fast, and stills the waters that rage around it.</p></blockquote></div>
+      <blockquote class="q"><p>Sé como un promontorio contra el que las olas rompen sin cesar. Se mantiene firme y calma las aguas que braman a su alrededor.</p></blockquote></div>
     <div class="fr" style="z-index:3"><img src="img/s03.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Lay hold of to-day’s task, and you will not need to depend so much upon to-morrow’s.</p></blockquote></div>
+      <blockquote class="q"><p>Echa mano de la tarea de hoy y no necesitarás depender tanto de la de mañana.</p></blockquote></div>
     <div class="fr" style="z-index:4"><img src="img/s04.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Aye, the willing soul Fate leads, but the unwilling drags along.</p></blockquote></div>
+      <blockquote class="q"><p>Al alma dispuesta la guía el Destino; a la reacia la arrastra.</p></blockquote></div>
     <div class="fr" style="z-index:5"><img src="img/s05.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>All things are for a day, both what remembers and what is remembered.</p></blockquote></div>
+      <blockquote class="q"><p>Todo dura un día, tanto el que recuerda como lo recordado.</p></blockquote></div>
     <div class="fr" style="z-index:6"><img src="img/s06.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>There are more things, Lucilius, likely to frighten us than there are to crush us; we suffer more often in imagination than in reality.</p></blockquote></div>
+      <blockquote class="q"><p>Hay más cosas, Lucilio, que nos asustan que las que nos aplastan; sufrimos más a menudo en la imaginación que en la realidad.</p></blockquote></div>
     <div class="fr" style="z-index:7"><img src="img/s07.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>And then recollect that it is neither the past nor the future that can oppress you, but always the present only.</p></blockquote></div>
-    <a class="hint" href="#tools" aria-label="Scroll down">&darr;</a>
+      <blockquote class="q"><p>Y recuerda entonces que lo único que puede oprimirte es siempre el presente, nunca el pasado ni el futuro.</p></blockquote></div>
+    <a class="hint" href="#tools" aria-label="Bajar">&darr;</a>
   </div>
 </main>
 <section class="tools" id="tools">
   <div class="bg" aria-hidden="true"></div>
   <div class="tools-in">
-    <h2 class="rv">The lab</h2>
-    <p class="lede rv" style="--d:.1s">Strategies, an optimizer and a few calculators, all built and tracked in the open.</p>
-    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Bitcoin</span><span class="cd">Paper trading on real nightly signals.</span></a><a class="card rv" style="--d:0.12s" href="semis8/"><span class="th"><img src="img/semis8.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Semis8</span><span class="cd">Eight chips, one leader at a time.</span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Mag7</span><span class="cd">Seven giants and one weekly rule.</span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">CVaR Optimizer</span><span class="cd">The least risky mix for the return you want.</span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Compound Interest</span><span class="cd">Interest earning interest.</span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">BTC Debts</span><span class="cd">Zones the price has yet to cross.</span></a></div>
-    <div class="pills rv"><a class="pill" href="semis/">Semiconductors</a><a class="pill" href="msci/">MSCI</a><a class="pill" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
-    <small class="rv">Live paper trading and backtests with costs. Past returns do not guarantee future results. None of this is investment advice.</small>
+    <h2 class="rv">El laboratorio</h2>
+    <p class="lede rv" style="--d:.1s">Estrategias, un optimizador y algunas calculadoras, todo construido y seguido a la vista.</p>
+    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Bitcoin</span><span class="cd">Paper trading con señales reales cada noche.</span></a><a class="card rv" style="--d:0.12s" href="semis8/"><span class="th"><img src="img/semis8.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Semis8</span><span class="cd">Ocho chips, un líder cada vez.</span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Mag7</span><span class="cd">Siete gigantes y una regla semanal.</span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Optimizador CVaR</span><span class="cd">La mezcla menos arriesgada para la rentabilidad que buscas.</span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Interés compuesto</span><span class="cd">Intereses que generan intereses.</span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Deudas BTC</span><span class="cd">Zonas que el precio aún no ha cruzado.</span></a></div>
+    <div class="pills rv"><a class="pill" href="semis/">Semiconductores</a><a class="pill" href="msci/">MSCI</a><a class="pill" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
+    <small class="rv">Paper trading en vivo y backtests con costes. La rentabilidad pasada no garantiza rentabilidades futuras. Nada de esto es asesoramiento de inversión.</small>
   </div>
 </section>
 <script>
 (function(){
   var seq=document.getElementById('seq'), fr=[].slice.call(document.querySelectorAll('.fr')), N=fr.length;
-  var count=document.querySelector('.count'), pin=document.querySelector('.pin');
+  var pin=document.querySelector('.pin');
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, raf=0;
   function cl(v){return Math.min(1,Math.max(0,v))}
   function run(){
@@ -101,7 +100,6 @@
     var g=cl(-r.top/span), t=g*N, cur=Math.min(N-1,Math.floor(t));
     pin.style.setProperty('--g',g.toFixed(4));
     pin.style.setProperty('--ha',(1-cl(t*4)).toFixed(3));
-    count.textContent=(cur+1<10?'0':'')+(cur+1)+' / '+N;
     for(var k=0;k<N;k++){
       var f=fr[k], u=t-k;
       var a = k===0 ? 1 : cl((u+.18)/.3);
