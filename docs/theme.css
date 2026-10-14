@@ -1,8 +1,8 @@
 /* Sharpe Lab shared theme: dark, warm ink, pill controls, serif display. */
 :root{
-  --bg:#131313; --card:#1b1a18; --panel:#1b1a18; --border:#34312c; --rule:#34312c;
+  --bg:#0d1824; --card:#142330; --panel:#142330; --border:#2a3f50; --rule:#2a3f50;
   --text:#f3f1ed; --fg:#f3f1ed; --muted:rgba(255,255,255,.56); --mut:rgba(255,255,255,.56);
-  --accent:#dfb16c; --acc:#dfb16c; --yellow:#dfb16c;
+  --accent:#e3a46b; --acc:#e3a46b; --yellow:#e3a46b;
   --live:#b6bc86; --green:#b6bc86; --red:#df8c70;
   --serif:"IM Fell DW Pica","Iowan Old Style",Georgia,serif;
   --sans:"Hanken Grotesk",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
@@ -10,12 +10,12 @@
 }
 html{background:var(--bg)}
 body{
-  background:radial-gradient(120% 60% at 50% 0%,#2a2218 0%,#131313 55%) no-repeat,#131313 !important;
+  background:radial-gradient(120% 60% at 50% 0%,#1a3148 0%,#0d1824 55%) no-repeat,#0d1824 !important;
   color:var(--text) !important;font-family:var(--sans) !important;-webkit-font-smoothing:antialiased;
 }
 h1,h2,h3{font-family:var(--serif) !important;font-weight:400 !important;letter-spacing:-.01em;color:var(--text)}
 a{color:inherit}
-::selection{background:#c0b498;color:#131313}
+::selection{background:#a9c1d4;color:#0d1824}
 .muted,.sub,footer{color:var(--muted) !important}
 /* panels */
 .expl,.card,.panel,.box,section.card,table,.kpi,.tile{
@@ -34,11 +34,11 @@ button,.btn,.tab,.mbtn{
   font-weight:500 !important;transition:background .2s,transform .2s;
 }
 button:hover,.btn:hover,.tab:hover,.mbtn:hover{background:rgba(255,255,255,.2) !important}
-button.primary,.btn.primary,.tab.active,.tab.on,button.active{background:#f3f1ed !important;color:#131313 !important}
+button.primary,.btn.primary,.tab.active,.tab.on,button.active{background:#f3f1ed !important;color:#0d1824 !important}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:1px solid var(--text);outline-offset:4px}
 th{background:transparent !important;color:var(--muted) !important;font-family:var(--sans) !important;font-weight:500 !important;font-size:11px !important;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border) !important}
 tr:hover td{background:rgba(255,255,255,.03)}
 td input{border-radius:999px !important}
-.tag,.badge,.pill{color:#131313}
+.tag,.badge,.pill{color:#0d1824}
 @media (max-width:700px){table{display:block;overflow-x:auto;max-width:100%}}
 *{box-shadow:none !important}

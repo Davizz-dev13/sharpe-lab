@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1b1a18; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#b6bc86; --red:#df8c70; --yellow:#eab619; }
+  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#142330; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#b6bc86; --red:#df8c70; --yellow:#eab619; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:'Hanken Grotesk',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
   header { padding:24px 28px 8px; }
@@ -294,7 +294,7 @@ function render(wCur, wOpt, wMax, wRec, tickers, alpha){
   });
 
   charts.push(new Chart(document.getElementById('alloc-chart'),{type:'bar',
-    data:{labels:tickers, datasets:names.map((nm,i)=>({label:nm, data:tickers.map(t=>(sets[i][t]||0)*100), backgroundColor:pc[i], borderColor:'#1b1a18', borderWidth:1}))},
+    data:{labels:tickers, datasets:names.map((nm,i)=>({label:nm, data:tickers.map(t=>(sets[i][t]||0)*100), backgroundColor:pc[i], borderColor:'#142330', borderWidth:1}))},
     options:{maintainAspectRatio:false, scales:{x:{ticks:{color:'rgba(255,255,255,.56)'},grid:{display:false}}, y:{ticks:{color:'rgba(255,255,255,.56)',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.08)'},max:100}},
     plugins:{legend:{labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10}}}}}}));
 
@@ -405,8 +405,8 @@ function renderFrontier(pts, markers){
   const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
   markers.forEach((m,i)=>{
     // sticker halo: bigger cream disc behind the colored marker
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#1b1a18',borderWidth:2.5,pointRadius:8,pointStyle:'circle',pointHoverRadius:10});
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#1b1a18',borderWidth:2,pointRadius:13,pointStyle:'circle',showLine:false,_halo:true});
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#142330',borderWidth:2.5,pointRadius:8,pointStyle:'circle',pointHoverRadius:10});
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#142330',borderWidth:2,pointRadius:13,pointStyle:'circle',showLine:false,_halo:true});
     if(i===3){ // recommended: outer orange ring
       sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'rgba(0,0,0,0)',borderColor:'#d96b2a',borderWidth:2.5,pointRadius:16,pointStyle:'circle',showLine:false,_halo:true});
     }
