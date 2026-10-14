@@ -17,7 +17,6 @@
   .fr::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(rgba(13,24,36,.28),rgba(13,24,36,0) 30%,rgba(13,24,36,calc(var(--qa,0)*.8)) 80%),radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(13,24,36,.55))}
   .q{position:absolute;z-index:2;left:50%;bottom:10svh;width:min(880px,calc(100% - 48px));margin:0;transform:translateX(-50%);text-align:center;opacity:var(--qa,0);filter:blur(var(--qb,16px))}
   .q p{margin:0 0 14px;font-family:var(--serif);font-size:clamp(22px,2.9vw,40px);line-height:1.2;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.8)}
-  .q cite{display:block;font-style:normal;font-size:13px;letter-spacing:.04em;color:var(--muted)}
   .ttl{position:absolute;z-index:2;left:0;right:0;top:34%;text-align:center;padding:0 24px;opacity:var(--ta,1);filter:blur(calc((1 - var(--ta,1))*10px))}
   .ttl h1{margin:0 0 12px;font-size:clamp(56px,12vw,120px);line-height:1;text-shadow:0 4px 40px rgba(0,0,0,.6)}
   .ttl p{margin:0 auto;max-width:34ch;font-size:17px;color:rgba(243,241,237,.78)}
@@ -64,19 +63,19 @@
   <div class="pin">
     <div class="bar"></div><div class="count" aria-hidden="true"></div>
     <div class="fr" style="z-index:1"><img src="img/s01.webp" alt="" width="1672" height="941"><div class="ttl"><h1>Sharpe Lab</h1><p>Every strategy I study, tested out of sample and tracked live.</p></div>
-      <blockquote class="q"><p>Nothing, Lucilius, is ours, except time.</p><cite>Seneca, Letters to Lucilius 1.3, tr. Richard M. Gummere</cite></blockquote></div>
+      <blockquote class="q"><p>Nothing, Lucilius, is ours, except time.</p></blockquote></div>
     <div class="fr" style="z-index:2"><img src="img/s02.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Be like a promontory against which the waves are always breaking. It stands fast, and stills the waters that rage around it.</p><cite>Marcus Aurelius, Meditations 4.49, Foulis translation (1742)</cite></blockquote></div>
+      <blockquote class="q"><p>Be like a promontory against which the waves are always breaking. It stands fast, and stills the waters that rage around it.</p></blockquote></div>
     <div class="fr" style="z-index:3"><img src="img/s03.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Lay hold of to-day’s task, and you will not need to depend so much upon to-morrow’s.</p><cite>Seneca, Letters to Lucilius 1.2, tr. Richard M. Gummere</cite></blockquote></div>
+      <blockquote class="q"><p>Lay hold of to-day’s task, and you will not need to depend so much upon to-morrow’s.</p></blockquote></div>
     <div class="fr" style="z-index:4"><img src="img/s04.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Aye, the willing soul Fate leads, but the unwilling drags along.</p><cite>Seneca, Letters to Lucilius 107.11 (a verse he cites), tr. Gummere</cite></blockquote></div>
+      <blockquote class="q"><p>Aye, the willing soul Fate leads, but the unwilling drags along.</p></blockquote></div>
     <div class="fr" style="z-index:5"><img src="img/s05.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>All things are for a day, both what remembers and what is remembered.</p><cite>Marcus Aurelius, Meditations 4.35, Foulis translation (1742)</cite></blockquote></div>
+      <blockquote class="q"><p>All things are for a day, both what remembers and what is remembered.</p></blockquote></div>
     <div class="fr" style="z-index:6"><img src="img/s06.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>There are more things, Lucilius, likely to frighten us than there are to crush us; we suffer more often in imagination than in reality.</p><cite>Seneca, Letters to Lucilius 13.4, tr. Richard M. Gummere</cite></blockquote></div>
+      <blockquote class="q"><p>There are more things, Lucilius, likely to frighten us than there are to crush us; we suffer more often in imagination than in reality.</p></blockquote></div>
     <div class="fr" style="z-index:7"><img src="img/s07.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>And then recollect that it is neither the past nor the future that can oppress you, but always the present only.</p><cite>Marcus Aurelius, Meditations 8.36, Foulis translation (1742)</cite></blockquote></div>
+      <blockquote class="q"><p>And then recollect that it is neither the past nor the future that can oppress you, but always the present only.</p></blockquote></div>
     <a class="hint" href="#tools" aria-label="Scroll down">&darr;</a>
   </div>
 </main>
@@ -85,7 +84,7 @@
   <div class="tools-in">
     <h2 class="rv">The lab</h2>
     <p class="lede rv" style="--d:.1s">Strategies, an optimizer and a few calculators, all built and tracked in the open.</p>
-    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Bitcoin</span><span class="cd">Paper trading on real nightly signals.</span></a><a class="card rv" style="--d:0.12s" href="semis8/"><span class="th"><img src="img/semis8.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Semis8</span><span class="cd">Eight chips, one leader at a time.</span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Mag7</span><span class="cd">Seven giants and one weekly rule.</span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">CVaR Optimizer</span><span class="cd">The least risky mix for the return you want.</span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Compound Interest</span><span class="cd">Interest earning interest.</span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.jpg" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">BTC Debts</span><span class="cd">Zones the price has yet to cross.</span></a></div>
+    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Bitcoin</span><span class="cd">Paper trading on real nightly signals.</span></a><a class="card rv" style="--d:0.12s" href="semis8/"><span class="th"><img src="img/semis8.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Semis8</span><span class="cd">Eight chips, one leader at a time.</span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Mag7</span><span class="cd">Seven giants and one weekly rule.</span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">CVaR Optimizer</span><span class="cd">The least risky mix for the return you want.</span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Compound Interest</span><span class="cd">Interest earning interest.</span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">BTC Debts</span><span class="cd">Zones the price has yet to cross.</span></a></div>
     <div class="pills rv"><a class="pill" href="semis/">Semiconductors</a><a class="pill" href="msci/">MSCI</a><a class="pill" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
     <small class="rv">Live paper trading and backtests with costs. Past returns do not guarantee future results. None of this is investment advice.</small>
   </div>
