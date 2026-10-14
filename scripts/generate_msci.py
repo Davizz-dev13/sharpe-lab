@@ -96,7 +96,7 @@ def backtest(close: pd.Series, w: pd.Series, cost: float, cash_rate: float) -> p
 def main():
     errors = []
     try:
-        close = download(TICKER)
+        close = download(TICKER).dropna()
     except Exception as e:
         print(json.dumps({"errors": [str(e)]}))
         raise
