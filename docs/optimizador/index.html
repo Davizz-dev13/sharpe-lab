@@ -9,21 +9,21 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
 <script src="vendor/solver.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#2a170f; --mut:#7a6a58; --acc:#d96b2a; --green:#2e7d50; --red:#d9402f; --yellow:#eab619; }
+  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1b1a18; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#b6bc86; --red:#df8c70; --yellow:#eab619; }
   * { box-sizing:border-box; }
-  body { margin:0; font-family:'DM Sans',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
+  body { margin:0; font-family:'Hanken Grotesk',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
   header { padding:24px 28px 8px; }
-  h1 { margin:0 0 4px; font-size:22px; font-family:'Bungee',sans-serif; font-weight:400; letter-spacing:.02em; }
+  h1 { margin:0 0 4px; font-size:22px; font-family:'IM Fell DW Pica',sans-serif; font-weight:400; letter-spacing:.02em; }
   .sub { color:var(--mut); font-size:13px; line-height:1.5; max-width:900px; }
   main { padding:8px 28px 40px; max-width:1200px; }
-  .panel { background:var(--panel); border:3px solid var(--fg); border-radius:0; padding:16px 18px; margin-top:18px; }
-  .panel h2 { margin:0 0 10px; font-size:15px; font-family:'Bungee',sans-serif; font-weight:400; letter-spacing:.02em; }
-  .badge { display:inline-block; font-size:11px; padding:2px 8px; border:1px solid var(--border); color:var(--mut); margin-left:8px; vertical-align:middle; font-family:'DM Sans',sans-serif; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin-top:18px; }
+  .panel h2 { margin:0 0 10px; font-size:15px; font-family:'IM Fell DW Pica',sans-serif; font-weight:400; letter-spacing:.02em; }
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border:1px solid var(--border); color:var(--mut); margin-left:8px; vertical-align:middle; font-family:'Hanken Grotesk',sans-serif; }
   table { border-collapse:collapse; width:100%; font-size:12.5px; }
   th, td { padding:6px 8px; text-align:right; border-bottom:2px solid var(--border); white-space:nowrap; }
-  th { background:var(--fg); color:var(--bg); font-family:'Bungee',sans-serif; font-weight:400; font-size:10px; letter-spacing:.03em; }
+  th { background:var(--fg); color:var(--bg); font-family:'IM Fell DW Pica',sans-serif; font-weight:400; font-size:10px; letter-spacing:.03em; }
   th:first-child, td:first-child { text-align:left; }
   .pos { color:var(--green); } .neg { color:var(--red); }
   .chartbox { height:280px; margin-bottom:8px; }
@@ -31,13 +31,13 @@
   footer { color:var(--mut); font-size:11.5px; padding:20px 28px 40px; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
   @media (max-width:860px){ .grid2 { grid-template-columns:1fr; } main { padding:8px 14px 40px; } header { padding:20px 16px 6px; } footer { padding:20px 16px 40px; } }
-  input[type=number] { width:64px; padding:4px 6px; border:2px solid var(--fg); background:var(--panel); color:var(--fg); font-family:'DM Sans',sans-serif; font-size:13px; text-align:right; }
+  input[type=number] { width:64px; padding:4px 6px; border:1px solid var(--border); background:var(--panel); color:var(--fg); font-family:'Hanken Grotesk',sans-serif; font-size:13px; text-align:right; }
   input[type=number]:disabled { opacity:.35; border-color:var(--border); }
   input[type=checkbox] { width:16px; height:16px; accent-color:var(--acc); }
-  select { padding:5px 8px; border:2px solid var(--fg); background:var(--panel); color:var(--fg); font-family:'DM Sans',sans-serif; font-size:13px; }
+  select { padding:5px 8px; border:1px solid var(--border); background:var(--panel); color:var(--fg); font-family:'Hanken Grotesk',sans-serif; font-size:13px; }
   .ctab td:first-child { font-weight:600; }
   .dot { display:inline-block; width:9px; height:9px; margin-right:6px; }
-  .bigbtn { display:inline-block; margin-top:14px; padding:12px 26px; background:var(--yellow); border:3px solid var(--fg); font-family:'Bungee',sans-serif; font-size:14px; cursor:pointer; }
+  .bigbtn { display:inline-block; margin-top:14px; padding:12px 26px; background:var(--yellow); border:1px solid var(--border); font-family:'IM Fell DW Pica',sans-serif; font-size:14px; cursor:pointer; }
   .bigbtn:active { transform:scale(.98); }
   .bigbtn:disabled { opacity:.5; cursor:default; }
   .note { color:var(--mut); font-size:12px; margin-top:8px; line-height:1.5; }
@@ -51,9 +51,11 @@
   a { color:var(--acc); }
   .back { display:inline-block; margin-top:18px; color:var(--mut); font-size:14px; text-decoration:none; }
   .back:hover { color:var(--fg); }
-  .winbtn{padding:4px 10px;border:2px solid var(--fg);background:var(--panel);color:var(--fg);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;margin-right:2px}
+  .winbtn{padding:4px 10px;border:1px solid var(--border);background:var(--panel);color:var(--fg);font-family:'Hanken Grotesk',sans-serif;font-size:12px;cursor:pointer;margin-right:2px}
   .winbtn.active{background:var(--yellow)}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
 </head>
 <body>
 <header>
@@ -72,8 +74,8 @@
       <div class="twrap"><table class="ctab" id="lim-table"><thead><tr><th>Asset</th><th>Include</th><th>Max %</th></tr></thead><tbody></tbody></table></div>
       <div style="margin-top:12px;font-size:13px">
         <label style="font-size:12px;color:var(--mut);display:block;margin-bottom:4px">Add your own ticker</label>
-        <input type="text" id="custom-ticker" placeholder="e.g. DOGE, ETH, SOL" style="width:130px;padding:5px 8px;border:2px solid var(--fg);background:var(--panel);color:var(--fg);font-family:'DM Sans',sans-serif;font-size:13px;text-transform:uppercase">
-        <button id="custom-add" style="padding:6px 14px;background:var(--yellow);border:3px solid var(--fg);font-family:'Bungee',sans-serif;font-size:11px;cursor:pointer">Add</button>
+        <input type="text" id="custom-ticker" placeholder="e.g. DOGE, ETH, SOL" style="width:130px;padding:5px 8px;border:1px solid var(--border);background:var(--panel);color:var(--fg);font-family:'Hanken Grotesk',sans-serif;font-size:13px;text-transform:uppercase">
+        <button id="custom-add" style="padding:6px 14px;background:var(--yellow);border:1px solid var(--border);font-family:'IM Fell DW Pica',sans-serif;font-size:11px;cursor:pointer">Add</button>
         <div class="note" id="custom-status">Built-in universe covers the usual stocks, ETFs, commodities and crypto. Other crypto loads live here (Coinbase USD pairs); anything else can join the nightly data on request.</div>
       </div>
       <div style="margin-top:12px;font-size:13px">
@@ -138,11 +140,11 @@
 </main>
 <footer id="foot"></footer>
 <script>
-const COLORS = {"Cash":"#7a6a58","Gold":"#eab619","Commodities":"#2e7d50","S&P 500":"#2f6fd0","Bitcoin":"#f7931a","MSCI World":"#9467bd","Emerging":"#17a2b8","Silver":"#8f9ba8"};
+const COLORS = {"Cash":"rgba(255,255,255,.56)","Gold":"#eab619","Commodities":"#b6bc86","S&P 500":"#2f6fd0","Bitcoin":"#f7931a","MSCI World":"#9467bd","Emerging":"#17a2b8","Silver":"#8f9ba8"};
 const DEFAULT_CUR = {"Cash":0,"Gold":25,"Commodities":0,"S&P 500":0,"Bitcoin":15,"MSCI World":50,"Emerging":10,"Silver":0};
 const DEFAULT_MAX = {"Cash":100,"Gold":30,"Commodities":30,"S&P 500":30,"Bitcoin":15,"MSCI World":30,"Emerging":30,"Silver":30};
 const DEFAULT_INC = {"Cash":true,"Gold":true,"Commodities":true,"S&P 500":true,"Bitcoin":true,"MSCI World":true,"Emerging":true,"Silver":false};
-const PALETTE = ["#b87333","#627eea","#d9402f","#3b8bc2","#4a5a6a","#76b900","#e05194","#00a2ed","#f25c05","#8e44ad","#16a085","#c0392b","#7f8c8d","#2c3e50","#a0522d","#6b8e23","#4682b4","#daa520","#cd5c5c","#20b2aa"];
+const PALETTE = ["#b87333","#627eea","#df8c70","#3b8bc2","#4a5a6a","#76b900","#e05194","#00a2ed","#f25c05","#8e44ad","#16a085","#c0392b","#7f8c8d","#2c3e50","#a0522d","#6b8e23","#4682b4","#daa520","#cd5c5c","#20b2aa"];
 const colorOf = s => { if(COLORS[s]) return COLORS[s]; let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))>>>0; return PALETTE[h%PALETTE.length]; };
 const DAYS_YR = 365;
 let DATA = null;
@@ -274,7 +276,7 @@ function render(wCur, wOpt, wMax, wRec, tickers, alpha){
   charts.forEach(c=>c.destroy()); charts=[];
   const names = ['Your portfolio','Min CVaR','Max CAGR','Recommended'];
   const sets = [wCur,wOpt,wMax,wRec];
-  const pc = ['#c98a12','#d96b2a','#2f6fd0','#2e7d50'];
+  const pc = ['#c98a12','#d96b2a','#2f6fd0','#b6bc86'];
 
   const wt=document.querySelector('#w-table tbody'); wt.innerHTML='';
   tickers.forEach(t=>{
@@ -292,23 +294,23 @@ function render(wCur, wOpt, wMax, wRec, tickers, alpha){
   });
 
   charts.push(new Chart(document.getElementById('alloc-chart'),{type:'bar',
-    data:{labels:tickers, datasets:names.map((nm,i)=>({label:nm, data:tickers.map(t=>(sets[i][t]||0)*100), backgroundColor:pc[i], borderColor:'#2a170f', borderWidth:1}))},
-    options:{maintainAspectRatio:false, scales:{x:{ticks:{color:'#7a6a58'},grid:{display:false}}, y:{ticks:{color:'#7a6a58',callback:v=>v+'%'},grid:{color:'#e3d9c0'},max:100}},
-    plugins:{legend:{labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}}}}}));
+    data:{labels:tickers, datasets:names.map((nm,i)=>({label:nm, data:tickers.map(t=>(sets[i][t]||0)*100), backgroundColor:pc[i], borderColor:'#1b1a18', borderWidth:1}))},
+    options:{maintainAspectRatio:false, scales:{x:{ticks:{color:'rgba(255,255,255,.56)'},grid:{display:false}}, y:{ticks:{color:'rgba(255,255,255,.56)',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.08)'},max:100}},
+    plugins:{legend:{labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10}}}}}}));
 
   const eqs = sets.map(w=>{let e=1; return portReturns(w,tickers).map(r=>e*=(1+r));});
   charts.push(new Chart(document.getElementById('eq-chart'),{data:{datasets:names.map((nm,i)=>({type:'line',label:nm,data:DATA.dates.map((d,j)=>({x:d,y:eqs[i][j]})),borderColor:pc[i],borderWidth:1.6,pointRadius:0}))},
     options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#7a6a58',maxTicksLimit:8},grid:{color:'#e3d9c0'}},
-            y:{type:'logarithmic',ticks:{color:'#7a6a58'},grid:{color:'#e3d9c0'}}},
-    plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}}}}}));
+    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'rgba(255,255,255,.56)',maxTicksLimit:8},grid:{color:'rgba(255,255,255,.08)'}},
+            y:{type:'logarithmic',ticks:{color:'rgba(255,255,255,.56)'},grid:{color:'rgba(255,255,255,.08)'}}},
+    plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10}}}}}}));
 
   const dds = eqs.map(eq=>{let p=0; return eq.map(e=>{if(e>p)p=e;return (e/p-1)*100;});});
   charts.push(new Chart(document.getElementById('dd-chart'),{data:{datasets:names.map((nm,i)=>({type:'line',label:nm,data:DATA.dates.map((d,j)=>({x:d,y:dds[i][j]})),borderColor:pc[i],borderWidth:1.3,pointRadius:0,fill:false}))},
     options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#7a6a58',maxTicksLimit:8},grid:{color:'#e3d9c0'}},
-            y:{ticks:{color:'#7a6a58',callback:v=>v+'%'},grid:{color:'#e3d9c0'}}},
-    plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'#7a6a58',boxWidth:10,font:{size:10}}}}}}));
+    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'rgba(255,255,255,.56)',maxTicksLimit:8},grid:{color:'rgba(255,255,255,.08)'}},
+            y:{ticks:{color:'rgba(255,255,255,.56)',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.08)'}}},
+    plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10}}}}}}));
 }
 
 function annReturn(weights, tickers){
@@ -397,23 +399,23 @@ function flashDataset(chart, idx){
   requestAnimationFrame(tick);
 }
 function renderFrontier(pts, markers){
-  const pc=['#c98a12','#d96b2a','#2f6fd0','#2e7d50'];
+  const pc=['#c98a12','#d96b2a','#2f6fd0','#b6bc86'];
   let xMax=0; pts.forEach(p=>{if(p.x>xMax)xMax=p.x;}); markers.forEach(m=>{if(m.x>xMax)xMax=m.x;});
   xMax=Math.max(0.1, xMax*1.15);
   const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
   markers.forEach((m,i)=>{
     // sticker halo: bigger cream disc behind the colored marker
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#2a170f',borderWidth:2.5,pointRadius:8,pointStyle:'circle',pointHoverRadius:10});
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#2a170f',borderWidth:2,pointRadius:13,pointStyle:'circle',showLine:false,_halo:true});
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#1b1a18',borderWidth:2.5,pointRadius:8,pointStyle:'circle',pointHoverRadius:10});
+    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#faf5e7',borderColor:'#1b1a18',borderWidth:2,pointRadius:13,pointStyle:'circle',showLine:false,_halo:true});
     if(i===3){ // recommended: outer orange ring
       sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'rgba(0,0,0,0)',borderColor:'#d96b2a',borderWidth:2.5,pointRadius:16,pointStyle:'circle',showLine:false,_halo:true});
     }
   });
   charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},
     options:{maintainAspectRatio:false,
-    scales:{x:{type:'linear',min:0,suggestedMax:xMax,title:{display:true,text:'Daily CVaR % (avg loss of worst days, lower = safer)',color:'#7a6a58',font:{size:10}},ticks:{color:'#7a6a58',callback:v=>(Math.round(v*10)/10)+'%'},grid:{color:'#e3d9c0'}},
-            y:{title:{display:true,text:'Expected yearly return %',color:'#7a6a58',font:{size:10}},ticks:{color:'#7a6a58',callback:v=>v+'%'},grid:{color:'#e3d9c0'}}},
-    plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'#7a6a58',boxWidth:10,font:{size:10},filter:(it,ch)=>!ch.datasets[it.datasetIndex]._halo}},
+    scales:{x:{type:'linear',min:0,suggestedMax:xMax,title:{display:true,text:'Daily CVaR % (avg loss of worst days, lower = safer)',color:'rgba(255,255,255,.56)',font:{size:10}},ticks:{color:'rgba(255,255,255,.56)',callback:v=>(Math.round(v*10)/10)+'%'},grid:{color:'rgba(255,255,255,.08)'}},
+            y:{title:{display:true,text:'Expected yearly return %',color:'rgba(255,255,255,.56)',font:{size:10}},ticks:{color:'rgba(255,255,255,.56)',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.08)'}}},
+    plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10},filter:(it,ch)=>!ch.datasets[it.datasetIndex]._halo}},
       tooltip:{filter:c=>!c.dataset._halo,callbacks:{label:c=>c.dataset.label+': return '+c.parsed.y.toFixed(1)+'% / daily CVaR '+c.parsed.x.toFixed(2)+'%'}}}}}));
 }
 function saveCustom(sym){

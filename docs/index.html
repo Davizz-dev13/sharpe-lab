@@ -1,104 +1,88 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sharpe Lab</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
 <style>
-  :root { --bg:#f4ecd8; --card:#faf5e7; --border:#d8cdb2; --text:#2a170f; --muted:#7a6a58; --accent:#d96b2a; --yellow:#eab619; }
-  * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; display:flex; align-items:center; justify-content:center; }
-  main { width:100%; max-width:460px; padding:32px 24px; }
-  h1 { margin:0 0 4px; font-size:34px; letter-spacing:.5px; text-align:center; }
-  .sub { color:var(--muted); font-size:13px; margin-bottom:34px; text-align:center; }
-  .mbtn { display:block; width:100%; padding:16px 18px; margin:12px 0; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; font-size:16px; font-weight:600; cursor:pointer; text-decoration:none; text-align:left; transition:border-color .15s, transform .05s; }
-  .mbtn:hover { border-color:var(--accent); }
-  .mbtn:active { transform:scale(.985); }
-  .mbtn.primary { border-color:var(--accent); }
-  .mbtn .arrow { float:right; color:var(--muted); font-weight:400; }
-  button.mbtn { text-align:center; }
-  #v-home a.mbtn { text-align:center; }
-  .back { display:block; margin:22px auto 0; background:none; border:none; color:var(--muted); font-size:14px; cursor:pointer; padding:6px 10px; }
-  .back:hover { color:var(--text); }
-  .expl { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; font-size:14.5px; line-height:1.55; }
-  .expl p { margin:0 0 12px; }
-  .expl p:last-child { margin:0; }
-  .expl .muted { color:var(--muted); font-size:12.5px; }
-  .expl h3 { font-family:'Bungee',sans-serif; font-weight:400; font-size:14px; margin:18px 0 8px; }
-  .expl h3:first-child { margin-top:0; }
-  footer { color:var(--muted); font-size:11.5px; margin-top:34px; text-align:center; }
-  .view { display:none; }
-  .view.active { display:block; }
-
-  /* Restyle */
-  body{font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,sans-serif;}
-  h1{font-family:'Bungee',sans-serif;font-weight:400;}
-  .mbtn{border:3px solid var(--text);border-radius:0;background:var(--card);color:var(--text);font-family:'Bungee',sans-serif;font-weight:400;font-size:14px;}
-  .mbtn:hover{background:var(--bg);}
-  .mbtn.primary{background:var(--yellow);border-color:var(--text);}
-  .expl{border:3px solid var(--text);border-radius:0;background:var(--card);}
-
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0}
+  .hero{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 24px;position:relative}
+  h1{margin:0 0 14px;font-size:clamp(52px,13vw,96px);line-height:1}
+  .sub{font-size:16px;max-width:30ch;line-height:1.45}
+  .down{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);width:42px;height:42px;display:grid;place-items:center;border-radius:999px;background:rgba(255,255,255,.12);color:var(--text);text-decoration:none;font-size:18px}
+  .step{min-height:80svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:72px 24px}
+  .step .tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  .step h2{margin:0 0 16px;font-size:clamp(34px,7vw,60px);line-height:1.05;max-width:16ch}
+  .step p{margin:0 0 28px;max-width:46ch;font-size:17px;line-height:1.55;color:rgba(243,241,237,.72)}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px}
+  .pill{display:inline-flex;align-items:center;justify-content:center;height:42px;padding:0 20px;font-size:15px;text-decoration:none;cursor:pointer;border-radius:999px;background:rgba(255,255,255,.12);color:var(--text);transition:background .2s}
+  .pill:hover{background:rgba(255,255,255,.2)}
+  .pill.main{background:#f3f1ed;color:#131313}
+  .pill.main:hover{background:#fff}
+  .end{padding:80px 24px 56px;text-align:center}
+  .end p{font-size:12px;color:var(--muted);max-width:52ch;margin:0 auto}
+  .rv{opacity:0;filter:blur(8px);transform:translateY(18px);transition:opacity 1s ease,filter 1s ease,transform 1s ease}
+  .rv.in{opacity:1;filter:none;transform:none}
+  .rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;filter:none;transform:none;transition:none}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<main>
-  <h1>Sharpe Lab</h1>
-  <div class="sub">quantitative strategies, tracked live</div>
+<header class="hero">
+  <h1 class="rv in">Sharpe Lab</h1>
+  <div class="sub muted rv in d1">Every strategy I study, tested out of sample and tracked live.</div>
+  <a class="down" href="#s1" aria-label="Scroll down">&darr;</a>
+</header>
 
-  <div class="view active" id="v-home">
-    <button class="mbtn" onclick="show('v-expl')">Explanation</button>
-    <a class="mbtn primary" href="optimizador/">CVaR Optimizer</a>
-    <button class="mbtn" onclick="show('v-strats')">Strats</button>
-    <a class="mbtn" href="interes/">Compound Interest</a>
-    <a class="mbtn" href="deudas/">BTC Debts (FVG)</a>
-    <a class="mbtn" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a>
+<section class="step" id="s1">
+  <div class="tag rv">01 / Strategies</div>
+  <h2 class="rv d1">Ideas that pass the test go live</h2>
+  <p class="rv d2">Each strategy is checked on 10-year windows with realistic costs. The survivors run in paper trading with real nightly signals and fake money.</p>
+  <div class="pills rv d3">
+    <a class="pill main" href="btc/">Bitcoin</a>
+    <a class="pill" href="semis/">Semiconductors</a>
+    <a class="pill" href="semis8/">Semis8</a>
+    <a class="pill" href="msci/">MSCI</a>
+    <a class="pill" href="mag7/">Mag7</a>
   </div>
+</section>
 
-  <div class="view" id="v-expl">
-    <div class="expl">
-      <h3>What is this</h3>
-      <p>Sharpe Lab is my personal quantitative finance lab. The goal: very high Sharpes without giving up much CAGR and, above all, without the ugly drawdowns.</p>
-      <p>Every idea is tested out of sample, with realistic transaction costs and 10-year windows. The ones that pass get tracked in paper trading in real time (fake money, real signals every night) before a single euro trusts them.</p>
+<section class="step" id="s2">
+  <div class="tag rv">02 / Optimizer</div>
+  <h2 class="rv d1">The least risky portfolio for your target</h2>
+  <p class="rv d2">Pick the assets, a cap for each and a yearly return. A linear program in your browser minimizes CVaR, the average loss of the worst 5% of days, and draws the efficient frontier.</p>
+  <div class="pills rv d3"><a class="pill main" href="optimizador/">CVaR Optimizer</a></div>
+</section>
 
-      <h3>The strategies</h3>
-      <p>The Strats menu holds the live dashboards: Bitcoin, MSCI, semiconductors and the Mag7. Each strategy computes its signal every night from public data and the site tracks its paper P&amp;L day by day, so you can see exactly what it would have done, not what a backtest claims it would have done.</p>
+<section class="step" id="s3">
+  <div class="tag rv">03 / Compounding</div>
+  <h2 class="rv d1">Interest earning interest</h2>
+  <p class="rv d2">Set the starting capital, the contribution and the rate. Add steps or one-off months and watch the curve split into what you put in and what the interest added.</p>
+  <div class="pills rv d3"><a class="pill main" href="interes/">Compound Interest</a></div>
+</section>
 
-      <h3>The CVaR optimizer</h3>
-      <p>You pick the assets, a max weight for each and a yearly return target. The optimizer builds the portfolio with the lowest possible risk for that target, solving a linear program in your browser.</p>
-      <p>Risk here is not volatility. Variance punishes good days and bad days the same, and nobody cries about good days. <b>CVaR</b> only looks at what hurts: the average loss of the worst stretch of days. At 95% confidence, that is the mean of the worst 5% of historical days.</p>
-      <p>Why does it ask for a return target? Because "the ideal portfolio" does not exist in the abstract. Risk and return pull in opposite directions, and the math will not choose between them for you. Minimizing risk with no target has one perfect answer: 100% cash. The target turns the question into something useful: the least risky portfolio that still earns at least what you asked for.</p>
-      <p>The efficient frontier chart shows exactly that trade-off: every dot on the curve is the least risky portfolio for one return target. Your portfolio, the min CVaR solution and the max CAGR one are marked on top, so you can see at a glance whether your money sits on the curve or below it.</p>
-      <p>One honest caveat: the expected return of each asset comes from its 5-year historical mean. It is the most fragile input in the whole model, so treat the numbers as a map, not a promise. You can also add your own crypto ticker and the page downloads its history on the spot.</p>
+<section class="step" id="s4">
+  <div class="tag rv">04 / Bitcoin levels</div>
+  <h2 class="rv d1">Zones the price has not crossed</h2>
+  <p class="rv d2">Daily, weekly and monthly debts on BTC, drawn over the price chart.</p>
+  <div class="pills rv d3"><a class="pill main" href="deudas/">BTC Debts</a></div>
+</section>
 
-      <h3>The compound interest calculator</h3>
-      <p>The most boring and most powerful force in finance: interest earning interest. You set the starting capital, a monthly or weekly contribution, the yearly rate and the years, and it shows the final capital split into what you put in and what the interest put in, with the growth curve and the year-by-year table.</p>
-      <p>The adjustments are the realistic part: real life is not a fixed contribution forever. You can add a step ("from year 5 on, 1300 instead of 1000") or a one-off month ("this December, 1400"), as many as you want, and the math respects them.</p>
+<section class="step" id="s5">
+  <div class="tag rv">05 / Radar</div>
+  <h2 class="rv d1">Small caps before the catalyst</h2>
+  <p class="rv d2">A pre-catalyst radar that lives in its own project.</p>
+  <div class="pills rv d3"><a class="pill main" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
+</section>
 
-      <p class="muted">None of this is investment advice.</p>
-    </div>
-    <button class="back" onclick="show('v-home')">&larr; Back</button>
-  </div>
-
-  <div class="view" id="v-strats">
-    <a class="mbtn" href="optimizador/">CVaR Optimizer<span class="arrow">&rarr;</span></a>
-    <a class="mbtn" href="semis/">Semiconductors<span class="arrow">&rarr;</span></a>
-    <a class="mbtn" href="semis8/">Semis8<span class="arrow">&rarr;</span></a>
-    <a class="mbtn" href="btc/">Bitcoin<span class="arrow">&rarr;</span></a>
-    <a class="mbtn" href="msci/">MSCI<span class="arrow">&rarr;</span></a>
-    <a class="mbtn" href="mag7/">Mag7<span class="arrow">&rarr;</span></a>
-    <button class="back" onclick="show('v-home')">&larr; Back</button>
-  </div>
-
-  <footer>Live paper trading and backtests with costs. Past returns do not guarantee future results.</footer>
-</main>
+<footer class="end rv"><p>Live paper trading and backtests with costs. Past returns do not guarantee future results. None of this is investment advice.</p></footer>
 <script>
-function show(id){
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
-}
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.25});
+document.querySelectorAll('.rv:not(.in)').forEach(function(el){io.observe(el)});
 </script>
 </body>
 </html>
