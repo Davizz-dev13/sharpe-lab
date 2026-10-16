@@ -14,6 +14,8 @@
   .fr{position:absolute;inset:0;opacity:0}
   .fr:first-child{opacity:1}
   .fr>img,.fr>picture>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(var(--s,1));will-change:transform}
+  .fr.olive>picture>img{object-fit:contain;object-position:center;transform:none;will-change:auto}
+  .fr.olive{background:#15110d}
   .fr::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(rgba(21,17,13,.28),rgba(21,17,13,0) 30%,rgba(21,17,13,calc(var(--qa,0)*.8)) 80%),radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(21,17,13,.55))}
   .q{position:absolute;z-index:2;left:50%;bottom:10svh;width:min(880px,calc(100% - 48px));margin:0;transform:translateX(-50%);text-align:center;opacity:var(--qa,0);filter:blur(var(--qb,16px))}
   .q p{margin:0 0 14px;font-family:var(--serif);font-size:clamp(22px,2.9vw,40px);line-height:1.2;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.8)}
@@ -71,7 +73,7 @@
       <blockquote class="q"><p>The first step doesn't take you where you want to be. It takes you out of where you were.</p></blockquote></div>
     <div class="fr" style="z-index:5"><img src="img/s05.webp" alt="" width="1672" height="941" loading="lazy">
       <blockquote class="q"><p>Dreams aren't what you see while you sleep. They're what keeps you awake.</p></blockquote></div>
-    <div class="fr" style="z-index:6"><picture><source media="(max-aspect-ratio: 1/1)" srcset="img/s06m.webp"><img src="img/s06.webp" alt="" style="object-position:30% 50%" width="1672" height="941" loading="lazy"></picture>
+    <div class="fr olive" style="z-index:6"><picture><source media="(max-aspect-ratio: 1/1)" srcset="img/s06m.webp"><img src="img/s06-wide.webp" alt="" width="1672" height="941" loading="lazy"></picture>
       <blockquote class="q"><p>A man who fears pain more than failure will taste both.</p></blockquote></div>
     <div class="fr" style="z-index:7"><img src="img/s07.webp" alt="" width="1672" height="941" loading="lazy">
       <blockquote class="q"><p>Discipline makes every day look the same. Its absence makes every year look the same.</p></blockquote></div>
