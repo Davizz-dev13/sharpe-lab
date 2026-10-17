@@ -154,7 +154,7 @@ function drawChart(){
  out+='<g clip-path="url(#plot)">';
  zones.forEach((z,i)=>{const a=z.date?origin(z):start, b=z.date&&z.paid_at?Date.parse(z.paid_at)/1000:stop;if(a>stop||b<start)return;const X=x(Math.max(a,start)),width=Math.max(2,x(Math.min(b,stop))-X),Y=y(z.high||z.low),height=z.high?Math.max(2,y(z.low)-Y):0,C=color(z),active=selected===z;
  if(z.high)out+=`<rect data-zone="${i}" x="${X}" y="${Y}" width="${width}" height="${height}" fill="${C}" fill-opacity="${active?.32:z.paid?.10:.17}" stroke="${C}" stroke-opacity="${z.paid&&!active?.4:1}" stroke-width="${active?2.5:1}" ${z.paid?'stroke-dasharray="3 3"':''}><title>${name(z)}: ${f(z.low)} - ${f(z.high)} · ${z.paid?'Pagada':'Por pagar'}</title></rect>`;
- else out+=`<path data-zone="${i}" d="M${X},${Y} h${width}" stroke="${C}" stroke-width="2" stroke-dasharray="6 4"><title>${name(z)}: ${f(z.low)} · provisional</title></path>`;
+ else out+=`<path data-zone="${i}" d="M${X},${Y} h${width}" stroke="${C}" stroke-width="2" stroke-dasharray="${z.provisional||z.paid?'6 4':'none'}"><title>${name(z)}: ${f(z.low)} · ${z.provisional?'Provisional':z.paid?'Pagada':'Por pagar'}</title></path>`;
  });
  const cw=Math.max(1,Math.min(9,PW/candles.length*.65));
  candles.forEach(c=>{const [t,l,h,o,cl]=c,C=cl>=o?'#b6bc86':'#df8c70',X=x(t+1800);out+=`<path d="M${X},${y(h)} V${y(l)}" stroke="${C}" stroke-width=".8"/><rect x="${X-cw/2}" y="${y(Math.max(o,cl))}" width="${cw}" height="${Math.max(1,Math.abs(y(o)-y(cl)))}" fill="${C}"><title>${new Date(t*1000).toISOString()} · O ${f(o)} H ${f(h)} L ${f(l)} C ${f(cl)}</title></rect>`;});
