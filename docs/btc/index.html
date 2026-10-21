@@ -126,6 +126,26 @@
     <div class="chart-wrap short"><canvas id="ytd-chart"></canvas></div>
   </div>
 
+  <h2 class="sect">¿Qué aporta un filtro de tendencia en BTC?</h2>
+  <div class="panel">
+    <h2>Filtro long/flat ROC252: el valor está en la volatilidad, no en esquivar caídas<span class="tag bt">ANÁLISIS IN-SAMPLE</span></h2>
+    <p class="note">Regla de ejemplo: largo si el retorno acumulado de los últimos 252 días es positivo; si no, cash (remunerado como BIL). Señal del día anterior, sin lookahead. Muestra: BTC-USD diario vía yfinance, 28 may 2015 - 20 oct 2026 (4.164 días, tras el calentamiento de 252 días). Dentro de muestra y sin costes de transacción: vale para entender por dónde llega el beneficio, no como promesa. No es una estrategia en seguimiento ni una señal en vivo; el track record que cuenta es el paper trading de arriba.</p>
+    <div class="kpis">
+      <div class="kpi"><b>54,4% &rarr; 47,8%</b>Volatilidad anual (B&amp;H &rarr; filtro)</div>
+      <div class="kpi"><b>0,90 &rarr; 1,02</b>Sharpe</div>
+      <div class="kpi"><b>+4,7 pp/año</b>Rentabilidad geométrica (42,5% &rarr; 47,2%)</div>
+      <div class="kpi"><b>24,8%</b>Días en cash</div>
+    </div>
+    <table>
+      <tr><th>Métrica (anualizada)</th><th>Buy &amp; Hold</th><th>Filtro ROC252</th></tr>
+      <tr><td>Volatilidad</td><td>54,4%</td><td>47,8%</td></tr>
+      <tr><td>Sharpe</td><td>0,90</td><td>1,02</td></tr>
+      <tr><td>Rentabilidad geométrica</td><td>42,5%</td><td>47,2%</td></tr>
+      <tr><td>Rentabilidad aritmética</td><td>50,3%</td><td>50,0%</td></tr>
+    </table>
+    <p class="note" style="margin-top:12px">La lectura interesante: en los días que el filtro está en cash, BTC ganó de media un +2,8% anual frente al 1,4% del cash. Es decir, el filtro no esquiva tramos de rentabilidad esperada negativa - el "premio de parada" es ligeramente negativo (-0,35 pp/año). Todo el beneficio llega por el otro canal: menos volatilidad, y por tanto mejor capitalización compuesta (de ahí los +4,7 pp/año geométricos con la aritmética prácticamente igual). Esto es justo lo que predice el marco de Kaminski y Lo (<i>When Do Stop-Loss Rules Stop Losses?</i>, Journal of Financial Markets, 2014): una salida a cash solo suma rentabilidad esperada cuando hay momentum suficiente (autocorrelación &ge; Sharpe a la misma frecuencia) o detecta un régimen de media negativa; en BTC la autocorrelación mensual (0,05) queda muy por debajo del Sharpe mensual (0,24), así que lo que hay que vender de este filtro es la medida de riesgo, no la cura. Fuentes: datos propios (optimizador, generado 20 oct 2026) y <a href="https://doi.org/10.1016/j.finmar.2013.07.001">doi.org/10.1016/j.finmar.2013.07.001</a>.</p>
+  </div>
+
 </main>
 <footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
 <script>
