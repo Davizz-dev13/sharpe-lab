@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://davizz-dev13.github.io/sharpe-lab/sitemap.xml
