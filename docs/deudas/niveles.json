@@ -1,11 +1,12 @@
 {
- "updated": "2026-10-17",
- "niveles": [
-  {"tf": "Acumulación", "low": 87512, "high": 88350, "approx": true, "paid": false, "note": "Sin pagar"},
-  {"tf": "Acumulación", "low": 82843, "high": 84096, "approx": false, "paid": false, "note": "Sin pagar"},
-  {"tf": "Acumulación", "low": 81895, "high": null, "approx": true, "paid": true, "note": "Pagada"},
-  {"tf": "Semanal", "low": 78138, "high": null, "approx": false, "paid": false, "note": "Sin pagar"},
-  {"tf": "Mensual", "label": "octubre", "low": 79540, "high": 81142, "approx": true, "paid": false, "note": "Se paga si pierde 79.540"},
-  {"tf": "Posible zona", "low": 78100, "high": null, "approx": true, "paid": false, "provisional": true, "note": "Provisional, confianza baja"}
- ]
+  "updated": "2026-10-21",
+  "niveles": [
+    {"tf": "Acumulación", "low": 87512, "high": 88350, "approx": true, "paid": false, "note": "Sin pagar"},
+    {"tf": "Acumulación", "low": 82843, "high": 84096, "approx": false, "paid": false, "note": "Sin pagar"},
+    {"tf": "Acumulación", "low": 81666, "high": 111191, "approx": false, "paid": false, "note": "Sin pagar"},
+    {"tf": "Acumulación", "low": 81895, "high": null, "approx": true, "paid": true, "note": "Pagada"},
+    {"tf": "Semanal", "low": 78138, "high": null, "approx": false, "paid": false, "note": "Sin pagar"},
+    {"tf": "Mensual", "label": "octubre", "low": 79540, "high": 81142, "approx": true, "paid": false, "note": "Se paga si pierde 79.540"},
+    {"tf": "Posible zona", "low": 78100, "high": null, "approx": true, "paid": false, "provisional": true, "note": "Provisional, confianza baja"}
+  ]
 }
