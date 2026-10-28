@@ -21,6 +21,7 @@
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="../analytics.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -97,15 +98,15 @@
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav"><a href="../btc/" class="on">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a></nav>
+  <nav class="stratnav"><a href="../btc/" class="on">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../metodologia/">Metodología</a></nav>
   <h1>Bitcoin</h1>
   <div class="sub" id="updated">Cargando datos...</div>
   <div class="sub" style="margin-top:4px">SMA200W+RSI es la estrategia propia: entrada cuando el cierre semanal cruza a la baja la SMA200 semanal; salida cuando el RSI(14) semanal supera el nivel configurado (85 genérico; oro 87, S&P 500 75, Nasdaq 79) y luego el precio cae más de un 5% desde el máximo. ROC60 y Donchian20 son diarias.</div>
 </header>
 <main>
   <div class="panel">
-    <h2>Paper trading en vivo: Bitcoin<span class="tag lv">TRACK RECORD REAL</span></h2>
-    <p class="note" id="live-note">Dinero ficticio siguiendo en tiempo real las señales que genera el motor cada noche. Nada de backtest ni simulación: cada día se registra la posición (largo o cash) y la rentabilidad acumulada desde el go-live, comparada con buy &amp; hold, y todo se reconcilia con la hoja "Quant Tracker". Es el único resultado que cuenta: real, fuera de muestra y sin retoques.</p>
+    <h2>Paper trading en vivo: Bitcoin<span class="tag lv">SEGUIMIENTO EN VIVO</span></h2>
+    <p class="note" id="live-note">Dinero ficticio siguiendo las señales que genera el motor cada noche desde el go-live: la posición (largo o cash) y la rentabilidad acumulada, comparada con buy &amp; hold. Las reglas ya estaban fijadas antes del go-live, así que es lo más parecido a operarlo de verdad. Ojo: hoy la curva se recalcula cada noche y algún valor pasado ha cambiado después de publicarse, así que todavía no es un track record auditado (<a href="../metodologia/#sesgos">metodología</a>).</p>
     <p class="note" style="margin-bottom:6px"><b style="color:var(--text)">Estrategias en seguimiento ahora mismo:</b></p>
     <ul class="live-list">
       <li><b>BTC-USD</b> - ROC60 y Donchian20 (el gráfico de abajo) · go-live 7 sep 2026</li>
@@ -142,6 +143,18 @@
     <div class="chart-wrap short"><canvas id="ytd-chart"></canvas></div>
   </div>
 
+  <div class="panel">
+    <h2>Riesgo frente al benchmark<span class="tag bt">BACKTEST</span></h2>
+    <div class="sla-controls"><label for="sla-strat" class="sla-note" style="margin:0">Estrategia</label><select id="sla-strat"></select>
+      <label for="sla-asset" class="sla-note" style="margin:0 0 0 8px">Activo</label><select id="sla-asset"><option value="">Cartera (11 activos)</option></select></div>
+    <div id="sla"></div>
+  </div>
+  <div class="panel">
+    <h2>Registro de operaciones<span class="tag bt">BACKTEST + PAPER</span></h2>
+    <p class="note">Operaciones de la estrategia y el activo elegidos arriba (en "Cartera", las de BTC-USD).</p>
+    <div id="sla-trades"></div>
+  </div>
+
   <h2 class="sect">¿Qué aporta un filtro de tendencia en BTC?</h2>
   <div class="panel">
     <h2>Filtro long/flat ROC252: el valor está en la volatilidad, no en esquivar caídas<span class="tag bt">ANÁLISIS IN-SAMPLE</span></h2>
@@ -163,7 +176,7 @@
   </div>
 
 </main>
-<footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
+<footer>Datos diarios vía yfinance. Backtests con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
 <script>
 const COLORS = ['#2f6fd0','#b6bc86','#c94f8d','#c98a12','#5b93c9','#e07b4e','#7c5cbf','#4ca372'];
 let DATA = null, mainChart = null, ytdChart = null, liveChart = null;
@@ -312,6 +325,31 @@ fetch('../data.json').then(r => r.json()).then(d => {
 }).catch(e => {
   document.getElementById('updated').textContent = 'No se pudieron cargar los datos (' + e + ')';
 });
+</script>
+<script>
+// Curva vs benchmark, drawdown, Sharpe rodante y operaciones (analytics.js)
+fetch('../data.json').then(r => r.json()).then(d => {
+  const ss = document.getElementById('sla-strat'), sa = document.getElementById('sla-asset');
+  Object.keys(d.strategies).forEach(k => { const o = document.createElement('option'); o.value = o.textContent = k; ss.appendChild(o); });
+  if (d.strategies.ROC60) ss.value = 'ROC60';
+  (d.universe || []).forEach(t => { const o = document.createElement('option'); o.value = o.textContent = t; sa.appendChild(o); });
+  const rf = d.rf_annual != null ? d.rf_annual : 0.02;
+  const draw = () => {
+    const st = ss.value, a = sa.value;
+    const src = a ? d.per_asset[a + '|' + st] : d.strategies[st];
+    if (!src) { document.getElementById('sla').textContent = 'Sin datos para esta combinación.'; return; }
+    const s = [{label: st + (a ? ' · ' + a : ' · cartera'), equity: src.equity, color: '#d4a85a', width: 1.8},
+               {label: 'Buy & hold ' + (a || 'de los 11 activos'), equity: src.bh_equity, color: 'rgba(255,255,255,.55)', dash: [5, 4]}];
+    const spy = d.per_asset['SPY|' + st];
+    if (spy && a !== 'SPY') s.push({label: 'SPY (benchmark)', equity: spy.bh_equity, color: '#7fa7d9', width: 1.2});
+    SLA.panel(document.getElementById('sla'), {dates: d.dates, series: s, rf,
+      note: 'El benchmark fijo es SPY comprado y mantenido. El Sharpe rodante usa los últimos 12 meses y descuenta el cash (' + (rf * 100).toFixed(0) + ' % anual).'});
+    const ta = a || 'BTC-USD';
+    if (d.trades) SLA.trades(document.getElementById('sla-trades'), SLA.unpack(d.trades[ta + '|' + st], ta), {filename: ta + '_' + st + '_operaciones.csv'});
+    else document.getElementById('sla-trades').innerHTML = '<p class="sla-note">El registro aparece en la próxima actualización de los datos.</p>';
+  };
+  ss.onchange = sa.onchange = draw; draw();
+}).catch(e => { document.getElementById('sla').textContent = 'No se pudieron cargar los datos (' + e + ').'; });
 </script>
 </body>
 </html>

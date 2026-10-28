@@ -21,6 +21,7 @@
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="../analytics.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -97,7 +98,7 @@
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/" class="on">MSCI</a><a href="../mag7/">Mag7</a></nav>
+  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/" class="on">MSCI</a><a href="../mag7/">Mag7</a><a href="../metodologia/">Metodología</a></nav>
   <h1>MSCI World</h1>
   <div class="sub" id="updated">Cargando datos...</div>
 </header>
@@ -122,8 +123,17 @@
     </div>
     <div class="chart-wrap"><canvas id="msci-chart"></canvas></div>
   </div>
+  <div class="panel">
+    <h2>Riesgo frente al benchmark<span class="tag bt">BACKTEST 10 AÑOS</span></h2>
+    <div id="sla"></div>
+  </div>
+  <div class="panel">
+    <h2>Registro de operaciones<span class="tag bt">BACKTEST + PAPER</span></h2>
+    <p class="note">Cada tramo en el que la estrategia está larga (peso &gt; 0). El resultado es el del precio de URTH entre la señal de entrada y la de salida; el tamaño real de la posición varía con la volatilidad.</p>
+    <div id="sla-trades"></div>
+  </div>
 </main>
-<footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
+<footer>Datos diarios vía yfinance. Backtests con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
 <script>
 let MSCI = null, msciChart = null, tfCur = 'ALL';
 
@@ -201,6 +211,17 @@ fetch('msci.json').then(r => r.json()).then(d => {
 }).catch(e => {
   document.getElementById('updated').textContent = 'No se pudieron cargar los datos (' + e + ')';
 });
+</script>
+<script>
+// Curva vs benchmark, drawdown, Sharpe rodante y operaciones (analytics.js)
+fetch('msci.json').then(r => r.json()).then(d => {
+  const s = [{label: 'MomVol MSCI World', equity: d.equity, color: '#d4a85a', width: 1.8},
+             {label: 'Buy & hold MSCI World (URTH)', equity: d.bh_equity, color: 'rgba(255,255,255,.55)', dash: [5, 4]}];
+  if (d.benchmark && d.benchmark.equity) s.push({label: d.benchmark.ticker + ' (benchmark)', equity: d.benchmark.equity, color: '#7fa7d9', width: 1.2});
+  SLA.panel(document.getElementById('sla'), {dates: d.dates, series: s, rf: d.rules ? d.rules.cash_rate : 0.02, note: 'El benchmark fijo es SPY (S&P 500) comprado y mantenido. El Sharpe rodante usa los últimos 12 meses y descuenta el cash (' + ((d.rules && d.rules.cash_rate != null ? d.rules.cash_rate : 0.02) * 100).toFixed(0) + ' % anual).'});
+  if (d.trades) SLA.trades(document.getElementById('sla-trades'), d.trades, {filename: 'msci_operaciones.csv'});
+  else document.getElementById('sla-trades').innerHTML = '<p class="sla-note">El registro aparece en la próxima actualización de los datos.</p>';
+}).catch(e => { document.getElementById('sla').textContent = 'No se pudieron cargar los datos (' + e + ').'; });
 </script>
 </body>
 </html>

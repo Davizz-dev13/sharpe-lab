@@ -42,3 +42,22 @@ td input{border-radius:999px !important}
 .tag,.badge,.pill{color:#15110d}
 @media (max-width:700px){table{display:block;overflow-x:auto;max-width:100%}}
 *{box-shadow:none !important}
+
+/* Analítica común (analytics.js): curva vs benchmark, drawdown, Sharpe rodante, operaciones */
+.sla-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:900px){.sla-grid{grid-template-columns:1fr 1fr}.sla-grid .sla-box:first-child{grid-column:1 / -1}}
+.sla-box{min-width:0}
+.sla-h{font-size:15px !important;margin:0 0 6px !important}
+.sla-wrap{position:relative;height:260px}
+.sla-grid .sla-box:first-child .sla-wrap{height:300px}
+.sla-note{color:var(--muted) !important;font-size:12.5px;line-height:1.5;margin:10px 0 0}
+.sla-twrap{max-height:420px;overflow:auto;margin-top:8px}
+.sla-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.sla-table th,.sla-table td{padding:6px 8px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border)}
+.sla-table .n{text-align:right}
+.sla-table .pos{color:var(--green)} .sla-table .neg{color:var(--red)}
+.sla-open{color:var(--accent)}
+.sla-btn{margin-top:10px;padding:6px 14px;font-size:12.5px;cursor:pointer}
+.sla-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+.sla-controls select{padding:5px 12px;font-size:13px}
+@media (max-width:700px){.sla-wrap{height:220px}.sla-grid .sla-box:first-child .sla-wrap{height:240px}.sla-twrap table{display:table}}

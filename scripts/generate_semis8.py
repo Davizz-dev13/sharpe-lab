@@ -15,6 +15,7 @@ import yaml
 import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from core.benchmark import benchmark_equity, BENCHMARK
 from core.stats import sharpe_ratio  # Sharpe sobre exceso de rentabilidad (cash = tasa libre de riesgo)
 
 from scripts.semis8_core import SEMIS8 as SEMIS, target_weights, backtest, rotation_log
@@ -122,6 +123,7 @@ def main():
         "dates": [str(d.date()) for d in Cw.index],
         "equity": [round(float(v), 4) for v in eq],
         "bh_equity": [round(float(v), 4) for v in bh_eq],
+        "benchmark": {"ticker": BENCHMARK, "equity": benchmark_equity(Cw.index)},
         "stats": stats_d(ret),
         "bh_stats": stats_d(bh),
         "folds": folds_d(ret, START_YEAR),
