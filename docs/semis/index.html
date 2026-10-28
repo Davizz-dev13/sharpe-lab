@@ -21,15 +21,16 @@
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.font.family="CMU, Georgia, serif";Chart.defaults.font.size=12;Chart.defaults.color="#555";Chart.defaults.borderColor="#e8e8e8";if(document.fonts)document.fonts.ready.then(function(){Object.values(Chart.instances).forEach(function(c){c.update("none")})});</script>
 <script src="../analytics.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+
+
 <style>
-  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1f1913; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#b6bc86; --red:#df8c70; }
+  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1f1913; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#2d6a3e; --red:#a8322d; }
   * { box-sizing:border-box; }
-  body { margin:0; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
+  body { margin:0; font-family:'CMU',Georgia,serif; background:var(--bg); color:var(--fg); }
   header { padding:24px 28px 8px; }
   h1 { margin:0 0 4px; font-size:22px; }
   .sub { color:var(--mut); font-size:13px; line-height:1.5; max-width:900px; }
@@ -50,29 +51,29 @@
   footer { color:var(--mut); font-size:11.5px; padding:20px 28px 40px; }
 
   /* Restyle */
-  body{font-family:'Hanken Grotesk',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
-  h1,.panel h2{font-family:'IM Fell DW Pica',sans-serif;font-weight:400;letter-spacing:.02em;}
+  body{font-family:'CMU',Georgia,serif;}
+  h1,.panel h2{font-family:'CMU',Georgia,serif;font-weight:400;letter-spacing:.02em;}
   .panel{border:1px solid var(--border);border-radius:14px;}
   .badge{border-radius:14px;}
-  th{background:var(--fg);color:var(--bg);font-family:'IM Fell DW Pica',sans-serif;font-weight:400;font-size:10px;letter-spacing:.03em;}
+  th{background:var(--fg);color:var(--bg);font-family:'CMU',Georgia,serif;font-weight:400;font-size:10px;letter-spacing:.03em;}
   th,td{border-bottom:2px solid var(--border);}
   a{color:var(--acc);}
-  button,select{border:1px solid var(--border)!important;border-radius:14px!important;background:var(--panel);color:var(--fg);font-family:'Hanken Grotesk',sans-serif;}
+  button,select{border:1px solid var(--border)!important;border-radius:14px!important;background:var(--panel);color:var(--fg);font-family:'CMU',Georgia,serif;}
 
 
   .stratnav { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px; }
   .stratnav a { font-size:12.5px; font-weight:600; text-decoration:none; color:var(--mut); border:1px solid var(--border); border-radius:14px; padding:4px 12px; background:var(--panel); }
   .stratnav a.on { color:var(--acc); border-color:var(--acc); }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../theme.css">
+
+
 <script src="../frescura.js" defer></script>
+<link rel="stylesheet" href="../theme.css">
 </head>
-<body>
+<body class="has-topnav">
+<nav class="topnav" aria-label="Secciones"><div class="nav-in"><a class="nav-name" href="../">Sharpe Lab</a><div class="nav-links"><a href="../btc/">Bitcoin</a><a href="../semis/" class="on" aria-current="page">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <header>
-  <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav" aria-label="Secciones"><a href="../btc/">Bitcoin</a><a href="../semis/" class="on" aria-current="page">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a></nav>
-  <h1>Rotaci&oacute;n Semis &middot; roc126 top2 vol-escalada</h1>
+    <h1>Rotaci&oacute;n Semis &middot; roc126 top2 vol-escalada</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
   <div class="sub" id="ruletext"></div>
 </header>
@@ -133,15 +134,15 @@ fetch('semis.json').then(r=>r.json()).then(d=>{
     '<div class="kpi"><b>'+d.holdings.length+'</b>patas</div>';
 
   const chartOpts = (ytitle) => ({maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
-    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'rgba(255,255,255,.56)',maxTicksLimit:9},grid:{color:'rgba(255,255,255,.08)'}},
-            y:{type:'logarithmic',ticks:{color:'rgba(255,255,255,.56)'},grid:{color:'rgba(255,255,255,.08)'},title:{display:true,text:ytitle,color:'rgba(255,255,255,.56)'}}},
-    plugins:{legend:{labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10}}}}});
+    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:9},grid:{color:'#e8e8e8'}},
+            y:{type:'logarithmic',ticks:{color:'#555'},grid:{color:'#e8e8e8'},title:{display:true,text:ytitle,color:'#555'}}},
+    plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}}}});
 
   if (d.live.dates.length > 0) {
     document.getElementById('live-empty').style.display='none';
     new Chart(document.getElementById('live-chart'), {data:{datasets:[
-      {type:'line', label:'Rotaci\u00f3n Semis', data:d.live.dates.map((x,i)=>({x,y:d.live.equity[i]})), borderColor:'#2f6fd0', borderWidth:1.6, pointRadius:0},
-      {type:'line', label:'B&H semis', data:d.live.dates.map((x,i)=>({x,y:d.live.bh[i]})), borderColor:'rgba(255,255,255,.56)', borderWidth:1.3, borderDash:[4,3], pointRadius:0},
+      {type:'line', label:'Rotaci\u00f3n Semis', data:d.live.dates.map((x,i)=>({x,y:d.live.equity[i]})), borderColor:'#1a3f8b', borderWidth:1.6, pointRadius:0},
+      {type:'line', label:'B&H semis', data:d.live.dates.map((x,i)=>({x,y:d.live.bh[i]})), borderColor:'#555', borderWidth:1.3, borderDash:[4,3], pointRadius:0},
     ]}, options:chartOpts('Crecimiento de 1\u20ac desde el go-live')});
   } else {
     document.getElementById('live-wrap').style.display='none';
@@ -165,8 +166,8 @@ fetch('semis.json').then(r=>r.json()).then(d=>{
     '<div class="kpi"><b>'+st.max_dd+'%</b>Max DD (B&amp;H '+bh.max_dd+'%)</div>'+
     '<div class="kpi"><b>'+fmtPct(st.ytd_return)+'</b>YTD (B&amp;H '+fmtPct(bh.ytd_return)+')</div>';
   new Chart(document.getElementById('bt-chart'), {data:{datasets:[
-    {type:'line', label:'Rotaci\u00f3n Semis', data:d.dates.map((x,i)=>({x,y:d.equity[i]})), borderColor:'#2f6fd0', borderWidth:1.6, pointRadius:0},
-    {type:'line', label:'B&H semis (equiponderado)', data:d.dates.map((x,i)=>({x,y:d.bh_equity[i]})), borderColor:'rgba(255,255,255,.56)', borderWidth:1.3, borderDash:[4,3], pointRadius:0},
+    {type:'line', label:'Rotaci\u00f3n Semis', data:d.dates.map((x,i)=>({x,y:d.equity[i]})), borderColor:'#1a3f8b', borderWidth:1.6, pointRadius:0},
+    {type:'line', label:'B&H semis (equiponderado)', data:d.dates.map((x,i)=>({x,y:d.bh_equity[i]})), borderColor:'#555', borderWidth:1.3, borderDash:[4,3], pointRadius:0},
   ]}, options:chartOpts('Crecimiento de 1\u20ac (log)')});
 
   const rt=document.querySelector('#rot-table tbody');
@@ -180,9 +181,9 @@ fetch('semis.json').then(r=>r.json()).then(d=>{
 <script>
 // Curva vs benchmark, drawdown y Sharpe rodante (analytics.js)
 fetch('semis.json').then(r => r.json()).then(d => {
-  const s = [{label: 'Semis (roc126 top2)', equity: d.equity, color: '#d4a85a', width: 1.8},
-             {label: 'Buy & hold del universo', equity: d.bh_equity, color: 'rgba(255,255,255,.55)', dash: [5, 4]}];
-  if (d.benchmark && d.benchmark.equity) s.push({label: d.benchmark.ticker + ' (benchmark)', equity: d.benchmark.equity, color: '#7fa7d9', width: 1.2});
+  const s = [{label: 'Semis (roc126 top2)', equity: d.equity, color: '#1a3f8b', width: 1.8},
+             {label: 'Buy & hold del universo', equity: d.bh_equity, color: '#8a8a8a', dash: [5, 4]}];
+  if (d.benchmark && d.benchmark.equity) s.push({label: d.benchmark.ticker + ' (benchmark)', equity: d.benchmark.equity, color: '#b5651d', width: 1.2});
   SLA.panel(document.getElementById('sla'), {dates: d.dates, series: s, rf: d.rules ? d.rules.cash_rate : 0.02, note: 'El benchmark fijo es SPY (S&P 500) comprado y mantenido. El Sharpe rodante usa los últimos 12 meses y descuenta el cash (' + ((d.rules && d.rules.cash_rate != null ? d.rules.cash_rate : 0.02) * 100).toFixed(0) + ' % anual).'});
 }).catch(e => { document.getElementById('sla').textContent = 'No se pudieron cargar los datos (' + e + ').'; });
 </script>

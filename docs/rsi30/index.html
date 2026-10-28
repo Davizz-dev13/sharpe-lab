@@ -15,15 +15,16 @@
 <meta property="og:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.font.family="CMU, Georgia, serif";Chart.defaults.font.size=12;Chart.defaults.color="#555";Chart.defaults.borderColor="#e8e8e8";if(document.fonts)document.fonts.ready.then(function(){Object.values(Chart.instances).forEach(function(c){c.update("none")})});</script>
 <script src="../analytics.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
+
 <style>
-  :root { --bg:#f4ecd8; --card:#faf5e7; --border:#d8cdb2; --text:#1f1913; --muted:rgba(255,255,255,.56); --accent:#d96b2a; --live:#b6bc86; }
+  :root { --bg:#f4ecd8; --card:#faf5e7; --border:#d8cdb2; --text:#1f1913; --muted:rgba(255,255,255,.56); --accent:#d96b2a; --live:#2d6a3e; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--text); font-family:'Hanken Grotesk',-apple-system,'Segoe UI',Roboto,sans-serif; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'CMU',Georgia,serif; }
   header { padding:28px 24px 8px; max-width:1200px; margin:0 auto; }
   h1 { margin:0; font-size:26px; }
-  h1,.panel h2 { font-family:'IM Fell DW Pica',sans-serif; font-weight:400; letter-spacing:.02em; }
+  h1,.panel h2 { font-family:'CMU',Georgia,serif; font-weight:400; letter-spacing:.02em; }
   .sub { color:var(--muted); font-size:13px; margin-top:6px; }
   main { max-width:1200px; margin:0 auto; padding:16px 24px 60px; }
   .tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.5px; padding:2px 8px; border-radius:14px; border:1px solid var(--border); vertical-align:middle; margin-left:8px; }
@@ -33,17 +34,17 @@
   .panel h2 { margin:0 0 4px; font-size:17px; }
   .panel .note { color:var(--muted); font-size:12.5px; margin:0 0 12px; line-height:1.5; }
   .panel ul.note { padding-left:18px; }
-  .warn { border-left:4px solid #df8c70; padding:10px 14px; background:rgba(217,64,47,.06); border-radius:8px; font-size:13.5px; line-height:1.5; margin:0 0 14px; }
+  .warn { border-left:4px solid #a8322d; padding:10px 14px; background:rgba(217,64,47,.06); border-radius:8px; font-size:13.5px; line-height:1.5; margin:0 0 14px; }
   .controls { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 14px; align-items:center; }
-  .controls button { background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; padding:6px 12px; font-size:13px; cursor:pointer; font-family:'Hanken Grotesk',sans-serif; }
+  .controls button { background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; padding:6px 12px; font-size:13px; cursor:pointer; font-family:'CMU',Georgia,serif; }
   .controls button.active { background:var(--accent); color:var(--bg); border-color:var(--text); font-weight:600; }
   .tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
   table { width:100%; border-collapse:collapse; font-size:13px; }
   th, td { text-align:left; padding:8px 10px; border-bottom:2px solid var(--border); white-space:nowrap; }
-  th { background:var(--text); color:var(--bg); font-family:'IM Fell DW Pica',sans-serif; font-weight:400; font-size:10.5px; letter-spacing:.03em; }
+  th { background:var(--text); color:var(--bg); font-family:'CMU',Georgia,serif; font-weight:400; font-size:10.5px; letter-spacing:.03em; }
   td.n, th.n { text-align:right; }
   tr.hl td { font-weight:600; }
-  .pos { color:#b6bc86; } .neg { color:#df8c70; }
+  .pos { color:#2d6a3e; } .neg { color:#a8322d; }
   a { color:var(--accent); }
   .stratnav { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px; }
   .stratnav a { font-size:12.5px; font-weight:600; text-decoration:none; color:var(--muted); border:1px solid var(--border); border-radius:14px; padding:4px 12px; background:var(--card); }
@@ -51,14 +52,14 @@
   footer { text-align:center; color:var(--muted); font-size:12px; padding:20px; max-width:900px; margin:0 auto; }
   @media (max-width:600px) { header, main { padding-left:14px; padding-right:14px; } .panel { padding:14px; } th, td { padding:6px 7px; font-size:12px; } }
 </style>
-<link rel="stylesheet" href="../theme.css">
+
 <script src="../frescura.js" defer></script>
+<link rel="stylesheet" href="../theme.css">
 </head>
-<body>
+<body class="has-topnav">
+<nav class="topnav" aria-label="Secciones"><div class="nav-in"><a class="nav-name" href="../">Sharpe Lab</a><div class="nav-links"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/" class="on" aria-current="page">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <header>
-  <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav" aria-label="Secciones"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/" class="on" aria-current="page">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a></nav>
-  <h1>RSI 30</h1>
+    <h1>RSI 30</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
   <div class="sub" id="updated">Cargando datos...</div>
 </header>
@@ -129,8 +130,8 @@ function render(k) {
   const rows = (s.stats || []).slice().sort((a, b) => (a.half === b.half ? 0 : a.half === 'IS' ? -1 : 1));
   document.getElementById('stats').innerHTML = '<thead><tr><th>Mitad</th><th>Regla</th><th class="n">CAGR</th><th class="n">Sharpe</th><th class="n">Max DD</th><th class="n">Tiempo dentro</th><th class="n">Operaciones</th><th class="n">Aciertos</th></tr></thead><tbody>' +
     rows.map(r => '<tr' + (r.half === 'OOS' && r.rule === main ? ' class="hl"' : '') + '><td>' + (r.half === 'IS' ? 'IS' : 'Fuera de muestra') + '</td><td>' + ruleEs(r.rule) + '</td><td class="n ' + (r.CAGR >= 0 ? 'pos' : 'neg') + '">' + pct(r.CAGR) + '</td><td class="n">' + num(r.Sharpe) + '</td><td class="n neg">' + pct(r.MaxDD) + '</td><td class="n">' + pct(r.TimeInMarket, 0) + '</td><td class="n">' + (r.Trades == null ? '–' : r.Trades) + '</td><td class="n">' + (r.WinRate == null ? '–' : pct(r.WinRate, 0)) + '</td></tr>').join('') + '</tbody>';
-  const series = [{label: ruleEs(main), equity: s.equity, color: '#d4a85a', width: 1.8},
-                  {label: 'Buy & hold ' + (NAMES[asset] || asset), equity: s.bh_equity, color: 'rgba(255,255,255,.55)', dash: [5, 4]}];
+  const series = [{label: ruleEs(main), equity: s.equity, color: '#1a3f8b', width: 1.8},
+                  {label: 'Buy & hold ' + (NAMES[asset] || asset), equity: s.bh_equity, color: '#8a8a8a', dash: [5, 4]}];
   SLA.panel(document.getElementById('sla'), {dates: s.dates, series, rf: D.cash_rate,
     note: 'Curva de la regla elegida (' + ruleEs(main) + ') frente a mantener el activo. Desde el ' + s.split + ' es fuera de muestra. El Sharpe rodante usa los últimos 12 meses y descuenta el cash (' + (D.cash_rate * 100).toFixed(0) + ' % anual). Puntos semanales para que la página pese poco.'});
   const trades = (s.trades || []).map(t => ({entry_date: t.entry_date, entry_price: t.entry_px, exit_date: t.exit_date, exit_price: t.exit_px, return_pct: t.ret * 100, open: !t.exit_date}));
