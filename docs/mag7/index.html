@@ -21,6 +21,7 @@
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="../analytics.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -102,6 +103,15 @@
     <div style="max-width:640px;height:260px;margin-bottom:14px"><canvas id="bt-chart"></canvas></div>
     <table id="bt-table"><thead><tr><th>Activo</th><th>Estrategia</th><th>B&amp;H</th><th>Sharpe</th><th>Sharpe B&amp;H</th><th>Max DD</th><th>Max DD B&amp;H</th><th>Operaciones</th><th>% ganadoras</th><th>Media/op.</th><th>Exposici&oacute;n</th></tr></thead><tbody></tbody></table>
   </div>
+  <div class="panel">
+    <h2>Riesgo frente al benchmark <span class="badge ref">cartera, 10 a&ntilde;os</span></h2>
+    <div id="sla"></div>
+  </div>
+  <div class="panel">
+    <h2>Registro de operaciones <span class="badge ref">11 activos</span></h2>
+    <div class="sla-controls"><label for="sla-asset" class="sla-note" style="margin:0">Activo</label><select id="sla-asset"><option value="">Todos</option></select></div>
+    <div id="sla-trades"></div>
+  </div>
 </main>
 <footer id="foot"></footer>
 <script>
@@ -180,6 +190,24 @@ fetch('mag7.json').then(r=>r.json()).then(d=>{
     tb2.appendChild(tr);
   }
 });
+</script>
+<script>
+// Curva vs benchmark, drawdown, Sharpe rodante y operaciones (analytics.js)
+fetch('mag7.json').then(r => r.json()).then(d => {
+  const p = d.portfolio || {};
+  const s = [{label: 'Cartera Mag7 (SMA200W+RSI)', equity: p.equity, color: '#d4a85a', width: 1.8},
+             {label: 'Buy & hold de los 11 activos', equity: p.bh_equity, color: 'rgba(255,255,255,.55)', dash: [5, 4]}];
+  const spy = d.assets && d.assets.SPY;
+  if (spy && p.dates) s.push({label: 'SPY (benchmark)', equity: SLA.align(spy.dates, spy.close, p.dates), color: '#7fa7d9', width: 1.2});
+  SLA.panel(document.getElementById('sla'), {dates: p.dates, series: s, rf: d.rules ? d.rules.cash_rate : 0.02,
+    note: 'Datos semanales. El benchmark fijo es SPY comprado y mantenido. El Sharpe rodante usa las últimas 52 semanas y descuenta el cash (' + ((d.rules ? d.rules.cash_rate : 0.02) * 100).toFixed(0) + ' % anual).'});
+  const all = [];
+  Object.entries(d.assets || {}).forEach(([t, a]) => (a.trades || []).forEach(tr => all.push(Object.assign({asset: t}, tr))));
+  const sel = document.getElementById('sla-asset');
+  Object.keys(d.assets || {}).forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
+  const draw = () => SLA.trades(document.getElementById('sla-trades'), sel.value ? all.filter(x => x.asset === sel.value) : all, {asset: true, filename: 'mag7_operaciones.csv'});
+  sel.onchange = draw; draw();
+}).catch(e => { document.getElementById('sla').textContent = 'No se pudieron cargar los datos (' + e + ').'; });
 </script>
 </body>
 </html>
