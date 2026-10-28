@@ -66,12 +66,14 @@
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../theme.css">
+<script src="../frescura.js" defer></script>
 </head>
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
   <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/" class="on">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../metodologia/">Metodología</a></nav>
   <h1>Rotaci&oacute;n Semis8 &middot; ensemble top1 multiescala</h1>
+  <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
   <div class="sub" id="ruletext"></div>
 </header>
 <main>
@@ -116,10 +118,12 @@
   </div>
 </main>
 <footer id="foot"></footer>
+<aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
 <script>
 const fmtPct = v => (v==null?'-':(v>0?'+':'')+Number(v).toFixed(2)+'%');
 const cls = v => v==null?'':(v>=0?'pos':'neg');
 fetch('semis8.json').then(r=>r.json()).then(d=>{
+  (window.SLFresh ? SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36) : document.addEventListener('DOMContentLoaded', () => SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36)));
   document.getElementById('ruletext').innerHTML =
     'Universo: '+d.universe.join(', ')+'.<br>Selecci&oacute;n: '+d.rules.selection+'.<br>Dimensionado: '+d.rules.sizing+'.<br>'+d.rules.execution+'.';
   document.getElementById('live-badge').textContent = 'desde el 18 sep 2026';
