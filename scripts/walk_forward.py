@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core.data import history
+from core.stats import sharpe_ratio, periods_per_year
 from core.backtest import backtest_strategy
 from scripts.david_sma200w import david_weekly_daily_returns
 
@@ -39,7 +40,11 @@ RSI_BY_ASSET = {k: float(v) for k, v in MAG7W_CFG.get("rsi_level_by_asset", {}).
 START_YEAR = 2018  # primer ano de prueba; lo anterior es "entrenamiento"
 
 
-def fold_stats(ret: pd.Series) -> dict:
+def _r2(x):
+    return round(x, 2) if x is not None else None
+
+
+def fold_stats(ret: pd.Series, ppy: float) -> dict:
     ret = ret.fillna(0.0)
     if len(ret) < 20:
         return None
@@ -47,7 +52,7 @@ def fold_stats(ret: pd.Series) -> dict:
     dd = eq / eq.cummax() - 1
     sd = ret.std(ddof=1)
     return {
-        "sharpe": round(float(ret.mean() / sd * np.sqrt(252)), 2) if sd and sd > 1e-12 else None,
+        "sharpe": _r2(sharpe_ratio(ret, CASH, ppy)),
         "return_pct": round((float(eq.iloc[-1]) - 1) * 100, 2),
         "max_dd": round(float(dd.min()) * 100, 2),
     }
@@ -78,12 +83,14 @@ def main():
            "strategies": {}, "errors": errors}
 
     for s in STRATEGIES:
-        portfolio = pd.DataFrame({t: rets[(t, s)] for t in UNIVERSE if (t, s) in rets}).mean(axis=1)
+        # dias sin mercado = rentabilidad 0 (cada activo pesa 1/N tambien en fin de semana)
+        portfolio = pd.DataFrame({t: rets[(t, s)] for t in UNIVERSE if (t, s) in rets}).fillna(0.0).mean(axis=1)
+        ppy = periods_per_year(portfolio.index)  # barras/ano reales del calendario union (~365)
         folds, fold_sharpes = [], []
         oos_parts = []
         for y in years:
             test = portfolio[(portfolio.index >= f"{y}-01-01") & (portfolio.index <= f"{y}-12-31")]
-            st = fold_stats(test)
+            st = fold_stats(test, ppy)
             if st is None:
                 continue
             folds.append({"year": y, **st})
@@ -99,7 +106,7 @@ def main():
             "agg": {
                 "n_folds": len(folds),
                 "oos_total_return": round((float(oos_eq.iloc[-1]) - 1) * 100, 2) if len(oos_eq) else None,
-                "oos_sharpe": round(float(oos.mean() / sd * np.sqrt(252)), 2) if sd and sd > 1e-12 else None,
+                "oos_sharpe": _r2(sharpe_ratio(oos, CASH, ppy)) if len(oos) > 1 else None,
                 "oos_max_dd": round(float(oos_dd.min()) * 100, 2) if len(oos_dd) else None,
                 "median_fold_sharpe": round(float(np.median(fold_sharpes)), 2) if fold_sharpes else None,
                 "pct_folds_positive": round(100 * np.mean([f["return_pct"] > 0 for f in folds]), 0) if folds else None,

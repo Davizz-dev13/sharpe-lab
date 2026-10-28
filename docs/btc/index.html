@@ -163,7 +163,7 @@
   </div>
 
 </main>
-<footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
+<footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
 <script>
 const COLORS = ['#2f6fd0','#b6bc86','#c94f8d','#c98a12','#5b93c9','#e07b4e','#7c5cbf','#4ca372'];
 let DATA = null, mainChart = null, ytdChart = null, liveChart = null;

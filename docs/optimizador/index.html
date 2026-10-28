@@ -128,6 +128,7 @@
     <div class="panel">
       <h2>Metrics (<span id="m-span">5 years</span>, historical data) <span class="badge">past returns do not guarantee future results</span></h2>
       <div class="twrap"><table id="m-table"><thead><tr><th>Portfolio</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Daily CVaR</th></tr></thead><tbody></tbody></table></div>
+      <p style="font-size:12px;color:var(--mut);margin:8px 0 0">Sharpe is computed on returns in excess of cash (BIL / 3-month T-bill) on the same day; CAGR and Sharpe are annualized with the real number of days per year in the window.</p>
     </div>
     <div class="panel">
       <h2>Efficient frontier <span class="badge" id="ef-badge"></span></h2>
@@ -162,7 +163,21 @@ const DEFAULT_MAX = {"Cash":100,"Gold":30,"Commodities":30,"S&P 500":30,"Bitcoin
 const DEFAULT_INC = {"Cash":true,"Gold":true,"Commodities":true,"S&P 500":true,"Bitcoin":true,"MSCI World":true,"Emerging":true,"Silver":false};
 const PALETTE = ["#b87333","#627eea","#df8c70","#3b8bc2","#4a5a6a","#76b900","#e05194","#00a2ed","#f25c05","#8e44ad","#16a085","#c0392b","#7f8c8d","#2c3e50","#a0522d","#6b8e23","#4682b4","#daa520","#cd5c5c","#20b2aa"];
 const colorOf = s => { if(COLORS[s]) return COLORS[s]; let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))>>>0; return PALETTE[h%PALETTE.length]; };
-const DAYS_YR = 365;
+// Barras por año de la ventana activa. No es una constante: el calendario largo
+// solo tiene días laborables antes de que BTC empezara a cotizar (2014) y 365
+// días/año después, así que se mide con las fechas reales de cada ventana.
+let DAYS_YR = 365;
+// Tasa libre de riesgo diaria (rentabilidad del cash/BIL en cada día de la ventana):
+// el Sharpe se calcula sobre el exceso de rentabilidad respecto a ella.
+let RF = null;
+function calibrate(){
+  const ds = DATA.dates, n = ds.length;
+  const yrs = (Date.parse(ds[n-1]+'T00:00:00Z') - Date.parse(ds[0]+'T00:00:00Z')) / (365.25*864e5);
+  DAYS_YR = yrs > 0 ? (n-1)/yrs : 365;
+  const cash = DATA.assets.find(a => a.short === 'Cash');
+  const r = cash ? DATA.returns[cash.ticker] : null;
+  RF = r ? r.map(v => v == null ? 0 : v) : null;
+}
 let DATA = null;
 let TICK = {};
 let charts = [];
@@ -185,11 +200,12 @@ function metrics(rets, alpha){
   let eq=1, peak=1, mdd=0, sum=0, sum2=0;
   const sorted = new Float64Array(n);
   for(let i=0;i<n;i++){
-    const r=rets[i]; sum+=r; sum2+=r*r; sorted[i]=r;
+    const r=rets[i], x=r-(RF?RF[i]:0); sum+=x; sum2+=x*x; sorted[i]=r;
     eq*=(1+r); if(eq>peak)peak=eq; const dd=eq/peak-1; if(dd<mdd)mdd=dd;
   }
+  // Sharpe sobre el exceso de rentabilidad frente al cash (BIL) del mismo día
   const mean=sum/n, varr=sum2/n-mean*mean, sd=Math.sqrt(Math.max(varr,0));
-  const sharpe = sd>1e-12 ? mean/sd*Math.sqrt(DAYS_YR) : null;
+  const sharpe = sd>1e-9 ? mean/sd*Math.sqrt(DAYS_YR) : null;
   const cagr = Math.pow(eq, DAYS_YR/n)-1;
   const k = Math.max(1, Math.floor(n*alpha));
   const arr = Array.from(sorted).sort((a,b)=>a-b);
@@ -549,6 +565,7 @@ async function switchWindow(w){
       LONG=await (await fetch('optimizador-long.json')).json();
     }
     DATA = w===5 ? DATA5 : sliceLong(w);
+    calibrate();
     WINDOW=w;
     TICK={}; DATA.assets.forEach(a=>TICK[a.short]=a.ticker);
     document.querySelector('#cur-table tbody').innerHTML='';
@@ -579,6 +596,7 @@ async function switchWindow(w){
 
 fetch('optimizador.json').then(r=>r.json()).then(d=>{
   DATA=d; DATA5=d;
+  calibrate();
   d.assets.forEach(a=>TICK[a.short]=a.ticker);
   document.getElementById('foot').textContent='Data: '+d.assets.map(a=>a.ticker).join(', ')+' · '+d.dates.length+' days · Generated: '+d.generated_at;
   buildTables();
@@ -607,8 +625,8 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const muReq=Math.pow(1+retAn,1/DAYS_YR)-1;
         const gDaily=greedyMaxReturn(tickers,maxW);
         const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
-        if(!wOpt){ err.textContent='No solution: that target is too high for these assets, limits and window. Max reachable right now: ~'+(gDaily*365*100).toFixed(1)+'% yearly. Lower the target or raise a max.'; err.style.display='block'; return; }
-        if(muReq>0.85*gDaily){ const cn=document.getElementById('cur-note'); cn.textContent=(cn.textContent?cn.textContent+' ':'')+'Heads-up: this target is near the max reachable (~'+(gDaily*365*100).toFixed(1)+'% yearly), so Min CVaR is forced into an extreme mix to reach it.'; }
+        if(!wOpt){ err.textContent='No solution: that target is too high for these assets, limits and window. Max reachable right now: ~'+(gDaily*DAYS_YR*100).toFixed(1)+'% yearly. Lower the target or raise a max.'; err.style.display='block'; return; }
+        if(muReq>0.85*gDaily){ const cn=document.getElementById('cur-note'); cn.textContent=(cn.textContent?cn.textContent+' ':'')+'Heads-up: this target is near the max reachable (~'+(gDaily*DAYS_YR*100).toFixed(1)+'% yearly), so Min CVaR is forced into an extreme mix to reach it.'; }
         const wMax=solveMaxCAGR(tickers,maxW);
         document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets · '+WINDOW+'Y window';
         const r0Daily=annReturn(wOpt,tickers)/DAYS_YR;

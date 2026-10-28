@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core.data import history
+from core.stats import sharpe_ratio
 from core.signals import strategy_position
 from core.backtest import backtest_strategy, buy_and_hold_backtest
 from scripts.david_sma200w import david_weekly_daily_returns
@@ -35,11 +36,13 @@ RSI_BY_ASSET = {k: float(v) for k, v in MAG7W_CFG.get("rsi_level_by_asset", {}).
 
 
 def stats(ret: pd.Series) -> dict:
+    """Sharpe sobre el exceso de rentabilidad (cash como tasa libre de riesgo),
+    anualizado con las barras por año reales de la serie (252 en bolsa, 365 en
+    BTC y en la cartera, que usa el calendario unión con fines de semana)."""
     ret = ret.fillna(0.0)
     eq = (1 + ret).cumprod()
     dd = eq / eq.cummax() - 1
-    sd = ret.std(ddof=1)
-    sharpe = float(ret.mean() / sd * np.sqrt(252)) if sd and sd > 1e-12 else None
+    sharpe = sharpe_ratio(ret, CASH)
     ytd = ret[ret.index >= f"{ret.index[-1].year}-01-01"]
     return {
         "sharpe": sharpe,
@@ -81,13 +84,17 @@ def main():
 
     GO_LIVE = "2026-09-07"  # inicio del paper trading en vivo (arranque del servicio)
     out = {"generated_at": pd.Timestamp.utcnow().isoformat(), "universe": UNIVERSE,
-           "go_live": GO_LIVE,
+           "go_live": GO_LIVE, "rf_annual": CASH,
            "strategies": {}, "per_asset": {}, "errors": errors}
 
+    # Cartera equiponderada: los dias sin mercado de un activo (fines de semana y
+    # festivos) cuentan como rentabilidad 0, no como hueco. Asi cada activo pesa
+    # siempre 1/N; antes mean() ignoraba los NaN y el fin de semana la cartera
+    # era 100% BTC.
     for s in STRATEGIES:
-        portfolio = pd.DataFrame({t: rets[(t, s)] for t in UNIVERSE if (t, s) in rets}).reindex(idx).mean(axis=1)
-        eq = (1 + portfolio.fillna(0.0)).cumprod()
-        bh = pd.DataFrame(bh_rets).reindex(idx).mean(axis=1)
+        portfolio = pd.DataFrame({t: rets[(t, s)] for t in UNIVERSE if (t, s) in rets}).reindex(idx).fillna(0.0).mean(axis=1)
+        eq = (1 + portfolio).cumprod()
+        bh = pd.DataFrame(bh_rets).reindex(idx).fillna(0.0).mean(axis=1)
         bh_eq = (1 + bh.fillna(0.0)).cumprod()
         out["strategies"][s] = {
             "equity": [round(float(v), 4) for v in eq],
@@ -125,7 +132,7 @@ def main():
         live["bh"] = [round(float(v), 4) for v in bh_eq]
     out["live"] = live
 
-    bh_all = pd.DataFrame(bh_rets).mean(axis=1)
+    bh_all = pd.DataFrame(bh_rets).reindex(idx).fillna(0.0).mean(axis=1)
     bh_ytd = bh_all[bh_all.index >= f"{year}-01-01"]
     out["bh_ytd"] = round(((1 + bh_ytd.fillna(0.0)).prod() - 1) * 100, 2) if len(bh_ytd) else 0.0
     out["dates"] = dates

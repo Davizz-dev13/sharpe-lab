@@ -105,11 +105,12 @@
   <div class="panel">
     <h2>MomVol MSCI World<span class="tag bt">BACKTEST + PAPER</span></h2>
     <p class="note">MomVol sobre URTH (proxy del MSCI World): largo cuando el ROC de 126 días es positivo, peso min(1, 0.10/vol20); si no, cash. Ojo: URTH solo tiene datos desde 2012, ventana más corta que el resto de estrategias. La línea vertical marca el go-live: a su derecha es paper trading real.</p>
-    <div class="kpis">
-      <div class="kpi"><b>1.11</b>Sharpe OOS</div>
-      <div class="kpi"><b>12.5%</b>CAGR OOS</div>
-      <div class="kpi"><b>-14%</b>Max DD OOS</div>
-      <div class="kpi"><b>0.93 / -26%</b>B&amp;H Sharpe / DD</div>
+    <!-- KPI leídos de msci.json (los genera scripts/generate_msci.py): backtest de la ventana de 10 años -->
+    <div class="kpis" id="msci-kpis">
+      <div class="kpi"><b id="k-sharpe">–</b>Sharpe (10 años)</div>
+      <div class="kpi"><b id="k-cagr">–</b>CAGR (10 años)</div>
+      <div class="kpi"><b id="k-dd">–</b>Max DD (10 años)</div>
+      <div class="kpi"><b id="k-bh">–</b>B&amp;H Sharpe / DD</div>
     </div>
     <div class="controls tf-mini" data-chart="msci">
       <button data-tf="1M">1M</button>
@@ -122,7 +123,7 @@
     <div class="chart-wrap"><canvas id="msci-chart"></canvas></div>
   </div>
 </main>
-<footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
+<footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
 <script>
 let MSCI = null, msciChart = null, tfCur = 'ALL';
 
@@ -178,8 +179,18 @@ function renderMsci() {
   msciChart.$golive = MSCI.go_live;
 }
 
+function fmtNum(v, dec) { return (v == null || isNaN(v)) ? '–' : Number(v).toFixed(dec); }
+function renderKpis(d) {
+  const s = d.stats || {}, b = d.bh_stats || {};
+  document.getElementById('k-sharpe').textContent = fmtNum(s.sharpe, 2);
+  document.getElementById('k-cagr').textContent = s.cagr == null ? '–' : fmtNum(s.cagr, 1) + '%';
+  document.getElementById('k-dd').textContent = s.max_dd == null ? '–' : fmtNum(s.max_dd, 1) + '%';
+  document.getElementById('k-bh').textContent = fmtNum(b.sharpe, 2) + ' / ' + (b.max_dd == null ? '–' : fmtNum(b.max_dd, 0) + '%');
+}
+
 fetch('msci.json').then(r => r.json()).then(d => {
   MSCI = d;
+  renderKpis(d);
   document.getElementById('updated').textContent =
     'Actualizado: ' + new Date(d.generated_at).toLocaleString('es-ES') + ' · go-live ' + d.go_live;
   document.querySelectorAll('.tf-mini button').forEach(b => b.onclick = () => {
