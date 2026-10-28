@@ -21,6 +21,7 @@
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="../analytics.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -140,6 +141,18 @@
   <div class="panel">
     <h2>Ganancias YTD por estrategia (%)<span class="tag bt">BACKTEST</span></h2>
     <div class="chart-wrap short"><canvas id="ytd-chart"></canvas></div>
+  </div>
+
+  <div class="panel">
+    <h2>Riesgo frente al benchmark<span class="tag bt">BACKTEST</span></h2>
+    <div class="sla-controls"><label for="sla-strat" class="sla-note" style="margin:0">Estrategia</label><select id="sla-strat"></select>
+      <label for="sla-asset" class="sla-note" style="margin:0 0 0 8px">Activo</label><select id="sla-asset"><option value="">Cartera (11 activos)</option></select></div>
+    <div id="sla"></div>
+  </div>
+  <div class="panel">
+    <h2>Registro de operaciones<span class="tag bt">BACKTEST + PAPER</span></h2>
+    <p class="note">Operaciones de la estrategia y el activo elegidos arriba (en "Cartera", las de BTC-USD).</p>
+    <div id="sla-trades"></div>
   </div>
 
   <h2 class="sect">¿Qué aporta un filtro de tendencia en BTC?</h2>
@@ -312,6 +325,31 @@ fetch('../data.json').then(r => r.json()).then(d => {
 }).catch(e => {
   document.getElementById('updated').textContent = 'No se pudieron cargar los datos (' + e + ')';
 });
+</script>
+<script>
+// Curva vs benchmark, drawdown, Sharpe rodante y operaciones (analytics.js)
+fetch('../data.json').then(r => r.json()).then(d => {
+  const ss = document.getElementById('sla-strat'), sa = document.getElementById('sla-asset');
+  Object.keys(d.strategies).forEach(k => { const o = document.createElement('option'); o.value = o.textContent = k; ss.appendChild(o); });
+  if (d.strategies.ROC60) ss.value = 'ROC60';
+  (d.universe || []).forEach(t => { const o = document.createElement('option'); o.value = o.textContent = t; sa.appendChild(o); });
+  const rf = d.rf_annual != null ? d.rf_annual : 0.02;
+  const draw = () => {
+    const st = ss.value, a = sa.value;
+    const src = a ? d.per_asset[a + '|' + st] : d.strategies[st];
+    if (!src) { document.getElementById('sla').textContent = 'Sin datos para esta combinación.'; return; }
+    const s = [{label: st + (a ? ' · ' + a : ' · cartera'), equity: src.equity, color: '#d4a85a', width: 1.8},
+               {label: 'Buy & hold ' + (a || 'de los 11 activos'), equity: src.bh_equity, color: 'rgba(255,255,255,.55)', dash: [5, 4]}];
+    const spy = d.per_asset['SPY|' + st];
+    if (spy && a !== 'SPY') s.push({label: 'SPY (benchmark)', equity: spy.bh_equity, color: '#7fa7d9', width: 1.2});
+    SLA.panel(document.getElementById('sla'), {dates: d.dates, series: s, rf,
+      note: 'El benchmark fijo es SPY comprado y mantenido. El Sharpe rodante usa los últimos 12 meses y descuenta el cash (' + (rf * 100).toFixed(0) + ' % anual).'});
+    const ta = a || 'BTC-USD';
+    if (d.trades) SLA.trades(document.getElementById('sla-trades'), SLA.unpack(d.trades[ta + '|' + st], ta), {filename: ta + '_' + st + '_operaciones.csv'});
+    else document.getElementById('sla-trades').innerHTML = '<p class="sla-note">El registro aparece en la próxima actualización de los datos.</p>';
+  };
+  ss.onchange = sa.onchange = draw; draw();
+}).catch(e => { document.getElementById('sla').textContent = 'No se pudieron cargar los datos (' + e + ').'; });
 </script>
 </body>
 </html>

@@ -20,6 +20,8 @@ from core.stats import sharpe_ratio
 from core.signals import strategy_position
 from core.backtest import backtest_strategy, buy_and_hold_backtest
 from scripts.david_sma200w import david_weekly_daily_returns
+from scripts.mag7w_core import weekly_frame, weekly_position, trades_from_position
+from core.signals import strategy_weights
 
 UNIVERSE = ["SPY", "QQQ", "GLD", "GC=F", "CL=F", "TLT", "AMD", "TSM", "ASML", "AVGO", "BTC-USD"]
 # SMA200W+RSI = la estrategia de David (semanal): cruce a la baja de la SMA200W,
@@ -52,8 +54,15 @@ def stats(ret: pd.Series) -> dict:
     }
 
 
+def compact_trades(trades: list[dict], since: str) -> list[list]:
+    """[entrada, precio, salida, precio, %] de las operaciones abiertas desde `since` (o aun abiertas)."""
+    return [[t["entry_date"], t["entry_price"], t["exit_date"], t["exit_price"], t["return_pct"]]
+            for t in trades if t["entry_date"] >= since or t["open"]]
+
+
 def main():
     data, rets, bh_rets, closes = {}, {}, {}, {}
+    trades = {}
     errors = []
     for t in UNIVERSE:
         try:
@@ -67,9 +76,14 @@ def main():
                     r_full, _ = david_weekly_daily_returns(
                         df_full, COST, CASH, RSI_BY_ASSET.get(t, RSI_DEFAULT))
                     rets[(t, s)] = r_full.reindex(df.index).fillna(0.0)
+                    x = weekly_frame(df_full)
+                    pos = weekly_position(x, RSI_BY_ASSET.get(t, RSI_DEFAULT))
+                    trades[f"{t}|{s}"] = compact_trades(trades_from_position(x, pos), str(df.index[0].date()))
                 else:
                     r, st = backtest_strategy(df, s, cost=COST, cash_rate=CASH)
                     rets[(t, s)] = r
+                    pos = (strategy_weights(df, s) > 0).astype(int)
+                    trades[f"{t}|{s}"] = compact_trades(trades_from_position(df, pos), str(df.index[0].date()))
         except Exception as e:
             errors.append(f"{t}: {e}")
 
@@ -136,6 +150,8 @@ def main():
     bh_ytd = bh_all[bh_all.index >= f"{year}-01-01"]
     out["bh_ytd"] = round(((1 + bh_ytd.fillna(0.0)).prod() - 1) * 100, 2) if len(bh_ytd) else 0.0
     out["dates"] = dates
+    # registro de operaciones por activo|estrategia (precios del cierre de la barra de senal)
+    out["trades"] = trades
     out["ytd_start"] = f"{year}-01-01"
 
     p = ROOT / "docs" / "data.json"

@@ -21,6 +21,7 @@
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="../analytics.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -95,6 +96,10 @@
   </div>
 
   <div class="panel">
+    <h2>Riesgo frente al benchmark <span class="badge ref">backtest 10 a&ntilde;os</span></h2>
+    <div id="sla"></div>
+  </div>
+  <div class="panel">
     <h2>Registro de rotaciones <span class="badge">cambios de patas, 10 a&ntilde;os</span></h2>
     <table id="rot-table"><thead><tr><th>Fecha</th><th>Patas mantenidas</th><th>Pesos</th></tr></thead><tbody></tbody></table>
   </div>
@@ -167,6 +172,15 @@ fetch('semis.json').then(r=>r.json()).then(d=>{
     rt.appendChild(tr);
   });
 });
+</script>
+<script>
+// Curva vs benchmark, drawdown y Sharpe rodante (analytics.js)
+fetch('semis.json').then(r => r.json()).then(d => {
+  const s = [{label: 'Semis (roc126 top2)', equity: d.equity, color: '#d4a85a', width: 1.8},
+             {label: 'Buy & hold del universo', equity: d.bh_equity, color: 'rgba(255,255,255,.55)', dash: [5, 4]}];
+  if (d.benchmark && d.benchmark.equity) s.push({label: d.benchmark.ticker + ' (benchmark)', equity: d.benchmark.equity, color: '#7fa7d9', width: 1.2});
+  SLA.panel(document.getElementById('sla'), {dates: d.dates, series: s, rf: d.rules ? d.rules.cash_rate : 0.02, note: 'El benchmark fijo es SPY (S&P 500) comprado y mantenido. El Sharpe rodante usa los últimos 12 meses y descuenta el cash (' + ((d.rules && d.rules.cash_rate != null ? d.rules.cash_rate : 0.02) * 100).toFixed(0) + ' % anual).'});
+}).catch(e => { document.getElementById('sla').textContent = 'No se pudieron cargar los datos (' + e + ').'; });
 </script>
 </body>
 </html>
