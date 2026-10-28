@@ -1,0 +1,46 @@
+name: Deudas BTC (cada hora)
+
+# Antes la deuda diaria solo se recalculaba en "Actualizar dashboard", una vez al dia
+# y con 2-3 h de retraso (cron 21:17 UTC; GitHub la lanza entre las 23:00 y las 00:30
+# UTC). La vela de origen (23:55 NY) cae a las 03:55 UTC en horario de verano de EE. UU.
+# y a las 04:55 UTC en invierno: un cron fijo en UTC se desfasa una hora con cada
+# cambio. Una corrida por hora (Coinbase publico, sin clave, ~10 s) evita las dos cosas
+# y el estado "pagada" pasa a tener como mucho ~1 h de retraso.
+on:
+  schedule:
+    - cron: '7 * * * *'
+    - cron: '37 * * * *'
+  repository_dispatch:
+    types: [deudas]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deudas
+  cancel-in-progress: false
+
+jobs:
+  deudas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/generate_deudas.py
+      - name: Commit si hay cambios
+        run: |
+          git config user.name "Davizz-dev13"
+          git config user.email "Davizz-dev13@users.noreply.github.com"
+          git add docs/deudas/deudas.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Deudas BTC: $(date -u +%Y-%m-%d\ %H:%M) UTC"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep 15
+          done
+          exit 1
