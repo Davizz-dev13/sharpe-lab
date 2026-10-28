@@ -103,7 +103,7 @@
     const closed = rows.filter(t => !t.open), wins = closed.filter(t => t.return_pct > 0);
     const avg = closed.length ? closed.reduce((s, t) => s + t.return_pct, 0) / closed.length : null;
     root.appendChild(el('p', 'sla-note', closed.length + ' operaciones cerradas' + (closed.length ? ' · ' + Math.round(100 * wins.length / closed.length) + ' % ganadoras · media ' + fmtP(avg) : '') +
-      ' · ' + (rows.length - closed.length) + ' abierta(s). Precios del cierre de la barra de señal, sin costes.'));
+      ' · ' + (rows.length - closed.length) + ' abierta(s). ' + (opt.priceNote || 'Precios del cierre de la barra de señal, sin costes.')));
     const head = (opt.asset ? '<th>Activo</th>' : '') + '<th>Entrada</th><th class="n">Precio</th><th>Salida</th><th class="n">Precio</th><th class="n">Resultado</th>';
     const body = rows.map(t => '<tr>' + (opt.asset ? '<td>' + t.asset + '</td>' : '') + '<td>' + t.entry_date + '</td><td class="n">' + fmtPx(t.entry_price) +
       '</td><td>' + (t.open ? '<span class="sla-open">abierta</span>' : t.exit_date) + '</td><td class="n">' + fmtPx(t.exit_price) +
