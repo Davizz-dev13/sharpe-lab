@@ -101,7 +101,11 @@ def main_long():
     bil_start = px["BIL"].first_valid_index()
     cash_ret = rets["BIL"].copy()
     pre = cal <= bil_start
-    cash_ret[pre] = irx[pre] / 100.0 / 365.0
+    # El calendario largo solo tiene dias laborables antes de 2014: cada fila
+    # devenga los dias naturales transcurridos desde la anterior (un lunes cobra
+    # el fin de semana), no 1/365 fijo, que se quedaba corto.
+    gap_days = pd.Series(cal, index=cal).diff().dt.days.fillna(1.0)
+    cash_ret[pre] = irx[pre] / 100.0 * gap_days[pre] / 365.0
     rets["BIL"] = cash_ret
 
     rets = rets.iloc[1:]

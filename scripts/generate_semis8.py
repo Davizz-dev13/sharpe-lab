@@ -15,6 +15,7 @@ import yaml
 import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from core.stats import sharpe_ratio  # Sharpe sobre exceso de rentabilidad (cash = tasa libre de riesgo)
 
 from scripts.semis8_core import SEMIS8 as SEMIS, target_weights, backtest, rotation_log
 
@@ -27,6 +28,10 @@ COST = float(CFG.get("backtest", {}).get("transaction_cost", 0.001))
 CASH = float(CFG.get("backtest", {}).get("cash_rate_annual", 0.02))
 
 
+def _r2(x):
+    return round(x, 2) if x is not None else None
+
+
 def stats_d(ret: pd.Series) -> dict:
     ret = ret.fillna(0.0)
     if len(ret) < 10:
@@ -36,7 +41,7 @@ def stats_d(ret: pd.Series) -> dict:
     sd = ret.std(ddof=1)
     ytd = ret[ret.index >= f"{ret.index[-1].year}-01-01"]
     return {
-        "sharpe": round(float(ret.mean() / sd * np.sqrt(252)), 2) if sd and sd > 1e-12 else None,
+        "sharpe": _r2(sharpe_ratio(ret, CASH)),
         "max_dd": round(float(dd.min()) * 100, 2),
         "total_return": round((float(eq.iloc[-1]) - 1) * 100, 2),
         "ytd_return": round(((1 + ytd).prod() - 1) * 100, 2) if len(ytd) else 0.0,
@@ -53,7 +58,7 @@ def folds_d(ret: pd.Series, start_year: int) -> list[dict]:
         dd = eq / eq.cummax() - 1
         sd = seg.std(ddof=1)
         out.append({"year": y,
-                    "sharpe": round(float(seg.mean() / sd * np.sqrt(252)), 2) if sd and sd > 1e-12 else None,
+                    "sharpe": _r2(sharpe_ratio(seg, CASH)),
                     "return_pct": round((float(eq.iloc[-1]) - 1) * 100, 2),
                     "max_dd": round(float(dd.min()) * 100, 2)})
     return out
