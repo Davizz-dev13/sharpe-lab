@@ -21,32 +21,33 @@
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<script>Chart.defaults.font.family="CMU, Georgia, serif";Chart.defaults.font.size=12;Chart.defaults.color="#555";Chart.defaults.borderColor="#e8e8e8";if(document.fonts)document.fonts.ready.then(function(){Object.values(Chart.instances).forEach(function(c){c.update("none")})});</script>
+
+
 <style>
-  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1f1913; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#b6bc86; --yellow:#d4a85a; }
+  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1f1913; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#2d6a3e; --yellow:#d4a85a; }
   * { box-sizing:border-box; }
-  body { margin:0; font-family:'Hanken Grotesk',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
+  body { margin:0; font-family:'CMU',Georgia,serif; background:var(--bg); color:var(--fg); }
   header { padding:24px 28px 8px; }
-  h1 { margin:0 0 4px; font-size:22px; font-family:'IM Fell DW Pica',sans-serif; font-weight:400; letter-spacing:.02em; }
+  h1 { margin:0 0 4px; font-size:22px; font-family:'CMU',Georgia,serif; font-weight:400; letter-spacing:.02em; }
   .sub { color:var(--mut); font-size:13px; line-height:1.5; max-width:900px; }
   main { padding:8px 28px 40px; max-width:1200px; }
   .panel { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin-top:18px; }
-  .panel h2 { margin:0 0 10px; font-size:15px; font-family:'IM Fell DW Pica',sans-serif; font-weight:400; letter-spacing:.02em; }
+  .panel h2 { margin:0 0 10px; font-size:15px; font-family:'CMU',Georgia,serif; font-weight:400; letter-spacing:.02em; }
   .fields { display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; }
   @media (max-width:560px){ .fields { grid-template-columns:1fr; } }
   .field label { display:block; font-size:12px; color:var(--mut); margin-bottom:4px; }
-  .field input, .field select { width:100%; padding:8px 10px; border:1px solid var(--border); background:var(--panel); color:var(--fg); font-family:'Hanken Grotesk',sans-serif; font-size:15px; }
+  .field input, .field select { width:100%; padding:8px 10px; border:1px solid var(--border); background:var(--panel); color:var(--fg); font-family:'CMU',Georgia,serif; font-size:15px; }
   .adj-form { display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; margin-top:14px; padding-top:12px; border-top:2px solid var(--border); }
   @media (max-width:560px){ .adj-form { grid-template-columns:1fr; } }
   .adj-form .full { grid-column:1 / -1; }
   .adj-form label { display:block; font-size:12px; color:var(--mut); margin-bottom:4px; }
-  .adj-form input, .adj-form select { width:100%; padding:7px 9px; border:1px solid var(--border); background:var(--panel); color:var(--fg); font-family:'Hanken Grotesk',sans-serif; font-size:14px; }
+  .adj-form input, .adj-form select { width:100%; padding:7px 9px; border:1px solid var(--border); background:var(--panel); color:var(--fg); font-family:'CMU',Georgia,serif; font-size:14px; }
   .adj-title { font-size:12.5px; font-weight:700; margin:14px 0 0; }
   .chip { display:flex; align-items:center; justify-content:space-between; gap:8px; border:1px solid var(--border); background:var(--bg); padding:6px 10px; margin-top:8px; font-size:13px; }
   .chip button { background:none; border:none; color:var(--mut); font-size:16px; cursor:pointer; padding:0 2px; line-height:1; }
   .chip button:hover { color:var(--fg); }
-  .addbtn { padding:8px 14px; background:var(--yellow); border:1px solid var(--border); font-family:'IM Fell DW Pica',sans-serif; font-size:12px; cursor:pointer; }
+  .addbtn { padding:8px 14px; background:var(--yellow); border:1px solid var(--border); font-family:'CMU',Georgia,serif; font-size:12px; cursor:pointer; }
   .addbtn:active { transform:scale(.98); }
   .hidden { display:none !important; }
   .kpis { display:flex; gap:18px; flex-wrap:wrap; margin:4px 0 6px; }
@@ -56,7 +57,7 @@
   .chartbox { height:300px; }
   table { border-collapse:collapse; width:100%; font-size:12.5px; }
   th, td { padding:5px 6px; text-align:right; border-bottom:2px solid var(--border); white-space:nowrap; }
-  th { background:var(--fg); color:var(--bg); font-family:'IM Fell DW Pica',sans-serif; font-weight:400; font-size:9.5px; letter-spacing:.03em; }
+  th { background:var(--fg); color:var(--bg); font-family:'CMU',Georgia,serif; font-weight:400; font-size:9.5px; letter-spacing:.03em; }
   th:first-child, td:first-child { text-align:left; }
   .twrap { overflow-x:auto; }
   .note { color:var(--mut); font-size:12px; margin-top:8px; line-height:1.5; }
@@ -66,14 +67,14 @@
   .back:hover { color:var(--fg); }
   @media (max-width:860px){ main { padding:8px 14px 40px; } header { padding:20px 16px 6px; } footer { padding:20px 16px 40px; } }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
+
+
 <link rel="stylesheet" href="../theme.css">
 </head>
-<body>
+<body class="has-topnav">
+<nav class="topnav" aria-label="Secciones"><div class="nav-in"><a class="nav-name" href="../">Sharpe Lab</a><div class="nav-links"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/" class="on" aria-current="page">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <header>
-  <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav" aria-label="Secciones"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/" class="on" aria-current="page">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a></nav>
-  <h1>Interés compuesto</h1>
+    <h1>Interés compuesto</h1>
   <div class="sub">La fuerza más aburrida y más potente de las finanzas: intereses que generan intereses. Juega con los números.</div>
 </header>
 <main>
@@ -203,13 +204,13 @@ function calc(){
   if(chart) chart.destroy();
   chart=new Chart(document.getElementById('chart'),{type:'line',
     data:{labels, datasets:[
-      {label:'Intereses', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#d4a85a', borderColor:'#1f1913', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
-      {label:'Aportado', data:sAport, backgroundColor:'rgba(255,255,255,.28)', borderColor:'#1f1913', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Intereses', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#1a3f8b', borderColor:'#ffffff', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Aportado', data:sAport, backgroundColor:'#cfcfcf', borderColor:'#ffffff', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
     ]},
     options:{maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
-      scales:{x:{title:{display:true,text:'Años',color:'rgba(255,255,255,.56)'},ticks:{color:'rgba(255,255,255,.56)',maxTicksLimit:12},grid:{color:'rgba(255,255,255,.08)'},stacked:true},
-              y:{ticks:{color:'rgba(255,255,255,.56)',callback:v=>(v/1000)+'k'},grid:{color:'rgba(255,255,255,.08)'},stacked:true}},
-      plugins:{legend:{labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10}}},
+      scales:{x:{title:{display:true,text:'Años',color:'#555'},ticks:{color:'#555',maxTicksLimit:12},grid:{color:'#e8e8e8'},stacked:true},
+              y:{ticks:{color:'#555',callback:v=>(v/1000)+'k'},grid:{color:'#e8e8e8'},stacked:true}},
+      plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}},
         tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmtEUR(c.parsed.y)}}}}});
 }
 ['f-p0','f-pmt','f-r','f-y','f-n','f-freq'].forEach(id=>document.getElementById(id).addEventListener('input',calc));

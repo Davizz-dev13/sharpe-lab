@@ -8,7 +8,7 @@
  *   SLA.trades(el, trades, {asset:false, filename:'operaciones.csv'})
  */
 (function () {
-  const MUTED = 'rgba(255,255,255,.56)', GRID = 'rgba(255,255,255,.08)';
+  const MUTED = '#555', GRID = '#e8e8e8';
   const DAY = 864e5;
 
   function ts(d) { return Date.parse(d + 'T00:00:00Z'); }
@@ -85,7 +85,7 @@
       data: { labels: dates, datasets: valid.map(s => ds(s, s.equity.map(v => v / s.equity[0]))) },
       options: baseOpts('Crecimiento de 1 (escala log)', { y: { type: 'logarithmic' }, dec: 2, ticks: 8 }) }));
     made.push(new Chart(boxes[1], { type: 'line',
-      data: { labels: dates, datasets: valid.map((s, i) => ds(s, drawdown(s.equity), i === 0 ? { fill: 'origin', backgroundColor: 'rgba(223,140,112,.15)' } : {})) },
+      data: { labels: dates, datasets: valid.map((s, i) => ds(s, drawdown(s.equity), i === 0 ? { fill: 'origin', backgroundColor: 'rgba(168,50,45,.10)' } : {})) },
       options: baseOpts('Caída desde máximos (%)', { dec: 1, unit: ' %', ticks: 5 }) }));
     made.push(new Chart(boxes[2], { type: 'line',
       data: { labels: dates, datasets: valid.map(s => ds(s, rollingSharpe(dates, s.equity, rf))) },

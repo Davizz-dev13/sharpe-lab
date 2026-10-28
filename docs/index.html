@@ -20,82 +20,107 @@
 <meta name="twitter:description" content="Estrategias cuantitativas estudiadas a la vista: backtests, seguimiento en vivo (paper), optimizador de cartera y calculadoras. Proyecto personal, no es asesoramiento.">
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css">
 <script src="frescura.js" defer></script>
 <style>
-  *{box-sizing:border-box}
-  body{margin:0;background:#15110d;overflow-x:hidden}
-  .seq{position:relative;height:calc(var(--n)*125svh + 30svh);--n:7}
-  .pin{position:sticky;top:0;height:100svh;overflow:hidden;background:#15110d}
+  /* Portada formal: misma columna, letra y filetes que davizz-dev13.github.io */
+  main.tools{max-width:720px;margin:0 auto;padding:120px 24px 30px}
+  .hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin:26px 0 10px}
+  .hero h1{margin:0 0 10px;font-size:40px;font-weight:700;letter-spacing:.5px}
+  .role{color:var(--muted);font-size:15px;line-height:1.55;font-style:italic}
+  .titlerule{width:120px;border-top:1px solid var(--rule);margin:22px auto 0}
+  .statement{font-size:17px;line-height:1.65;font-style:italic;text-align:center;margin:22px 0 6px}
+  .hero .fresh{margin:16px 0 0}
+  section.sec{padding:30px 0 6px;scroll-margin-top:80px}
+  section.sec h2{font-size:19px;font-weight:700;margin:0 0 14px}
+  .secno{margin-right:10px}
+  .grid{display:block}
+  nav.topnav .nav-in{max-width:720px}
+  .grid .card{display:flex !important;gap:18px;align-items:flex-start;padding:16px 0 !important;border:0 !important;border-top:1px solid var(--soft) !important;text-decoration:none;color:var(--ink) !important;background:none !important}
+  .grid .card:last-child{border-bottom:1px solid var(--soft) !important}
+  .grid .card .th{flex:0 0 132px;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--rule);display:block}
+  .card .th img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block}
+  .card .tx{display:flex;flex-direction:column;min-width:0}
+  .ct{font-size:16.5px;font-weight:700;margin:2px 0 4px;transition:color .25s ease}
+  .card:hover .ct{color:var(--link)}
+  .cd{font-size:15px;line-height:1.6;color:var(--ink);text-align:justify;hyphens:auto}
+  .go{display:inline-block;align-self:flex-start;margin-top:10px;padding:6px 16px;border:1px solid var(--rule);font-size:13.5px;font-variant:small-caps;transition:background .25s ease,color .25s ease}
+  .card:hover .go{background:var(--ink);color:var(--paper)}
+  .item{padding:10px 0;border-top:1px solid var(--soft);font-size:15px;line-height:1.6}
+  .item:last-child{border-bottom:1px solid var(--soft)}
+  .item a{color:var(--ink);font-weight:700;text-decoration:none;margin-right:8px;transition:color .25s ease}
+  .item a:hover{color:var(--link)}
+  .disc{font-size:15px;line-height:1.7;text-align:justify;hyphens:auto;margin:0}
+  .rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease var(--d,0s),transform .6s ease var(--d,0s)}
+  .rv.in{opacity:1;transform:none}
+  /* Frases: las fotos se quedan, sobre papel */
+  .seq{position:relative;height:calc(var(--n)*125svh + 30svh);--n:7;border-top:1px solid var(--rule)}
+  .pin{position:sticky;top:0;height:100svh;overflow:hidden;background:#1a1a1a}
   .fr{position:absolute;inset:0;opacity:0}
   .fr:first-child{opacity:1}
   .fr>img,.fr>picture>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(var(--s,1));will-change:transform}
   .fr.olive>picture>img{object-fit:contain;object-position:center;transform:none;will-change:auto}
-  .fr.olive{background:#15110d}
-  .fr::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(rgba(21,17,13,.28),rgba(21,17,13,0) 30%,rgba(21,17,13,calc(var(--qa,0)*.8)) 80%),radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(21,17,13,.55))}
-  .q{position:absolute;z-index:2;left:50%;bottom:10svh;width:min(880px,calc(100% - 48px));margin:0;transform:translateX(-50%);text-align:center;opacity:var(--qa,0);filter:blur(var(--qb,16px))}
-  .q p{margin:0 0 14px;font-family:var(--serif);font-size:clamp(22px,2.9vw,40px);line-height:1.2;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.8)}
+  .fr.olive{background:#1a1a1a}
+  .fr::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,0) 30%,rgba(0,0,0,calc(var(--qa,0)*.75)) 80%),radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(0,0,0,.5))}
+  .q{position:absolute;z-index:2;left:50%;bottom:10svh;width:min(820px,calc(100% - 48px));margin:0;transform:translateX(-50%);text-align:center;opacity:var(--qa,0);filter:blur(var(--qb,16px))}
+  .q p{margin:0 0 14px;font-size:clamp(22px,2.7vw,36px);line-height:1.3;font-style:italic;color:#fff;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.8)}
   .ttl{position:absolute;z-index:2;left:0;right:0;top:34%;text-align:center;padding:0 24px;opacity:var(--ta,1);filter:blur(calc((1 - var(--ta,1))*10px))}
-  .ttl h1,.ttl h2{margin:0 0 12px;font-size:clamp(56px,12vw,120px);line-height:1;text-shadow:0 4px 40px rgba(0,0,0,.6)}
-  .ttl p{margin:0 auto;max-width:34ch;font-size:17px;color:rgba(243,241,237,.78)}
-  .hint{position:absolute;z-index:5;left:50%;bottom:26px;transform:translateX(-50%);width:42px;height:42px;display:grid;place-items:center;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);color:var(--text);font-size:18px;opacity:var(--ha,1);animation:bob 2s ease-in-out infinite}
+  .ttl h2{margin:0 0 12px;font-size:clamp(48px,9vw,96px);line-height:1;color:#fff !important;font-variant:small-caps;text-shadow:0 4px 40px rgba(0,0,0,.6)}
+  .hint{position:absolute;z-index:5;left:50%;bottom:26px;transform:translateX(-50%);width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.8);background:rgba(0,0,0,.25);color:#fff;font-size:18px;opacity:var(--ha,1);animation:bob 2s ease-in-out infinite}
   @keyframes bob{50%{transform:translate(-50%,6px)}}
-  .bar{position:absolute;z-index:5;left:0;top:0;height:2px;width:calc(var(--g,0)*100%);background:rgba(243,241,237,.55)}
-  .tools{position:relative;display:block;padding:56px 24px 12vh;z-index:0}
-  .tools-in{position:relative;z-index:2;max-width:1180px;margin:0 auto;text-align:center}
-  .tools .bg{position:absolute;inset:0;background:url(img/end.webp) center/cover;opacity:.35}
-  .tools .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(#15110d,rgba(21,17,13,.5) 30%,rgba(21,17,13,.6) 70%,#15110d)}
-  .tools h1{margin:0 0 14px;font-size:clamp(44px,6vw,76px);line-height:1.04}
-  .tools .lede{margin:0 auto 40px;max-width:42ch;font-size:17px;color:rgba(243,241,237,.72)}
-  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;text-align:left}
-  .card{display:flex;flex-direction:column;border:1px solid #463a2d;border-radius:18px;overflow:hidden;background:rgba(31,25,19,.86);text-decoration:none;color:var(--text);transition:transform .3s,border-color .3s}
-  .card:hover{transform:translateY(-4px);border-color:#7a6850}
-  .card .th{display:block;aspect-ratio:16/10;overflow:hidden;border-bottom:1px solid #3a3026}
-  .card .th img{width:100%;height:100%;object-fit:cover;object-position:50% 0;transition:object-position 1.6s ease}
-  .card:hover .th img{object-position:50% 100%}
-  .ct{padding:16px 18px 2px;font-family:var(--serif);font-size:24px}
-  .cd{padding:0 18px 18px;font-size:14px;color:var(--muted)}
-  .rv{opacity:0;filter:blur(10px);transform:translateY(26px);transition:opacity .9s ease var(--d,0s),filter .9s ease var(--d,0s),transform .9s ease var(--d,0s)}
-  .rv.in{opacity:1;filter:none;transform:none}
-  .pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:36px}
-  .pill{display:inline-flex;align-items:center;height:42px;padding:0 20px;font-size:15px;text-decoration:none;border-radius:999px;background:rgba(255,255,255,.12);color:var(--text)}
-  .pill:hover{background:rgba(255,255,255,.2)}
-  .tools small{display:block;margin:64px auto 0;max-width:52ch;font-size:12px;color:var(--muted);line-height:1.5}
-  @media (max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media (max-width:560px){
-    .grid{grid-template-columns:1fr}
+  .bar{position:absolute;z-index:5;left:0;top:0;height:2px;width:calc(var(--g,0)*100%);background:rgba(255,255,255,.7)}
+  .backtop{text-align:center;margin:0;padding:26px 24px 10px;font-size:14px}
+  .backtop a{color:var(--link);text-decoration:none;border-bottom:1px solid var(--link)}
+  footer.foot{max-width:720px !important}
+  @media (max-width:900px){main.tools{padding-top:44px}}
+  @media (max-width:540px){
+    nav.topnav .nav-links{justify-content:space-between;gap:8px}
+    nav.topnav .nav-links a{font-size:12.5px !important}
+    main.tools{padding-top:40px}
+    .hero h1{font-size:32px}
+    .card{gap:14px}
+    .grid .card .th{flex-basis:96px}
+    .cd{text-align:left}
     .q{bottom:8svh}.q p{font-size:clamp(19px,5.6vw,26px)}
     .ttl{top:30%}
   }
   @media (prefers-reduced-motion:reduce){
     .seq{height:auto}.pin{position:relative;height:auto;overflow:visible}
     .fr{position:relative;height:70svh;opacity:1 !important}
-    .q{opacity:1 !important;filter:none !important}.fr::before{background:linear-gradient(rgba(21,17,13,0) 25%,rgba(21,17,13,.72) 78%)}
-    .hint,.bar{display:none}.tools{margin-top:0}.rv{opacity:1;filter:none;transform:none;transition:none}
+    .q{opacity:1 !important;filter:none !important}.fr::before{background:linear-gradient(rgba(0,0,0,0) 25%,rgba(0,0,0,.7) 78%)}
+    .hint,.bar{display:none}.rv{opacity:1;transform:none;transition:none}
   }
-  .topbar{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:12px;max-width:1180px;margin:0 auto;padding:16px 24px 0}
-  .topbar .brand{font-family:var(--serif);font-size:20px;text-decoration:none;color:var(--text)}
-  .topbar nav{display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end}
-  .topbar nav a{font-size:14px;color:var(--muted);text-decoration:none}
-  .topbar nav a:hover{color:var(--text)}
-  .backtop{text-align:center;margin:0;padding:28px 24px 48px}
-  .backtop a{color:var(--muted);font-size:14px}
-  @media (max-width:560px){.topbar{padding:12px 16px 0}.topbar nav{gap:10px}.topbar nav a{font-size:13px}.tools{padding:28px 16px 10vh}}
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
-<header class="topbar"><a class="brand" href="./">Sharpe Lab</a><nav aria-label="Principal"><a href="#tools">Herramientas</a><a href="metodologia/">Metodología</a><a href="sobre-mi/">Sobre mí</a></nav></header>
-<main class="tools" id="tools">
-  <div class="bg" aria-hidden="true"></div>
-  <div class="tools-in">
-    <h1 class="rv">Sharpe Lab</h1>
-    <p class="lede rv" style="--d:.1s">Cada estrategia que estudio, probada con costes y seguida en vivo. Además, un optimizador de carteras y algunas calculadoras.</p>
-    <p class="fresh" data-fresh-src="walkforward.json" aria-live="polite" style="margin:-24px 0 32px">Comprobando la fecha de los datos…</p>
-    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Bitcoin</span><span class="cd">Paper trading con señales reales cada noche.</span></a><a class="card rv" style="--d:0.12s" href="semis/"><span class="th"><img src="img/semis.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Semis</span><span class="cd">Los dos chips con más impulso, con la volatilidad a raya.</span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Mag7</span><span class="cd">Once activos y una regla semanal.</span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Optimizador CVaR</span><span class="cd">La mezcla menos arriesgada para la rentabilidad que buscas.</span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Interés compuesto</span><span class="cd">Intereses que generan intereses.</span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Deudas BTC</span><span class="cd">Zonas que el precio aún no ha cruzado.</span></a></div>
-    <div class="pills rv"><a class="pill" href="msci/">MSCI World</a><a class="pill" href="rsi30/">RSI 30</a><a class="pill" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a><a class="pill" href="metodologia/">Metodología</a><a class="pill" href="sobre-mi/">Sobre mí</a></div>
-    <small class="rv">Paper trading en vivo y backtests con costes. Sharpe Lab es un proyecto personal de aprendizaje: nada de esto es asesoramiento de inversión, y la rentabilidad pasada no garantiza rentabilidades futuras.</small>
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="./">Sharpe Lab</a><div class="nav-links"><a href="#tools">Herramientas</a><a href="metodologia/">Metodología</a><a href="sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+<main class="tools">
+  <div class="hero">
+    <h1>Sharpe Lab</h1>
+    <div class="role">Estrategias cuantitativas &middot; backtests con costes<br>Paper trading en vivo</div>
+    <div class="titlerule"></div>
+    <p class="fresh" data-fresh-src="walkforward.json" aria-live="polite">Comprobando la fecha de los datos…</p>
   </div>
+  <p class="statement">Cada estrategia que estudio, probada con costes y seguida en vivo. Además, un optimizador de carteras y algunas calculadoras.</p>
+
+  <section class="sec" id="tools">
+    <h2><span class="secno">1.</span>Herramientas</h2>
+    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Bitcoin</span><span class="cd">Paper trading con señales reales cada noche.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.12s" href="semis/"><span class="th"><img src="img/semis.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Semis</span><span class="cd">Los dos chips con más impulso, con la volatilidad a raya.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Mag7</span><span class="cd">Once activos y una regla semanal.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Optimizador CVaR</span><span class="cd">La mezcla menos arriesgada para la rentabilidad que buscas.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Interés compuesto</span><span class="cd">Intereses que generan intereses.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Deudas BTC</span><span class="cd">Zonas que el precio aún no ha cruzado.</span><span class="go">Abrir &rarr;</span></span></a></div>
+  </section>
+
+  <section class="sec rv" id="mas">
+    <h2><span class="secno">2.</span>Más</h2>
+    <div class="item"><a href="msci/">MSCI World</a></div>
+    <div class="item"><a href="rsi30/">RSI 30</a></div>
+    <div class="item"><a href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
+    <div class="item"><a href="metodologia/">Metodología</a></div>
+    <div class="item"><a href="sobre-mi/">Sobre mí</a></div>
+  </section>
+
+  <section class="sec rv" id="aviso">
+    <h2><span class="secno">3.</span>Aviso</h2>
+    <p class="disc">Paper trading en vivo y backtests con costes. Sharpe Lab es un proyecto personal de aprendizaje: nada de esto es asesoramiento de inversión, y la rentabilidad pasada no garantiza rentabilidades futuras.</p>
+  </section>
 </main>
 <section class="seq" id="seq" aria-label="Frases">
   <div class="pin">
@@ -117,6 +142,7 @@
   </div>
 </section>
 <p class="backtop"><a href="#tools">&uarr; Volver a las herramientas</a></p>
+<footer class="foot">Sharpe Lab &middot; David Gallardo &middot; Madrid, España</footer>
 <script>
 (function(){
   var seq=document.getElementById('seq'), fr=[].slice.call(document.querySelectorAll('.fr')), N=fr.length;
