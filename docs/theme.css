@@ -1,77 +1,146 @@
-/* Sharpe Lab shared theme: dark, warm ink, pill controls, serif display. */
+/* Sharpe Lab · tema formal, el mismo de davizz-dev13.github.io:
+   Computer Modern (CMU, servida como KaTeX Main), papel blanco, tinta negra, filetes finos. */
+@font-face{font-family:'CMU';src:url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/fonts/KaTeX_Main-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'CMU';src:url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/fonts/KaTeX_Main-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap;}
+@font-face{font-family:'CMU';src:url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/fonts/KaTeX_Main-Italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap;}
 :root{
-  --bg:#15110d; --card:#1f1913; --panel:#1f1913; --border:#3a3026; --rule:#3a3026;
-  --text:#f3f1ed; --fg:#f3f1ed; --muted:rgba(255,255,255,.56); --mut:rgba(255,255,255,.56);
-  --accent:#d4a85a; --acc:#d4a85a; --yellow:#d4a85a;
-  --live:#a8b078; --green:#b6bc86; --red:#df8c70;
-  --serif:"IM Fell DW Pica","Iowan Old Style",Georgia,serif;
-  --sans:"Hanken Grotesk",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  color-scheme:dark;
+  --ink:#1a1a1a; --paper:#ffffff; --link:#1a3f8b; --soft:#d9d9d9;
+  --bg:#ffffff; --card:#ffffff; --panel:#ffffff; --border:#d9d9d9; --rule:#1a1a1a;
+  --text:#1a1a1a; --fg:#1a1a1a; --muted:#555; --mut:#555;
+  --accent:#1a3f8b; --acc:#1a3f8b; --yellow:#1a1a1a;
+  --live:#2d6a3e; --green:#2d6a3e; --red:#a8322d;
+  --serif:'CMU',Georgia,serif; --sans:'CMU',Georgia,serif; --font:'CMU',Georgia,serif;
+  color-scheme:light;
 }
-html{background:var(--bg)}
-body{
-  background:radial-gradient(120% 60% at 50% 0%,#2b2118 0%,#15110d 55%) no-repeat,#15110d !important;
-  color:var(--text) !important;font-family:var(--sans) !important;-webkit-font-smoothing:antialiased;
+*,*::before,*::after{box-sizing:border-box}
+@keyframes pageIn{from{opacity:0}to{opacity:1}}
+html{background:var(--paper);scroll-behavior:smooth}
+body{margin:0;background:var(--paper) !important;color:var(--ink) !important;font-family:'CMU',Georgia,serif !important;font-size:15px;animation:pageIn .5s ease-out both;-webkit-font-smoothing:auto}
+body *{font-family:inherit}
+code,kbd,pre{font-family:'CMU',Georgia,serif !important;font-size:.95em !important;background:none !important;padding:0 !important;border-radius:0 !important;font-style:italic}
+::selection{background:#1a1a1a;color:#fff}
+*{box-shadow:none !important;text-shadow:none}
+
+/* Barra superior (igual que la de la web personal) */
+.topnav{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.96);border-bottom:1px solid var(--rule);z-index:50}
+.topnav .nav-in{max-width:1040px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.topnav .nav-name{font-weight:700;font-size:15px;letter-spacing:.4px;color:var(--ink) !important;text-decoration:none;font-variant:small-caps;white-space:nowrap;border:0 !important}
+.topnav .nav-links{display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end;gap:6px 16px;font-size:13px;margin:0 !important}
+.topnav .nav-links a{color:var(--ink) !important;background:none !important;text-decoration:none;font-variant:small-caps;font-weight:400 !important;font-size:13px !important;border:0 !important;border-bottom:1px solid transparent !important;border-radius:0 !important;padding:0 !important;transition:border-color .25s ease,color .25s ease;white-space:nowrap}
+.topnav .nav-links a:hover{color:var(--link) !important;border-bottom-color:var(--link) !important}
+.topnav .nav-links a.on{border-bottom-color:var(--ink) !important;font-weight:700 !important}
+.topnav .nav-links a.lab{color:var(--paper) !important;background:var(--ink) !important;border:1px solid var(--ink) !important;padding:4px 12px !important;transition:background .25s ease,color .25s ease}
+.topnav .nav-links a.lab:hover{background:var(--paper) !important;color:var(--ink) !important}
+body.has-topnav{padding-top:64px}
+@media (max-width:900px){
+  .topnav{position:static}
+  body.has-topnav{padding-top:0}
+  .topnav .nav-in{flex-wrap:wrap;row-gap:8px;padding:10px 16px}
+  .topnav .nav-links{width:100%;justify-content:flex-start;gap:6px 14px}
+  .topnav .nav-links a{font-size:13.5px !important}
 }
-h1,h2,h3{font-family:var(--serif) !important;font-weight:400 !important;letter-spacing:-.01em;color:var(--text)}
-a{color:inherit}
-::selection{background:#cdbb94;color:#15110d}
-.muted,.sub,footer{color:var(--muted) !important}
-/* panels */
-.expl,.card,.panel,.box,section.card,table,.kpi,.tile{
-  background:var(--card) !important;border:1px solid var(--border) !important;border-radius:18px !important;color:var(--text);
+
+/* Cabecera de cada página: título centrado con filete, como la portada personal */
+body.has-topnav > header{max-width:1040px !important;margin:0 auto !important;padding:44px 24px 6px !important;text-align:center}
+body.has-topnav > header h1{margin:0 0 10px !important;font-size:34px !important;font-weight:700 !important;letter-spacing:.5px !important;line-height:1.15}
+body.has-topnav > header::after{content:"";display:block;width:120px;border-top:1px solid var(--rule);margin:22px auto 0}
+body.has-topnav > header .sub{max-width:720px;margin-left:auto !important;margin-right:auto !important;font-style:italic;font-size:14.5px !important;line-height:1.6 !important}
+body.has-topnav > main{max-width:1040px !important;margin:0 auto !important;padding:14px 24px 40px !important}
+@media (max-width:600px){
+  body.has-topnav > header{padding:30px 16px 4px !important}
+  body.has-topnav > header h1{font-size:27px !important}
+  body.has-topnav > main{padding:10px 16px 36px !important}
 }
-table{border-radius:0 !important}
-th,td{border-color:var(--border) !important}
-/* controls */
-button,.btn,.mbtn,.tab,select,input,textarea{font-family:var(--sans) !important}
-input,select,textarea{
-  background:#242220 !important;color:var(--text) !important;border:1px solid var(--border) !important;border-radius:999px !important;
-}
-textarea{border-radius:14px !important}
-button,.btn,.tab,.mbtn{
-  border:0 !important;border-radius:999px !important;background:rgba(255,255,255,.12) !important;color:var(--text) !important;
-  font-weight:500 !important;transition:background .2s,transform .2s;
-}
-button:hover,.btn:hover,.tab:hover,.mbtn:hover{background:rgba(255,255,255,.2) !important}
-button.primary,.btn.primary,.tab.active,.tab.on,button.active{background:#f3f1ed !important;color:#15110d !important}
-a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:1px solid var(--text);outline-offset:4px}
-th{background:transparent !important;color:var(--muted) !important;font-family:var(--sans) !important;font-weight:500 !important;font-size:11px !important;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border) !important}
-tr:hover td{background:rgba(255,255,255,.03)}
-td input{border-radius:999px !important}
-.tag,.badge,.pill{color:#15110d}
+
+h1,h2,h3,h4{font-family:'CMU',Georgia,serif !important;color:var(--ink) !important;letter-spacing:0}
+h2{font-weight:700 !important}
+h3{font-weight:700 !important}
+p,li{line-height:1.65}
+a{color:var(--link)}
+.muted,.sub,.note,.st,footer,.legal{color:var(--muted) !important}
+.pos,.g{color:var(--green) !important} .neg,.r{color:var(--red) !important}
+
+/* Paneles = secciones separadas por filetes; tarjetas = recuadros finos */
+.panel,.expl,.box,section.card{background:transparent !important;border:0 !important;border-top:1px solid var(--soft) !important;border-radius:0 !important;padding:24px 0 18px !important;margin:0 !important;color:var(--ink)}
+main > .panel:first-child,main > .expl:first-child{border-top:0 !important}
+.panel h2,.sect{font-size:19px !important;font-weight:700 !important;margin:0 0 12px !important;letter-spacing:0 !important}
+.sect{border-top:1px solid var(--soft) !important;padding-top:24px !important;margin:12px 0 12px !important}
+.panel h3{font-size:16px !important}
+.card,.kpi,.tile,.chip{background:var(--paper) !important;border:1px solid var(--rule) !important;border-radius:0 !important;color:var(--ink) !important}
+.card h3{font-size:15px !important}
+.card .big,.card .rng,.kpi b{font-weight:700 !important}
+.card .row{color:var(--muted) !important}
+.kpis .kpi{border:0 !important;background:none !important}
+
+/* Botones y controles: como el botón "Go to Sharpe Lab" */
+button,.btn,.mbtn,.tab,.winbtn,.bigbtn,.addbtn,.sla-btn,.chart-btn{
+  font-family:'CMU',Georgia,serif !important;background:var(--paper) !important;color:var(--ink) !important;border:1px solid var(--rule) !important;border-radius:0 !important;
+  font-variant:small-caps;font-weight:400 !important;letter-spacing:.2px;transition:background .25s ease,color .25s ease;cursor:pointer}
+button:hover,.btn:hover,.tab:hover,.winbtn:hover,.bigbtn:hover,.addbtn:hover,.sla-btn:hover{background:var(--ink) !important;color:var(--paper) !important}
+button.active,button.primary,.btn.primary,.btn.on,.tab.active,.tab.on,.winbtn.active,.controls button.active,.bigbtn{background:var(--ink) !important;color:var(--paper) !important;border-color:var(--ink) !important}
+.bigbtn:hover{background:var(--paper) !important;color:var(--ink) !important}
+.chip button{border:0 !important;background:none !important;color:var(--muted) !important}
+.chip button:hover{color:var(--ink) !important}
+input,select,textarea{font-family:'CMU',Georgia,serif !important;background:var(--paper) !important;color:var(--ink) !important;border:1px solid var(--rule) !important;border-radius:0 !important}
+input[type=checkbox],input[type=radio]{accent-color:var(--ink)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:1px solid var(--link);outline-offset:3px}
+
+/* Tablas al estilo booktabs */
+table{background:transparent !important;border:0 !important;border-radius:0 !important;border-top:1.5px solid var(--rule) !important;border-bottom:1.5px solid var(--rule) !important;font-variant-numeric:tabular-nums}
+th{background:transparent !important;color:var(--ink) !important;font-family:'CMU',Georgia,serif !important;font-weight:700 !important;font-size:12.5px !important;letter-spacing:0 !important;text-transform:none !important;border-bottom:1px solid var(--rule) !important}
+td{border-bottom:1px solid #ececec !important;color:inherit}
+tr:last-child td{border-bottom:0 !important}
+tr:hover td{background:#f7f7f7}
+tr.fold-head:hover{background:#f7f7f7 !important}
+tr.selected,tr.hl td{background:#eef1f8 !important}
 @media (max-width:700px){table{display:block;overflow-x:auto;max-width:100%}}
-*{box-shadow:none !important}
+
+/* Etiquetas */
+.tag,.badge,.pill{background:transparent !important;color:var(--ink) !important;border:1px solid var(--rule) !important;border-radius:0 !important;font-variant:small-caps;font-weight:400 !important;letter-spacing:.3px;font-family:'CMU',Georgia,serif !important}
+.tag.lv,.badge.live,.badge.long{color:var(--green) !important;border-color:var(--green) !important}
+.badge.exit,.tag.no{color:var(--red) !important;border-color:var(--red) !important}
+.tag.ok{color:var(--green) !important;border-color:var(--green) !important}
+.warn{border-left:2px solid var(--ink) !important;font-style:italic}
+
+/* Gráficos sobre papel */
+.chart-wrap,.chartbox{background:var(--paper) !important}
+canvas{background:transparent}
 
 /* Analítica común (analytics.js): curva vs benchmark, drawdown, Sharpe rodante, operaciones */
-.sla-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.sla-grid{display:grid;grid-template-columns:1fr;gap:18px}
 @media (min-width:900px){.sla-grid{grid-template-columns:1fr 1fr}.sla-grid .sla-box:first-child{grid-column:1 / -1}}
 .sla-box{min-width:0}
 .sla-h{font-size:15px !important;margin:0 0 6px !important}
 .sla-wrap{position:relative;height:260px}
 .sla-grid .sla-box:first-child .sla-wrap{height:300px}
-.sla-note{color:var(--muted) !important;font-size:12.5px;line-height:1.5;margin:10px 0 0}
+.sla-note{color:var(--muted) !important;font-size:13px;line-height:1.55;margin:10px 0 0;font-style:italic}
 .sla-twrap{max-height:420px;overflow:auto;margin-top:8px}
-.sla-table{width:100%;border-collapse:collapse;font-size:12.5px}
-.sla-table th,.sla-table td{padding:6px 8px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border)}
+.sla-table{width:100%;border-collapse:collapse;font-size:13px}
+.sla-table th,.sla-table td{padding:6px 8px;text-align:left;white-space:nowrap}
 .sla-table .n{text-align:right}
 .sla-table .pos{color:var(--green)} .sla-table .neg{color:var(--red)}
-.sla-open{color:var(--accent)}
-.sla-btn{margin-top:10px;padding:6px 14px;font-size:12.5px;cursor:pointer}
+.sla-open{color:var(--link)}
+.sla-btn{margin-top:10px;padding:6px 16px;font-size:13.5px}
 .sla-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
-.sla-controls select{padding:5px 12px;font-size:13px}
+.sla-controls select{padding:5px 10px;font-size:13.5px}
 @media (max-width:700px){.sla-wrap{height:220px}.sla-grid .sla-box:first-child .sla-wrap{height:240px}.sla-twrap table{display:table}}
 
 /* Sello de frescura (frescura.js) y aviso legal */
-.fresh{display:inline-block;font-size:12.5px;color:var(--muted) !important;border:1px solid var(--border);border-radius:999px;padding:3px 12px;margin:8px 0 2px;line-height:1.4}
-.fresh::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:7px;vertical-align:1px}
-.fresh.stale{color:var(--red) !important;border-color:var(--red)}
+.fresh{display:inline-block;font-size:13px;color:var(--muted) !important;font-style:italic;border:0;padding:0;margin:10px 0 2px;line-height:1.4}
+.fresh::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:7px;vertical-align:2px}
+.fresh.stale{color:var(--red) !important}
 .fresh.stale::before{background:var(--red)}
-.legal{max-width:1200px;margin:0 auto;padding:0 24px 36px;font-size:11.5px;line-height:1.6;color:var(--muted) !important}
-.legal b{color:var(--text)}
+footer{max-width:1040px !important;margin:0 auto !important;padding:26px 24px 30px !important;color:var(--muted) !important;font-size:12.5px !important;line-height:1.6;border-top:1px solid var(--rule);text-align:center;font-style:italic}
+footer code{font-style:normal}
+.legal{max-width:1040px;margin:0 auto;padding:0 24px 40px;font-size:12px;line-height:1.6;color:var(--muted) !important;text-align:center;font-style:italic}
+.legal b{color:var(--ink)}
+footer a,.legal a,.note a,.sub a,p a,li a,td a{color:var(--link) !important;text-decoration:none;border-bottom:1px solid var(--link);transition:color .25s ease}
+footer a:hover,.legal a:hover,.note a:hover,.sub a:hover,p a:hover,li a:hover,td a:hover{color:var(--ink) !important}
 
-/* Menú común de secciones */
-.stratnav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
-.stratnav a{font-size:12.5px;font-weight:600;text-decoration:none;color:var(--muted);border:1px solid var(--border);border-radius:14px;padding:4px 12px;background:var(--card)}
-.stratnav a.on{color:var(--accent);border-color:var(--accent)}
-.stratnav a:hover{color:var(--text)}
+body.narrow > header,body.narrow > main,body.narrow > footer{max-width:720px !important}
+
+/* Menú de secciones antiguo, por si queda alguno fuera de la barra */
+.stratnav{display:flex;gap:6px 16px;flex-wrap:wrap}
+.back,.top a{color:var(--muted) !important}
+
+@media (prefers-reduced-motion:reduce){body{animation:none}html{scroll-behavior:auto}}
