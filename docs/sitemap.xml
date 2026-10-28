@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://davizz-dev13.github.io/sharpe-lab/</loc><lastmod>2026-10-21</lastmod></url>
-  <url><loc>https://davizz-dev13.github.io/sharpe-lab/dashboard.html</loc><lastmod>2026-10-21</lastmod></url>
   <url><loc>https://davizz-dev13.github.io/sharpe-lab/btc/</loc><lastmod>2026-10-21</lastmod></url>
   <url><loc>https://davizz-dev13.github.io/sharpe-lab/deudas/</loc><lastmod>2026-10-21</lastmod></url>
   <url><loc>https://davizz-dev13.github.io/sharpe-lab/interes/</loc><lastmod>2026-10-21</lastmod></url>
@@ -11,4 +10,5 @@
   <url><loc>https://davizz-dev13.github.io/sharpe-lab/semis/</loc><lastmod>2026-10-21</lastmod></url>
   <url><loc>https://davizz-dev13.github.io/sharpe-lab/semis8/</loc><lastmod>2026-10-21</lastmod></url>
   <url><loc>https://davizz-dev13.github.io/sharpe-lab/metodologia/</loc><lastmod>2026-10-28</lastmod></url>
+  <url><loc>https://davizz-dev13.github.io/sharpe-lab/sobre-mi/</loc><lastmod>2026-10-28</lastmod></url>
 </urlset>

@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sharpe Lab · Compound interest calculator</title>
-<meta name="description" content="Compound interest calculator: initial capital, monthly or weekly contributions, rate change from a chosen year and one-off month adjustments.">
+<title>Sharpe Lab · Calculadora de interés compuesto</title>
+<meta name="description" content="Calculadora de interés compuesto: capital inicial, aportaciones mensuales o semanales, cambios de aportación desde un año y ajustes de un mes concreto.">
 <link rel="icon" type="image/svg+xml" href="/sharpe-lab/favicon.svg">
 <link rel="canonical" href="https://davizz-dev13.github.io/sharpe-lab/interes/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Sharpe Lab">
-<meta property="og:title" content="Sharpe Lab · Compound interest calculator">
-<meta property="og:description" content="Compound interest calculator: initial capital, monthly or weekly contributions, rate change from a chosen year and one-off month adjustments.">
+<meta property="og:title" content="Sharpe Lab · Calculadora de interés compuesto">
+<meta property="og:description" content="Calculadora de interés compuesto: capital inicial, aportaciones mensuales o semanales, cambios de aportación desde un año y ajustes de un mes concreto.">
 <meta property="og:url" content="https://davizz-dev13.github.io/sharpe-lab/interes/">
 <meta property="og:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Sharpe Lab · Compound interest calculator">
-<meta name="twitter:description" content="Compound interest calculator: initial capital, monthly or weekly contributions, rate change from a chosen year and one-off month adjustments.">
+<meta name="twitter:title" content="Sharpe Lab · Calculadora de interés compuesto">
+<meta name="twitter:description" content="Calculadora de interés compuesto: capital inicial, aportaciones mensuales o semanales, cambios de aportación desde un año y ajustes de un mes concreto.">
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -71,80 +71,82 @@
 </head>
 <body>
 <header>
-  <h1>Compound interest</h1>
-  <div class="sub">The most boring and most powerful force in finance: interest earning interest. Play with the numbers.</div>
+  <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
+  <nav class="stratnav" aria-label="Secciones"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../optimizador/">Optimizador</a><a href="../interes/" class="on" aria-current="page">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a></nav>
+  <h1>Interés compuesto</h1>
+  <div class="sub">La fuerza más aburrida y más potente de las finanzas: intereses que generan intereses. Juega con los números.</div>
 </header>
 <main>
   <div class="panel">
-    <h2>Assumptions</h2>
+    <h2>Supuestos</h2>
     <div class="fields">
-      <div class="field"><label>Initial capital (&euro;)</label><input type="number" id="f-p0" min="0" step="500" value="10000"></div>
-      <div class="field"><label id="f-pmt-label">Monthly contribution (&euro;)</label><input type="number" id="f-pmt" min="0" step="50" value="300"></div>
-      <div class="field"><label>Contribution frequency</label>
+      <div class="field"><label>Capital inicial (&euro;)</label><input type="number" id="f-p0" min="0" step="500" value="10000"></div>
+      <div class="field"><label id="f-pmt-label">Aportación mensual (&euro;)</label><input type="number" id="f-pmt" min="0" step="50" value="300"></div>
+      <div class="field"><label>Frecuencia de aportación</label>
         <select id="f-freq">
-          <option value="m" selected>Monthly</option>
-          <option value="w">Weekly</option>
+          <option value="m" selected>Mensual</option>
+          <option value="w">Semanal</option>
         </select>
       </div>
-      <div class="field"><label>Annual rate (%)</label><input type="number" id="f-r" min="0" max="50" step="0.5" value="7"></div>
-      <div class="field"><label>Years</label><input type="number" id="f-y" min="1" max="60" step="1" value="20"></div>
-      <div class="field"><label>Compounding</label>
+      <div class="field"><label>Tipo anual (%)</label><input type="number" id="f-r" min="0" max="50" step="0.5" value="7"></div>
+      <div class="field"><label>Años</label><input type="number" id="f-y" min="1" max="60" step="1" value="20"></div>
+      <div class="field"><label>Capitalización</label>
         <select id="f-n">
-          <option value="1">Yearly</option>
-          <option value="4">Quarterly</option>
-          <option value="12" selected>Monthly</option>
-          <option value="52">Weekly</option>
-          <option value="365">Daily</option>
+          <option value="1">Anual</option>
+          <option value="4">Trimestral</option>
+          <option value="12" selected>Mensual</option>
+          <option value="52">Semanal</option>
+          <option value="365">Diaria</option>
         </select>
       </div>
     </div>
-    <div class="adj-title">Contribution adjustments</div>
+    <div class="adj-title">Cambios en la aportación</div>
     <div class="adj-form">
-      <div><label>Adjustment type</label>
+      <div><label>Tipo de cambio</label>
         <select id="f-adj-tipo">
-          <option value="tramo">From a year onwards</option>
-          <option value="puntual">One specific month</option>
+          <option value="tramo">Desde un año en adelante</option>
+          <option value="puntual">Un mes concreto</option>
         </select>
       </div>
-      <div><label>Year</label><input type="number" id="f-adj-ano" min="1" max="60" step="1" value="5"></div>
-      <div id="f-adj-mes-wrap" class="hidden"><label>Month</label>
+      <div><label>Año</label><input type="number" id="f-adj-ano" min="1" max="60" step="1" value="5"></div>
+      <div id="f-adj-mes-wrap" class="hidden"><label>Mes</label>
         <select id="f-adj-mes">
-          <option value="1">January</option><option value="2">February</option><option value="3">March</option>
-          <option value="4">April</option><option value="5">May</option><option value="6">June</option>
-          <option value="7">July</option><option value="8">August</option><option value="9">September</option>
-          <option value="10">October</option><option value="11">November</option><option value="12" selected>December</option>
+          <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+          <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+          <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+          <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12" selected>Diciembre</option>
         </select>
       </div>
-      <div><label>New contribution (&euro;/month)</label><input type="number" id="f-adj-cant" min="0" step="50" value="1300"></div>
-      <div class="full"><button class="addbtn" id="f-adj-add">Add adjustment</button></div>
+      <div><label>Nueva aportación (&euro;/mes)</label><input type="number" id="f-adj-cant" min="0" step="50" value="1300"></div>
+      <div class="full"><button class="addbtn" id="f-adj-add">Añadir cambio</button></div>
     </div>
     <div id="adj-list"></div>
-    <div class="note">Contributions go in at the end of each period (month or week). The rate converts to that period per the chosen compounding frequency. A specific-month adjustment wins over the bracket that month.</div>
+    <div class="note">Las aportaciones entran al final de cada periodo (mes o semana). El tipo se convierte a ese periodo según la capitalización elegida. Un cambio de un mes concreto manda sobre el tramo ese mes.</div>
   </div>
 
   <div class="panel">
-    <h2>Result</h2>
+    <h2>Resultado</h2>
     <div class="kpis">
-      <div class="kpi"><b id="k-final"></b><span>final capital</span></div>
-      <div class="kpi"><b id="k-aport"></b><span>total contributed</span></div>
-      <div class="kpi gain"><b id="k-int"></b><span>interest earned</span></div>
-      <div class="kpi"><b id="k-mult"></b><span>multiplier</span></div>
+      <div class="kpi"><b id="k-final"></b><span>capital final</span></div>
+      <div class="kpi"><b id="k-aport"></b><span>total aportado</span></div>
+      <div class="kpi gain"><b id="k-int"></b><span>intereses generados</span></div>
+      <div class="kpi"><b id="k-mult"></b><span>multiplicador</span></div>
     </div>
     <div class="chartbox"><canvas id="chart"></canvas></div>
   </div>
 
   <div class="panel">
-    <h2>Year by year</h2>
-    <div class="twrap"><table><thead><tr><th>Year</th><th>Contributed</th><th>Interest</th><th>Balance</th><th>% interest</th></tr></thead><tbody id="y-table"></tbody></table></div>
+    <h2>Año a año</h2>
+    <div class="twrap"><table><thead><tr><th>Año</th><th>Aportado</th><th>Intereses</th><th>Saldo</th><th>% intereses</th></tr></thead><tbody id="y-table"></tbody></table></div>
   </div>
 
-  <a class="back" href="../">&larr; Back to Sharpe Lab</a>
+  <a class="back" href="../">&larr; Volver a Sharpe Lab</a>
 </main>
-<footer>Simulation with a constant rate: reality does not move in a straight line. None of this is investment advice.</footer>
+<footer>Simulación con un tipo constante: la realidad no va en línea recta. Nada de esto es asesoramiento de inversión.</footer>
 <aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
 <script>
-const fmtEUR = v => '\u20ac'+v.toLocaleString('en-US',{maximumFractionDigits:0});
-const MONTHS=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+const fmtEUR = v => v.toLocaleString('es-ES',{maximumFractionDigits:0})+' \u20ac';
+const MONTHS=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 let ADJ=[];
 let chart=null;
 function contributionForYM(y, mo, base){
@@ -157,7 +159,7 @@ function renderAdj(){
   const box=document.getElementById('adj-list'); box.innerHTML='';
   ADJ.forEach((a,i)=>{
     const d=document.createElement('div'); d.className='chip';
-    const txt = a.type==='tramo' ? 'From year '+a.year+': '+fmtEUR(a.amount)+'/month' : MONTHS[a.month]+' of year '+a.year+': '+fmtEUR(a.amount);
+    const txt = a.type==='tramo' ? 'Desde el año '+a.year+': '+fmtEUR(a.amount)+'/mes' : MONTHS[a.month]+' del año '+a.year+': '+fmtEUR(a.amount);
     d.innerHTML='<span>'+txt+'</span><button data-i="'+i+'">&times;</button>';
     d.querySelector('button').addEventListener('click',e=>{ ADJ.splice(i,1); renderAdj(); calc(); });
     box.appendChild(d);
@@ -201,18 +203,18 @@ function calc(){
   if(chart) chart.destroy();
   chart=new Chart(document.getElementById('chart'),{type:'line',
     data:{labels, datasets:[
-      {label:'Interest', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#d4a85a', borderColor:'#1f1913', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
-      {label:'Contributed', data:sAport, backgroundColor:'rgba(255,255,255,.28)', borderColor:'#1f1913', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Intereses', data:sBal.map((b,i)=>b-sAport[i]), backgroundColor:'#d4a85a', borderColor:'#1f1913', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
+      {label:'Aportado', data:sAport, backgroundColor:'rgba(255,255,255,.28)', borderColor:'#1f1913', borderWidth:1, fill:true, pointRadius:0, stack:'s'},
     ]},
     options:{maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
-      scales:{x:{title:{display:true,text:'Years',color:'rgba(255,255,255,.56)'},ticks:{color:'rgba(255,255,255,.56)',maxTicksLimit:12},grid:{color:'rgba(255,255,255,.08)'},stacked:true},
+      scales:{x:{title:{display:true,text:'Años',color:'rgba(255,255,255,.56)'},ticks:{color:'rgba(255,255,255,.56)',maxTicksLimit:12},grid:{color:'rgba(255,255,255,.08)'},stacked:true},
               y:{ticks:{color:'rgba(255,255,255,.56)',callback:v=>(v/1000)+'k'},grid:{color:'rgba(255,255,255,.08)'},stacked:true}},
       plugins:{legend:{labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10}}},
         tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmtEUR(c.parsed.y)}}}}});
 }
 ['f-p0','f-pmt','f-r','f-y','f-n','f-freq'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 document.getElementById('f-freq').addEventListener('input',e=>{
-  document.getElementById('f-pmt-label').textContent = e.target.value==='w' ? 'Weekly contribution (\u20ac)' : 'Monthly contribution (\u20ac)';
+  document.getElementById('f-pmt-label').textContent = e.target.value==='w' ? 'Aportación semanal (\u20ac)' : 'Aportación mensual (\u20ac)';
 });
 document.getElementById('f-adj-tipo').addEventListener('change',e=>{
   document.getElementById('f-adj-mes-wrap').classList.toggle('hidden', e.target.value!=='puntual');

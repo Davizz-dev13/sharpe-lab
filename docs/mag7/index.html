@@ -76,14 +76,14 @@
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/" class="on">Mag7</a><a href="../metodologia/">Metodología</a></nav>
+  <nav class="stratnav" aria-label="Secciones"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/" class="on" aria-current="page">Mag7</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a></nav>
   <h1>Estrategia Semanal &middot; SMA200W + RSI / Recorte 5%</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
   <div class="sub" id="ruletext"></div>
 </header>
 <main>
   <div class="panel">
-    <h2>Live (paper) <span class="badge live">desde el 8 sep 2026</span></h2>
+    <h2>En vivo (paper) <span class="badge live">desde el 8 sep 2026</span></h2>
     <div class="kpis" id="live-kpis"></div>
     <table id="live-table"><thead><tr><th>Activo</th><th>Estado</th><th>Entrada</th><th>Precio entrada</th><th>Precio actual</th><th>No realizado</th></tr></thead><tbody></tbody></table>
   </div>
@@ -175,7 +175,7 @@ fetch('mag7.json').then(r=>r.json()).then(d=>{
     document.getElementById('bt-kpis').innerHTML =
       '<div class="kpi"><b>'+fmtPct(st.total_return)+'</b>retorno total</div>'+
       '<div class="kpi"><b>'+fmtPct(bh.total_return)+'</b>B&amp;H</div>'+
-      '<div class="kpi"><b>'+st.sharpe+'</b>Sharpe (B&amp;H '+(bh.sharpe==null?'-':bh.sharpe)+')</div>'+
+      '<div class="kpi"><b>'+(st.sharpe==null?'-':st.sharpe)+'</b>Sharpe (B&amp;H '+(bh.sharpe==null?'-':bh.sharpe)+')</div>'+
       '<div class="kpi"><b>'+st.max_dd+'%</b>Max DD (B&amp;H '+bh.max_dd+'%)</div>'+
       '<div class="kpi"><b>'+fmtPct(st.ytd_return)+'</b>YTD</div>';
     new Chart(document.getElementById('bt-chart'), {data:{datasets:[

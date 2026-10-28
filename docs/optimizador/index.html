@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sharpe Lab · Portfolio optimizer (min CVaR)</title>
-<meta name="description" content="Portfolio optimizer that minimizes CVaR subject to a return target: per-asset limits, efficient frontier and comparison with your portfolio and minimum variance.">
+<title>Sharpe Lab · Optimizador de carteras (mínimo CVaR)</title>
+<meta name="description" content="Optimizador de carteras que minimiza el CVaR para una rentabilidad objetivo: límites por activo, frontera eficiente y comparación con tu cartera.">
 <link rel="icon" type="image/svg+xml" href="/sharpe-lab/favicon.svg">
 <link rel="canonical" href="https://davizz-dev13.github.io/sharpe-lab/optimizador/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Sharpe Lab">
-<meta property="og:title" content="Sharpe Lab · Portfolio optimizer (min CVaR)">
-<meta property="og:description" content="Portfolio optimizer that minimizes CVaR subject to a return target: per-asset limits, efficient frontier and comparison with your portfolio and minimum variance.">
+<meta property="og:title" content="Sharpe Lab · Optimizador de carteras (mínimo CVaR)">
+<meta property="og:description" content="Optimizador de carteras que minimiza el CVaR para una rentabilidad objetivo: límites por activo, frontera eficiente y comparación con tu cartera.">
 <meta property="og:url" content="https://davizz-dev13.github.io/sharpe-lab/optimizador/">
 <meta property="og:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Sharpe Lab · Portfolio optimizer (min CVaR)">
-<meta name="twitter:description" content="Portfolio optimizer that minimizes CVaR subject to a return target: per-asset limits, efficient frontier and comparison with your portfolio and minimum variance.">
+<meta name="twitter:title" content="Sharpe Lab · Optimizador de carteras (mínimo CVaR)">
+<meta name="twitter:description" content="Optimizador de carteras que minimiza el CVaR para una rentabilidad objetivo: límites por activo, frontera eficiente y comparación con tu cartera.">
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -76,31 +76,33 @@
 </head>
 <body>
 <header>
-  <h1>Portfolio optimizer &middot; min CVaR</h1>
+  <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
+  <nav class="stratnav" aria-label="Secciones"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../optimizador/" class="on" aria-current="page">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a></nav>
+  <h1>Optimizador de carteras &middot; mínimo CVaR</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
-  <div class="sub">Pick assets, limits and a return target. The optimizer minimizes the average loss of the worst stretch of historical days (CVaR) for that target, solving a linear program. It compares against your portfolio and the max-CAGR corner.</div>
+  <div class="sub">Elige activos, límites y una rentabilidad objetivo. El optimizador minimiza la pérdida media de los peores días históricos (CVaR) para ese objetivo resolviendo un programa lineal, y lo compara con tu cartera y con la esquina de máximo CAGR.</div>
 </header>
 <main>
   <div class="grid2">
     <div class="panel">
-      <h2>1 &middot; Your current portfolio</h2>
-      <div class="twrap"><table class="ctab" id="cur-table"><thead><tr><th>Asset</th><th>Weight %</th></tr></thead><tbody></tbody></table></div>
+      <h2>1 &middot; Tu cartera actual</h2>
+      <div class="twrap"><table class="ctab" id="cur-table"><thead><tr><th>Activo</th><th>Peso %</th></tr></thead><tbody></tbody></table></div>
       <div class="note" id="cur-note"></div>
     </div>
     <div class="panel">
-      <h2>2 &middot; Universe and limits</h2>
-      <div class="twrap"><table class="ctab" id="lim-table"><thead><tr><th>Asset</th><th>Include</th><th>Max %</th></tr></thead><tbody></tbody></table></div>
+      <h2>2 &middot; Universo y límites</h2>
+      <div class="twrap"><table class="ctab" id="lim-table"><thead><tr><th>Activo</th><th>Incluir</th><th>Máx. %</th></tr></thead><tbody></tbody></table></div>
       <div style="margin-top:12px;font-size:13px">
-        <label style="font-size:12px;color:var(--mut);display:block;margin-bottom:4px">Add your own ticker</label>
-        <input type="text" id="custom-ticker" placeholder="e.g. DOGE, ETH, SOL" style="width:130px;padding:5px 8px;border:1px solid var(--border);background:var(--panel);color:var(--fg);font-family:'Hanken Grotesk',sans-serif;font-size:13px;text-transform:uppercase">
-        <button id="custom-add" style="padding:6px 14px;background:var(--yellow);border:1px solid var(--border);font-family:'IM Fell DW Pica',sans-serif;font-size:11px;cursor:pointer">Add</button>
-        <div class="note" id="custom-status">Built-in universe covers the usual stocks, ETFs, commodities and crypto. Other crypto loads live here (Coinbase USD pairs); anything else can join the nightly data on request.</div>
+        <label style="font-size:12px;color:var(--mut);display:block;margin-bottom:4px">Añade tu propio ticker</label>
+        <input type="text" id="custom-ticker" placeholder="p. ej. DOGE, ETH, SOL" style="width:130px;padding:5px 8px;border:1px solid var(--border);background:var(--panel);color:var(--fg);font-family:'Hanken Grotesk',sans-serif;font-size:13px;text-transform:uppercase">
+        <button id="custom-add" style="padding:6px 14px;background:var(--yellow);border:1px solid var(--border);font-family:'IM Fell DW Pica',sans-serif;font-size:11px;cursor:pointer">Añadir</button>
+        <div class="note" id="custom-status">El universo incluye las acciones, ETF, materias primas y criptos habituales. Otras criptos se cargan aquí en directo (pares USD de Coinbase); cualquier otra cosa se puede añadir a los datos nocturnos si me la pides.</div>
       </div>
       <div style="margin-top:12px;font-size:13px">
-        Expected return target: <input type="number" id="ret-obj" min="0" max="50" step="0.5" value="5" style="width:58px"> % yearly
+        Rentabilidad objetivo: <input type="number" id="ret-obj" min="0" max="50" step="0.5" value="5" style="width:58px"> % anual
       </div>
       <div style="margin-top:10px;font-size:13px">
-        CVaR confidence:
+        Confianza del CVaR:
         <select id="alpha-sel">
           <option value="0.10">90%</option>
           <option value="0.05" selected>95%</option>
@@ -108,37 +110,37 @@
         </select>
       </div>
       <div style="margin-top:10px;font-size:13px">
-        Backtest window:
-        <button class="winbtn active" data-win="5">5Y</button>
-        <button class="winbtn" data-win="10">10Y</button>
-        <button class="winbtn" data-win="20">20Y</button>
+        Ventana histórica:
+        <button class="winbtn active" data-win="5">5A</button>
+        <button class="winbtn" data-win="10">10A</button>
+        <button class="winbtn" data-win="20">20A</button>
       </div>
       <div class="note" id="win-note" style="display:none"></div>
-      <div class="note" id="mean-note">With no target, minimum CVaR is always 100% cash: minimizing risk while asking nothing in return is not a strategy. Each asset's expected return is its 5-year historical mean.</div>
-      <button class="bigbtn" id="solve-btn">Optimize</button>
-      <span id="spinner">solving the LP&hellip;</span>
+      <div class="note" id="mean-note">Sin objetivo, el mínimo CVaR siempre es 100 % cash: minimizar el riesgo sin pedir nada a cambio no es una estrategia. La rentabilidad esperada de cada activo es su media histórica de 5 años.</div>
+      <button class="bigbtn" id="solve-btn">Optimizar</button>
+      <span id="spinner">resolviendo el programa lineal&hellip;</span>
       <div class="err" id="err-box"></div>
     </div>
   </div>
 
   <div id="results" style="display:none">
     <div class="panel">
-      <h2>Optimal weights <span class="badge" id="res-badge"></span></h2>
+      <h2>Pesos óptimos <span class="badge" id="res-badge"></span></h2>
       <div class="chartbox"><canvas id="alloc-chart"></canvas></div>
-      <div class="twrap"><table id="w-table"><thead><tr><th>Asset</th><th>Your portfolio</th><th>Min CVaR</th><th>Max CAGR</th><th>Recommended</th></tr></thead><tbody></tbody></table></div>
+      <div class="twrap"><table id="w-table"><thead><tr><th>Activo</th><th>Tu cartera</th><th>Min CVaR</th><th>Max CAGR</th><th>Recomendada</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
-      <h2>Metrics (<span id="m-span">5 years</span>, historical data) <span class="badge">past returns do not guarantee future results</span></h2>
-      <div class="twrap"><table id="m-table"><thead><tr><th>Portfolio</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>Daily CVaR</th></tr></thead><tbody></tbody></table></div>
-      <p style="font-size:12px;color:var(--mut);margin:8px 0 0">Sharpe is computed on returns in excess of cash (BIL / 3-month T-bill) on the same day; CAGR and Sharpe are annualized with the real number of days per year in the window.</p>
+      <h2>Métricas (<span id="m-span">5 años</span>, datos históricos) <span class="badge">la rentabilidad pasada no garantiza la futura</span></h2>
+      <div class="twrap"><table id="m-table"><thead><tr><th>Cartera</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>CVaR diario</th></tr></thead><tbody></tbody></table></div>
+      <p style="font-size:12px;color:var(--mut);margin:8px 0 0">El Sharpe se calcula sobre la rentabilidad en exceso del cash (BIL / letra del Tesoro a 3 meses) del mismo día; CAGR y Sharpe se anualizan con los días reales por año de la ventana.</p>
     </div>
     <div class="panel">
-      <h2>Efficient frontier <span class="badge" id="ef-badge"></span></h2>
+      <h2>Frontera eficiente <span class="badge" id="ef-badge"></span></h2>
       <div class="chartbox tall"><canvas id="ef-chart"></canvas></div>
-      <div class="note">Each dot on the curve is the least risky portfolio the LP can build for one return target, with your selected assets and limits. The curve is the best achievable trade-off: risk on the horizontal axis (average loss of the worst days, lower is safer), expected yearly return on the vertical. The markers show where the four portfolios sit. The ringed Recommended point is where a line drawn from the Min CVaR return level would touch the curve at its steepest: the best extra return per unit of extra risk above the safe portfolio. Dots are solved on sampled days for speed, so the curve is a close sketch, not the exact LP of the main result.</div>
+      <div class="note">Cada punto de la curva es la cartera menos arriesgada que el programa lineal puede construir para un objetivo de rentabilidad, con tus activos y límites. La curva es el mejor equilibrio posible: el riesgo en el eje horizontal (pérdida media de los peores días; cuanto menos, más segura) y la rentabilidad anual esperada en el vertical. Los marcadores indican dónde está cada una de las cuatro carteras. El punto Recomendada, con anillo, es donde una recta trazada desde el nivel de rentabilidad de Min CVaR tocaría la curva con más pendiente: la mejor rentabilidad extra por unidad de riesgo extra sobre la cartera segura. Los puntos se resuelven con días muestreados para ir rápido, así que la curva es un esbozo cercano, no el programa lineal exacto del resultado principal.</div>
     </div>
     <div class="panel">
-      <h2>Growth of &euro;1</h2>
+      <h2>Crecimiento de 1 &euro;</h2>
       <div class="chartbox tall"><canvas id="eq-chart"></canvas></div>
     </div>
     <div class="panel">
@@ -148,14 +150,14 @@
   </div>
 
   <div class="panel expl">
-    <h2>How it works</h2>
-    <p>Variance treats gains and losses the same, but nobody cries about gains. <b>CVaR</b> (Conditional Value at Risk) only looks at what hurts: the average loss of the worst days. At 95% confidence, it is the mean of the worst 5% of historical scenarios.</p>
-    <p>Minimizing CVaR looks like an impossible statistics problem, but Rockafellar and Uryasev proved it turns <b>exactly</b> into a linear program: each historical day is a scenario, each scenario adds one constraint, and the simplex finds the optimal corner. The weights that come out are the ones that would have best protected against the worst stretches of the selected window, within your limits.</p>
-    <p>The piece that makes it useful is the <b>return target</b>: without it, the mathematically correct answer is boring (100% cash, which almost never loses). By demanding a minimum expected return, the LP is forced to take risk, and the simplex finds the corner that does it with the least possible pain. It is the usual efficient frontier, just measuring risk on the side that matters.</p>
-    <p>The four portfolios tell the story. <b>Your portfolio</b> is where you start. <b>Min CVaR</b> is the LP's safest way to reach your target. <b>Max CAGR</b> is the other extreme: fill the best historical performers up to their caps and ignore risk. <b>Recommended</b> sits between them, the point of the frontier with the best extra return per unit of extra risk above the safe portfolio. Comparing the four shows the difference between "doesn't move", "doesn't crash", and "chases return".</p>
-    <p class="note">Scenarios: historical days from the selected window (resampled so the LP stays fast on mobile). Cash is a US T-bill ETF (BIL). None of this is investment advice.</p>
+    <h2>Cómo funciona</h2>
+    <p>La varianza trata igual las ganancias que las pérdidas, pero nadie llora por ganar. El <b>CVaR</b> (Conditional Value at Risk) solo mira lo que duele: la pérdida media de los peores días. Con un 95 % de confianza, es la media del peor 5 % de los escenarios históricos.</p>
+    <p>Minimizar el CVaR parece un problema estadístico imposible, pero Rockafellar y Uryasev demostraron que se convierte <b>exactamente</b> en un programa lineal: cada día histórico es un escenario, cada escenario añade una restricción y el símplex encuentra la esquina óptima. Los pesos que salen son los que mejor habrían protegido frente a los peores tramos de la ventana elegida, dentro de tus límites.</p>
+    <p>Lo que lo hace útil es la <b>rentabilidad objetivo</b>: sin ella, la respuesta matemáticamente correcta es aburrida (100 % cash, que casi nunca pierde). Al exigir una rentabilidad esperada mínima, el programa lineal tiene que asumir riesgo, y el símplex encuentra la esquina que lo hace con el menor dolor posible. Es la frontera eficiente de siempre, pero midiendo el riesgo por el lado que importa.</p>
+    <p>Las cuatro carteras cuentan la historia. <b>Tu cartera</b> es el punto de partida. <b>Min CVaR</b> es la forma más segura de llegar a tu objetivo. <b>Max CAGR</b> es el otro extremo: llenar hasta su límite los activos que mejor lo han hecho y olvidarse del riesgo. <b>Recomendada</b> está entre ambas: el punto de la frontera con más rentabilidad extra por unidad de riesgo extra sobre la cartera segura. Comparar las cuatro enseña la diferencia entre "no se mueve", "no se hunde" y "persigue rentabilidad".</p>
+    <p class="note">Escenarios: días históricos de la ventana elegida (muestreados para que el programa lineal vaya rápido en el móvil). El cash es un ETF de letras del Tesoro de EE. UU. (BIL). Nada de esto es asesoramiento de inversión.</p>
   </div>
-  <a class="back" href="../">&larr; Back to Sharpe Lab</a>
+  <a class="back" href="../">&larr; Volver a Sharpe Lab</a>
 </main>
 <footer id="foot"></footer>
 <aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
@@ -295,21 +297,21 @@ function buildTables(){
 function readCur(tickers){
   let raw={}, tot=0;
   tickers.forEach(t=>{ const v=Math.max(0,parseFloat(document.getElementById('cur-'+t).value)||0); raw[t]=v; tot+=v; });
-  if(tot<=0){ const w={}; tickers.forEach(t=>w[t]=1/tickers.length); return {w, note:'Weights normalized to equal parts (they summed 0).'}; }
+  if(tot<=0){ const w={}; tickers.forEach(t=>w[t]=1/tickers.length); return {w, note:'Pesos repartidos a partes iguales (sumaban 0).'}; }
   const w={}; tickers.forEach(t=>w[t]=raw[t]/tot);
   let dropped=0;
   DATA.assets.forEach(a=>{
     if(tickers.includes(a.short)) return;
     dropped += Math.max(0,parseFloat((document.getElementById('cur-'+a.short)||{}).value)||0);
   });
-  let note = Math.abs(tot-100)>0.5 ? 'Weights normalized (they summed '+tot.toFixed(0)+'%).' : '';
-  if(dropped>0.5) note += (note?' ':'') + dropped.toFixed(0)+'% of your portfolio sits in assets without full history in this window; it was normalized over what remains.';
+  let note = Math.abs(tot-100)>0.5 ? 'Pesos normalizados (sumaban '+tot.toFixed(0)+' %).' : '';
+  if(dropped>0.5) note += (note?' ':'') + dropped.toFixed(0)+'% de tu cartera está en activos sin historia completa en esta ventana; se ha normalizado sobre el resto.';
   return {w, note};
 }
 function render(wCur, wOpt, wMax, wRec, tickers, alpha){
   document.getElementById('results').style.display='block';
   charts.forEach(c=>c.destroy()); charts=[];
-  const names = ['Your portfolio','Min CVaR','Max CAGR','Recommended'];
+  const names = ['Tu cartera','Min CVaR','Max CAGR','Recomendada'];
   const sets = [wCur,wOpt,wMax,wRec];
   const pc = ['#c98a12','#d96b2a','#2f6fd0','#b6bc86'];
 
@@ -437,7 +439,7 @@ function renderFrontier(pts, markers){
   const pc=['#c98a12','#d96b2a','#2f6fd0','#b6bc86'];
   let xMax=0; pts.forEach(p=>{if(p.x>xMax)xMax=p.x;}); markers.forEach(m=>{if(m.x>xMax)xMax=m.x;});
   xMax=Math.max(0.1, xMax*1.15);
-  const sets=[{type:'line',label:'Efficient frontier',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
+  const sets=[{type:'line',label:'Frontera eficiente',data:pts,borderColor:'#a68a5b',backgroundColor:'#a68a5b',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#a68a5b',tension:0.15,fill:false}];
   markers.forEach((m,i)=>{
     // sticker halo: bigger cream disc behind the colored marker
     sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#1f1913',borderWidth:2.5,pointRadius:8,pointStyle:'circle',pointHoverRadius:10});
@@ -448,8 +450,8 @@ function renderFrontier(pts, markers){
   });
   charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},
     options:{maintainAspectRatio:false,
-    scales:{x:{type:'linear',min:0,suggestedMax:xMax,title:{display:true,text:'Daily CVaR % (avg loss of worst days, lower = safer)',color:'rgba(255,255,255,.56)',font:{size:10}},ticks:{color:'rgba(255,255,255,.56)',callback:v=>(Math.round(v*10)/10)+'%'},grid:{color:'rgba(255,255,255,.08)'}},
-            y:{title:{display:true,text:'Expected yearly return %',color:'rgba(255,255,255,.56)',font:{size:10}},ticks:{color:'rgba(255,255,255,.56)',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.08)'}}},
+    scales:{x:{type:'linear',min:0,suggestedMax:xMax,title:{display:true,text:'CVaR diario % (pérdida media de los peores días; menos = más seguro)',color:'rgba(255,255,255,.56)',font:{size:10}},ticks:{color:'rgba(255,255,255,.56)',callback:v=>(Math.round(v*10)/10)+'%'},grid:{color:'rgba(255,255,255,.08)'}},
+            y:{title:{display:true,text:'Rentabilidad anual esperada %',color:'rgba(255,255,255,.56)',font:{size:10}},ticks:{color:'rgba(255,255,255,.56)',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.08)'}}},
     plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'rgba(255,255,255,.56)',boxWidth:10,font:{size:10},filter:(it,ch)=>!ch.datasets[it.datasetIndex]._halo}},
       tooltip:{filter:c=>!c.dataset._halo,callbacks:{label:c=>c.dataset.label+': return '+c.parsed.y.toFixed(1)+'% / daily CVaR '+c.parsed.x.toFixed(2)+'%'}}}}}));
 }
@@ -463,18 +465,18 @@ async function addCustom(symRaw){
   const st=document.getElementById('custom-status');
   const sym=(symRaw||'').trim().toUpperCase();
   if(!sym) return;
-  if(!/^[A-Z0-9.\-]{1,12}$/.test(sym)){ st.textContent='That ticker does not look valid.'; return; }
+  if(!/^[A-Z0-9.\-]{1,12}$/.test(sym)){ st.textContent='Ese ticker no parece válido.'; return; }
   const existing=DATA.assets.find(a=>a.short===sym || a.ticker===sym);
   if(existing){
     const cb=document.getElementById('inc-'+existing.short);
     if(cb && !cb.checked){ cb.checked=true; cb.dispatchEvent(new Event('change')); }
-    st.textContent=existing.short+' is already in the universe: included.';
+    st.textContent=existing.short+' ya está en el universo: incluido.';
     saveCustom(existing.short);
     return;
   }
-  st.textContent='Looking for '+sym+'...';
+  st.textContent='Buscando '+sym+'...';
   try{
-    st.textContent='Downloading '+sym+'-USD daily history (Coinbase)...';
+    st.textContent='Descargando el histórico diario de '+sym+'-USD (Coinbase)...';
     const DAY=86400000, now=Date.now();
     const px=new Map();
     let cur=now-1826*DAY;
@@ -483,7 +485,7 @@ async function addCustom(symRaw){
       const url='https://api.exchange.coinbase.com/products/'+sym+'-USD/candles?granularity=86400&start='+new Date(cur).toISOString()+'&end='+new Date(chunkEnd).toISOString();
       const r=await fetch(url);
       if(r.status===404){
-        st.textContent=sym+' is not in the nightly universe and has no USD pair on Coinbase. Stocks and ETFs can join the nightly data on request.';
+        st.textContent=sym+' no está en el universo nocturno ni tiene par USD en Coinbase. Las acciones y ETF se pueden añadir a los datos nocturnos si me las pides.';
         return;
       }
       if(!r.ok) throw new Error('HTTP '+r.status);
@@ -494,7 +496,7 @@ async function addCustom(symRaw){
     const n=DATA.dates.length;
     const closes=new Array(n); let last=null, covered=0;
     for(let i=0;i<n;i++){ const d=DATA.dates[i]; if(px.has(d)){ last=px.get(d); covered++; } closes[i]=last; }
-    if(covered < n*0.6){ st.textContent=sym+': only '+covered+' days of history, too little for the optimizer.'; return; }
+    if(covered < n*0.6){ st.textContent=sym+': solo '+covered+' días de historia, demasiado poco para el optimizador.'; return; }
     const lastCovered=[...px.keys()].sort().pop();
     if((new Date(DATA.dates[n-1])-new Date(lastCovered))/864e5 > 10){ st.textContent=sym+': data looks stale (last quote '+lastCovered+'). Skipped.'; return; }
     const rets=new Array(n).fill(0);
@@ -506,9 +508,9 @@ async function addCustom(symRaw){
     const cb=document.getElementById('inc-'+sym);
     if(cb){ cb.checked=true; cb.dispatchEvent(new Event('change')); }
     saveCustom(sym);
-    st.textContent=sym+' added live from Coinbase, '+covered+' days of history.';
+    st.textContent=sym+' añadido en directo desde Coinbase, '+covered+' días de historia.';
   }catch(e){
-    st.textContent='Could not load '+sym+' ('+e.message+'). The optimizer keeps working with the loaded assets.';
+    st.textContent='No se pudo cargar '+sym+' ('+e.message+'). El optimizador sigue funcionando con los activos cargados.';
   }
 }
 
@@ -552,7 +554,7 @@ function applyEligibility(ok){
       if(!el) return;
       el.disabled=true;
       if(el.type==='checkbox') el.checked=false;
-      const row=el.closest('tr'); if(row){ row.style.opacity='0.4'; row.title='No full history in this window'; }
+      const row=el.closest('tr'); if(row){ row.style.opacity='0.4'; row.title='Sin historia completa en esta ventana'; }
     });
   });
 }
@@ -564,7 +566,7 @@ async function switchWindow(w){
   const vals=saveInputs();
   try{
     if(w>5 && !LONG){
-      note.style.display='block'; note.textContent='Downloading '+w+' years of daily history...';
+      note.style.display='block'; note.textContent='Descargando '+w+' años de histórico diario...';
       LONG=await (await fetch('optimizador-long.json')).json();
     }
     DATA = w===5 ? DATA5 : sliceLong(w);
@@ -578,22 +580,22 @@ async function switchWindow(w){
     if(ok) applyEligibility(ok);
     restoreInputs(vals);
     document.getElementById('results').style.display='none';
-    document.getElementById('foot').textContent='Data: '+DATA.assets.map(a=>a.ticker).join(', ')+' · '+DATA.dates.length+' days · Generated: '+DATA.generated_at;
-    document.getElementById('m-span').textContent=w+' years';
-    document.getElementById('mean-note').textContent='With no target, minimum CVaR is always 100% cash: minimizing risk while asking nothing in return is not a strategy. Each asset\'s expected return is its '+w+'-year historical mean.';
+    document.getElementById('foot').textContent='Datos: '+DATA.assets.map(a=>a.ticker).join(', ')+' · '+DATA.dates.length+' días · Generado: '+DATA.generated_at;
+    document.getElementById('m-span').textContent=w+' años';
+    document.getElementById('mean-note').textContent='Sin objetivo, el mínimo CVaR siempre es 100 % cash: minimizar el riesgo sin pedir nada a cambio no es una estrategia. La rentabilidad esperada de cada activo es su media histórica de '+w+' años.';
     if(w===5){ note.style.display='none'; note.textContent=''; }
     else{
       const excl=DATA.assets.filter(a=>!ok[a.short]).map(a=>a.short);
       let customs=[]; try{ customs=JSON.parse(localStorage.getItem('opt-custom')||'[]'); }catch(e){}
-      let txt=w+'Y window: assets without the full '+w+' years are excluded: '+(excl.join(', ')||'none')+'.';
-      if(w>=20) txt+=' Commodities is the DBC broad basket here, and Cash before May 2007 accrues the 3-month T-bill rate (BIL did not exist yet).';
-      else txt+=' Commodities is the DBC broad basket in this window.';
-      if(customs.length) txt+=' Your added tickers ('+customs.join(', ')+') are only available in the 5Y window.';
-      txt+=' No invented backfill.';
+      let txt='Ventana de '+w+' años: se excluyen los activos sin los '+w+' años completos: '+(excl.join(', ')||'ninguno')+'.';
+      if(w>=20) txt+=' Aquí Commodities es la cesta amplia DBC, y el cash antes de mayo de 2007 devenga el tipo de la letra del Tesoro a 3 meses (BIL aún no existía).';
+      else txt+=' En esta ventana Commodities es la cesta amplia DBC.';
+      if(customs.length) txt+=' Tus tickers añadidos ('+customs.join(', ')+') solo están disponibles en la ventana de 5 años.';
+      txt+=' Sin rellenar datos inventados.';
       note.textContent=txt;
     }
   }catch(e){
-    note.style.display='block'; note.textContent='Could not load the '+w+'Y data ('+e.message+').';
+    note.style.display='block'; note.textContent='No se pudieron cargar los datos de '+w+' años ('+e.message+').';
   }
 }
 
@@ -602,7 +604,7 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
   calibrate();
   (window.SLFresh ? SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36) : document.addEventListener('DOMContentLoaded', () => SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36)));
   d.assets.forEach(a=>TICK[a.short]=a.ticker);
-  document.getElementById('foot').textContent='Data: '+d.assets.map(a=>a.ticker).join(', ')+' · '+d.dates.length+' days · Generated: '+d.generated_at;
+  document.getElementById('foot').textContent='Datos: '+d.assets.map(a=>a.ticker).join(', ')+' · '+d.dates.length+' días · Generado: '+d.generated_at;
   buildTables();
   document.querySelectorAll('.winbtn').forEach(b=>b.addEventListener('click',()=>switchWindow(b.dataset.win)));
   document.getElementById('custom-add').addEventListener('click',()=>addCustom(document.getElementById('custom-ticker').value));
@@ -615,10 +617,10 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
   btn.addEventListener('click',()=>{
     const err=document.getElementById('err-box'); err.style.display='none';
     const tickers=DATA.assets.map(a=>a.short).filter(t=>document.getElementById('inc-'+t).checked);
-    if(tickers.length<2){ err.textContent='Pick at least 2 assets.'; err.style.display='block'; return; }
+    if(tickers.length<2){ err.textContent='Elige al menos 2 activos.'; err.style.display='block'; return; }
     const maxW={}; tickers.forEach(t=>maxW[t]=Math.min(100,Math.max(1,parseFloat(document.getElementById('max-'+t).value)||100))/100);
     const capSum=Object.values(maxW).reduce((a,b)=>a+b,0);
-    if(capSum<0.999){ err.textContent='Max limits sum '+(capSum*100).toFixed(0)+'%: cannot reach 100% invested. Raise some limit.'; err.style.display='block'; return; }
+    if(capSum<0.999){ err.textContent='Los límites máximos suman '+(capSum*100).toFixed(0)+' %: no se puede llegar al 100 % invertido. Sube algún límite.'; err.style.display='block'; return; }
     const alpha=parseFloat(document.getElementById('alpha-sel').value);
     btn.disabled=true; document.getElementById('spinner').style.display='inline';
     setTimeout(()=>{
@@ -629,24 +631,24 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const muReq=Math.pow(1+retAn,1/DAYS_YR)-1;
         const gDaily=greedyMaxReturn(tickers,maxW);
         const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
-        if(!wOpt){ err.textContent='No solution: that target is too high for these assets, limits and window. Max reachable right now: ~'+(gDaily*DAYS_YR*100).toFixed(1)+'% yearly. Lower the target or raise a max.'; err.style.display='block'; return; }
-        if(muReq>0.85*gDaily){ const cn=document.getElementById('cur-note'); cn.textContent=(cn.textContent?cn.textContent+' ':'')+'Heads-up: this target is near the max reachable (~'+(gDaily*DAYS_YR*100).toFixed(1)+'% yearly), so Min CVaR is forced into an extreme mix to reach it.'; }
+        if(!wOpt){ err.textContent='Sin solución: ese objetivo es demasiado alto para estos activos, límites y ventana. Máximo alcanzable ahora: ~'+(gDaily*DAYS_YR*100).toFixed(1)+' % anual. Baja el objetivo o sube algún máximo.'; err.style.display='block'; return; }
+        if(muReq>0.85*gDaily){ const cn=document.getElementById('cur-note'); cn.textContent=(cn.textContent?cn.textContent+' ':'')+'Ojo: este objetivo está cerca del máximo alcanzable (~'+(gDaily*DAYS_YR*100).toFixed(1)+' % anual), así que Min CVaR tiene que irse a una mezcla extrema para llegar.'; }
         const wMax=solveMaxCAGR(tickers,maxW);
-        document.getElementById('res-badge').textContent='target '+(retAn*100).toFixed(1)+'% yearly · CVaR '+(100-alpha*100).toFixed(0)+'% · '+tickers.length+' assets · '+WINDOW+'Y window';
+        document.getElementById('res-badge').textContent='objetivo '+(retAn*100).toFixed(1)+' % anual · CVaR '+(100-alpha*100).toFixed(0)+' % · '+tickers.length+' activos · ventana de '+WINDOW+' años';
         const r0Daily=annReturn(wOpt,tickers)/DAYS_YR;
         const wRec=solveRecommended(tickers,maxW,alpha,r0Daily)||wOpt;
         render(wCur,wOpt,wMax,wRec,tickers,alpha);
         const efBadge=document.getElementById('ef-badge');
-        efBadge.textContent='computing frontier...';
+        efBadge.textContent='calculando la frontera...';
         const mk=(w,label)=>({x:metrics(portReturns(w,tickers),alpha).cvar*100, y:annReturn(w,tickers)*100, label});
-        computeFrontier(tickers,maxW,alpha,(i,N)=>{efBadge.textContent='computing frontier '+i+'/'+N+'...';},pts=>{
-          if(!pts||pts.length<3){ efBadge.textContent='frontier not available for this selection'; return; }
+        computeFrontier(tickers,maxW,alpha,(i,N)=>{efBadge.textContent='calculando la frontera '+i+'/'+N+'...';},pts=>{
+          if(!pts||pts.length<3){ efBadge.textContent='frontera no disponible para esta selección'; return; }
           efBadge.textContent='';
-          renderFrontier(pts,[mk(wCur,'Your portfolio'),mk(wOpt,'Min CVaR'),mk(wMax,'Max CAGR'),mk(wRec,'Recommended')]);
+          renderFrontier(pts,[mk(wCur,'Tu cartera'),mk(wOpt,'Min CVaR'),mk(wMax,'Max CAGR'),mk(wRec,'Recomendada')]);
         });
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
-        err.textContent='Solver error: '+e.message; err.style.display='block';
+        err.textContent='Error del solver: '+e.message; err.style.display='block';
       }finally{
         btn.disabled=false; document.getElementById('spinner').style.display='none';
       }
