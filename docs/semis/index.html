@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sharpe Lab · Rotación de semiconductores (roc126 top2)</title>
-<meta name="description" content="Rotación de semiconductores roc126 top2 con volatilidad escalada al 10%: seguimiento paper en vivo, walk-forward anual y registro de rotaciones.">
+<meta name="description" content="Rotación de semiconductores roc126 top2 con volatilidad escalada al 10%: seguimiento paper en vivo, backtest por años y registro de rotaciones.">
 <link rel="icon" type="image/svg+xml" href="/sharpe-lab/favicon.svg">
 <link rel="canonical" href="https://davizz-dev13.github.io/sharpe-lab/semis/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Sharpe Lab">
 <meta property="og:title" content="Sharpe Lab · Rotación de semiconductores (roc126 top2)">
-<meta property="og:description" content="Rotación de semiconductores roc126 top2 con volatilidad escalada al 10%: seguimiento paper en vivo, walk-forward anual y registro de rotaciones.">
+<meta property="og:description" content="Rotación de semiconductores roc126 top2 con volatilidad escalada al 10%: seguimiento paper en vivo, backtest por años y registro de rotaciones.">
 <meta property="og:url" content="https://davizz-dev13.github.io/sharpe-lab/semis/">
 <meta property="og:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Sharpe Lab · Rotación de semiconductores (roc126 top2)">
-<meta name="twitter:description" content="Rotación de semiconductores roc126 top2 con volatilidad escalada al 10%: seguimiento paper en vivo, walk-forward anual y registro de rotaciones.">
+<meta name="twitter:description" content="Rotación de semiconductores roc126 top2 con volatilidad escalada al 10%: seguimiento paper en vivo, backtest por años y registro de rotaciones.">
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -69,7 +69,7 @@
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/" class="on">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a></nav>
+  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/" class="on">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../metodologia/">Metodología</a></nav>
   <h1>Rotaci&oacute;n Semis &middot; roc126 top2 vol-escalada</h1>
   <div class="sub" id="ruletext"></div>
 </header>
@@ -83,7 +83,7 @@
   </div>
 
   <div class="panel">
-    <h2>Walk-forward anual (out-of-sample) <span class="badge">se&ntilde;al ejecutable al d&iacute;a siguiente</span></h2>
+    <h2>Backtest por años (<a href="../metodologia/#tipos">no es out-of-sample</a>) <span class="badge">se&ntilde;al ejecutable al d&iacute;a siguiente</span></h2>
     <div id="wf-note" class="sub" style="margin-bottom:8px"></div>
     <table id="wf-table"><thead><tr><th>A&ntilde;o</th><th>Retorno</th><th>B&amp;H semis</th><th>Sharpe</th><th>Max DD</th></tr></thead><tbody></tbody></table>
   </div>

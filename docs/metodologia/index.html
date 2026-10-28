@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sharpe Lab · Metodología</title>
+<meta name="description" content="Cómo funciona Sharpe Lab: reglas de cada estrategia, costes, qué es backtest y qué es seguimiento en vivo, fuentes de datos y sesgos conocidos, contados sin adornos.">
+<link rel="icon" type="image/svg+xml" href="/sharpe-lab/favicon.svg">
+<link rel="canonical" href="https://davizz-dev13.github.io/sharpe-lab/metodologia/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sharpe Lab">
+<meta property="og:title" content="Sharpe Lab · Metodología">
+<meta property="og:description" content="Cómo funciona Sharpe Lab: reglas de cada estrategia, costes, qué es backtest y qué es seguimiento en vivo, fuentes de datos y sesgos conocidos, contados sin adornos.">
+<meta property="og:url" content="https://davizz-dev13.github.io/sharpe-lab/metodologia/">
+<meta property="og:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sharpe Lab · Metodología">
+<meta name="twitter:description" content="Cómo funciona Sharpe Lab: reglas de cada estrategia, costes, qué es backtest y qué es seguimiento en vivo, fuentes de datos y sesgos conocidos, contados sin adornos.">
+<meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; }
+  header { padding:28px 24px 8px; max-width:980px; margin:0 auto; }
+  h1 { margin:6px 0 4px; font-size:30px; }
+  .sub { font-size:14px; line-height:1.55; max-width:760px; }
+  main { max-width:980px; margin:0 auto; padding:8px 24px 40px; }
+  .stratnav { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px; }
+  .stratnav a { font-size:12.5px; font-weight:600; text-decoration:none; color:var(--muted); border:1px solid var(--border); border-radius:14px; padding:4px 12px; background:var(--card); }
+  .stratnav a.on { color:var(--accent); border-color:var(--accent); }
+  .panel { padding:18px 20px; margin:18px 0; }
+  .panel h2 { margin:0 0 10px; font-size:21px; }
+  .panel h3 { margin:16px 0 6px; font-size:16px; }
+  p, li { font-size:14.5px; line-height:1.6; }
+  ul { padding-left:20px; margin:6px 0; }
+  li { margin:4px 0; }
+  .muted { font-size:13px; }
+  a { color:var(--accent); }
+  code { font-size:12.5px; background:rgba(255,255,255,.07); padding:1px 5px; border-radius:5px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin:8px 0; }
+  th, td { padding:7px 8px; text-align:left; vertical-align:top; border-bottom:1px solid var(--border); }
+  td.n, th.n { text-align:right; white-space:nowrap; }
+  .toc { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:13px; margin:12px 0 0; }
+  .toc a { text-decoration:none; }
+  .warn { border-left:3px solid var(--accent); padding:2px 0 2px 12px; margin:10px 0; }
+  .pos { color:var(--green); } .neg { color:var(--red); }
+  footer { max-width:980px; margin:0 auto; padding:10px 24px 40px; font-size:12px; line-height:1.6; }
+  @media (max-width:700px) { h1 { font-size:26px; } header, main, footer { padding-left:16px; padding-right:16px; } .panel { padding:14px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
+  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../metodologia/" class="on">Metodología</a></nav>
+  <h1>Metodología</h1>
+  <p class="sub">Cómo se calcula todo lo que ves en Sharpe Lab, de dónde salen los datos y qué limitaciones tiene. Si una cifra de la web no se entiende con esta página, es un fallo de la página.</p>
+  <nav class="toc" aria-label="Índice">
+    <a href="#resumen">Resumen</a><a href="#tipos">Backtest y en vivo</a><a href="#reglas">Reglas</a><a href="#costes">Costes</a><a href="#metricas">Métricas</a><a href="#datos">Datos y horario</a><a href="#sesgos">Sesgos conocidos</a><a href="#pendiente">Lo que falta</a>
+  </nav>
+</header>
+<main>
+
+<section class="panel" id="resumen">
+  <h2>Resumen en cinco puntos</h2>
+  <ul>
+    <li>Todas las estrategias son <b>reglas fijas</b>: la señal se calcula con el cierre y la posición se toma desde la barra siguiente, con un coste del 0,1 % por cambio de posición y el cash remunerado al 2 % anual.</li>
+    <li>Las curvas de 10 años son <b>backtests</b>. Las reglas y sus parámetros se eligieron mirando ese mismo histórico, así que los resultados son <b>dentro de muestra</b>, también los de la tabla "por años".</li>
+    <li>Desde cada fecha de go-live (septiembre de 2026) las estrategias se <b>siguen en vivo con dinero ficticio</b>. Hoy esa curva se recalcula cada noche; todavía no es un registro inmutable.</li>
+    <li>Los universos de Semis, Semis8 y Mag7 son <b>las listas de hoy</b> aplicadas al pasado: hay sesgo de supervivencia. Más abajo está cuánto cambia el resultado sin el mejor valor.</li>
+    <li>El Sharpe se calcula sobre la rentabilidad <b>en exceso del cash</b> y se anualiza con los días reales de cotización de cada serie.</li>
+  </ul>
+</section>
+
+<section class="panel" id="tipos">
+  <h2>Backtest, backtest por años y seguimiento en vivo</h2>
+  <table>
+    <thead><tr><th>Qué</th><th>Qué es</th><th>Qué vale y qué no</th></tr></thead>
+    <tbody>
+      <tr><td><b>Backtest</b></td><td>La regla aplicada a los últimos 10 años de datos diarios (semanales en Mag7), con costes y cash remunerado. El histórico anterior solo sirve para calentar indicadores como la SMA200 semanal.</td><td>Sirve para entender cómo se comporta la regla. No es una promesa: la regla se diseñó viendo estos datos.</td></tr>
+      <tr><td><b>Backtest por años</b></td><td>El mismo backtest partido por años naturales desde 2018 (las tablas que antes se llamaban "walk-forward" u "OOS").</td><td>Enseña si el resultado depende de uno o dos años buenos. <b>No es out-of-sample</b>: no se vuelve a elegir ningún parámetro con los datos anteriores a cada año.</td></tr>
+      <tr><td><b>Seguimiento en vivo (paper)</b></td><td>Dinero ficticio que sigue las señales del motor desde la fecha de go-live de cada estrategia.</td><td>Es lo más parecido a operarlo de verdad, porque las reglas ya estaban fijadas. Pero hoy la curva se recalcula entera cada noche (ver <a href="#sesgos">sesgos</a>), y lleva pocas semanas.</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Fechas de go-live: Bitcoin (ROC60, Donchian20 y SMA200W+RSI) 07/09/2026 · Mag7 08/09/2026 · Semis 09/09/2026 · MSCI World 10/09/2026 · Semis8 18/09/2026.</p>
+</section>
+
+<section class="panel" id="reglas">
+  <h2>Reglas de cada estrategia</h2>
+  <p>Todas son largas o en cash: nunca hay cortos ni apalancamiento.</p>
+  <table>
+    <thead><tr><th>Estrategia</th><th>Universo</th><th>Regla</th><th>Tamaño de la posición</th></tr></thead>
+    <tbody>
+      <tr><td><b>SMA200W+RSI</b> (la estrategia propia)</td><td>Panel de Bitcoin: SPY, QQQ, GLD, GC=F, CL=F, TLT, AMD, TSM, ASML, AVGO y BTC-USD. También la cartera Mag7.</td><td>Entra cuando el cierre semanal cruza a la baja la SMA200 semanal. La salida se arma cuando el RSI(14) semanal supera un nivel (85 en general; oro 87, S&amp;P 500 75, Nasdaq 79) y se ejecuta cuando el precio cae más de un 5 % desde el máximo posterior.</td><td>100 % del activo o 100 % cash.</td></tr>
+      <tr><td><b>ROC60</b></td><td>Panel de Bitcoin (11 activos)</td><td>Largo si la rentabilidad de los últimos 60 días es positiva; si no, cash.</td><td>100 % o cash, por activo.</td></tr>
+      <tr><td><b>Donchian20</b></td><td>Panel de Bitcoin (11 activos)</td><td>Entra cuando el cierre supera el máximo de los 20 días anteriores y sale cuando cae por debajo del mínimo de los 20 días anteriores.</td><td>100 % o cash, por activo.</td></tr>
+      <tr><td><b>Semis</b> (roc126 top2)</td><td>NVDA, AVGO, AMD, TSM y ASML</td><td>Cada día compra los 2 valores con mejor rentabilidad a 126 días, solo si es positiva; si ninguno lo es, 100 % cash.</td><td>Reparto a partes iguales; cada pata escalada por min(1; 0,10 / volatilidad de 20 días).</td></tr>
+      <tr><td><b>Semis8</b> (ensemble top1)</td><td>NVDA, AVGO, AMD, TSM, ASML, MU, ON e INTC</td><td>Rentabilidad a 63, 126, 189 y 252 días; cada horizonte se normaliza (z-score) entre los 8 y se promedian. Compra solo el mejor, y solo si su puntuación es positiva.</td><td>Una sola pata, escalada por min(1; 0,25 / volatilidad de 20 días).</td></tr>
+      <tr><td><b>Mag7</b></td><td>AAPL, MSFT, NVDA, AMZN, META, GOOGL, TSLA, GLD, BTC-USD, SPY y QQQ (son 11, no 7)</td><td>SMA200W+RSI semanal en cada activo; la cartera es la media equiponderada.</td><td>1/11 por activo, cada uno largo o en cash.</td></tr>
+      <tr><td><b>MSCI World</b> (MomVol)</td><td>URTH (ETF del MSCI World, datos desde 2012)</td><td>Largo si la rentabilidad a 126 días es positiva; si no, cash.</td><td>min(1; 0,10 / volatilidad de 20 días).</td></tr>
+    </tbody>
+  </table>
+  <h3>Herramientas (no son estrategias)</h3>
+  <ul>
+    <li><b>Optimizador CVaR</b>: minimiza el CVaR histórico (la pérdida media de los peores días) para una rentabilidad objetivo, resolviendo un programa lineal (formulación de Rockafellar y Uryasev) en tu navegador. Ventanas de 5, 10 y 20 años; los activos sin historia completa en la ventana se excluyen.</li>
+    <li><b>Deudas BTC</b>: el rango de la vela de 5 minutos de las 23:55 (hora de Nueva York) de BTC-USD en Coinbase, y si el precio ya ha vuelto a pasar por él.</li>
+    <li><b>Interés compuesto</b>: una calculadora con tipo constante. No usa datos de mercado.</li>
+  </ul>
+  <p class="muted">El código de cada regla está en el repositorio: <code>core/signals.py</code>, <code>scripts/mag7w_core.py</code>, <code>scripts/semis_core.py</code>, <code>scripts/semis8_core.py</code> y <code>scripts/generate_msci.py</code>.</p>
+</section>
+
+<section class="panel" id="costes">
+  <h2>Ejecución y costes</h2>
+  <ul>
+    <li><b>Ejecución</b>: la señal se calcula con el cierre del día y la posición cuenta desde la barra siguiente, de cierre a cierre. En las semanales (SMA200W+RSI y Mag7) la señal es la del cierre del viernes y se aplica a la semana siguiente; en el panel de Bitcoin esa posición semanal, al pasarla a días, empieza a contar desde el viernes siguiente, así que se pierden de lunes a jueves (es conservador).</li>
+    <li><b>Coste</b>: 0,1 % sobre lo que cambia la posición (<code>transaction_cost</code> en <code>config/settings.yaml</code>). Con escalado por volatilidad también se paga por los reajustes diarios.</li>
+    <li><b>Cash</b>: lo que no está invertido cobra un 2 % anual simple (<code>cash_rate_annual</code>), repartido como 2 %/252 por barra.</li>
+    <li><b>Lo que no se modela</b>: el deslizamiento aparte del coste, los saltos de apertura, los impuestos y los dividendos más allá de los precios ajustados de Yahoo.</li>
+  </ul>
+</section>
+
+<section class="panel" id="metricas">
+  <h2>Cómo se calculan las métricas</h2>
+  <ul>
+    <li><b>Rentabilidad total</b>: el producto de (1 + rentabilidad diaria) menos 1.</li>
+    <li><b>CAGR</b>: la rentabilidad total anualizada con los años naturales transcurridos entre la primera y la última fecha.</li>
+    <li><b>Max DD</b>: la mayor caída desde un máximo de la curva hasta el mínimo posterior.</li>
+    <li><b>Sharpe</b>: la media de la rentabilidad en exceso del cash (2 % anual) entre su desviación típica, multiplicada por la raíz de las barras por año <b>reales</b> de la serie: unas 252 en bolsa, unas 365 en Bitcoin y en las carteras que mezclan bolsa y Bitcoin, y 52 en las semanales. Así una estrategia que pasa mucho tiempo en cash no sale favorecida.</li>
+    <li><b>Carteras equiponderadas</b>: los días en que un mercado está cerrado (fines de semana y festivos) cuentan como rentabilidad 0 para ese activo, así que cada activo pesa siempre lo mismo. Bitcoin no pasa a ser el 100 % de la cartera el fin de semana.</li>
+    <li><b>Buy &amp; hold</b>: el mismo universo comprado a partes iguales y sin tocar, en la misma ventana.</li>
+  </ul>
+</section>
+
+<section class="panel" id="datos">
+  <h2>Datos y horario</h2>
+  <ul>
+    <li><b>Precios</b>: cierres diarios ajustados de Yahoo Finance (librería <code>yfinance</code>). Si Yahoo falla, esa noche no se actualiza nada.</li>
+    <li><b>Deudas BTC</b>: velas de 5 minutos de la API pública de Coinbase.</li>
+    <li><b>Optimizador</b>: 5 y 20 años de Yahoo; antes de mayo de 2007 el cash usa el tipo de la letra del Tesoro a 3 meses (<code>^IRX</code>), porque BIL todavía no existía.</li>
+    <li><b>Actualización</b>: un workflow de GitHub Actions regenera todos los datos cada noche (programado a las 21:17 UTC). GitHub retrasa o se salta a veces los crons, así que la hora real varía; cada página indica cuándo se generaron sus datos.</li>
+    <li><b>Bitcoin cotiza 24/7</b>: si el workflow se ejecuta pasada la medianoche UTC, la vela del día todavía no ha cerrado y el último dato es provisional.</li>
+  </ul>
+</section>
+
+<section class="panel" id="sesgos">
+  <h2>Sesgos conocidos</h2>
+
+  <h3>1. Supervivencia y selección en Semis y Semis8</h3>
+  <p>Los valores se eligieron en 2026, cuando ya se sabía cuáles habían ganado. Aplicar esa lista a los últimos 10 años favorece a la estrategia. Una forma de medirlo es repetir el backtest sin el mejor valor del periodo (NVDA):</p>
+  <div id="t-semis"><p class="muted">Cargando…</p></div>
+
+  <h3>2. Parámetros elegidos mirando el histórico (Mag7)</h3>
+  <p>Los niveles de RSI que arman la salida (85, y 87/75/79 en oro, S&amp;P 500 y Nasdaq) se fijaron el 08/09/2026 después de ver los datos. Con otros niveles razonables el resultado cambia mucho:</p>
+  <div id="t-mag7"><p class="muted">Cargando…</p></div>
+  <p id="mag7-trades" class="muted"></p>
+
+  <h3>3. Las tablas "por años" no son out-of-sample</h3>
+  <p>Cortar un backtest por años no lo convierte en fuera de muestra: las reglas se eligieron con todo el histórico a la vista, y el laboratorio de <code>core/signals.py</code> tiene 22 reglas probadas. Un walk-forward de verdad volvería a elegir el parámetro solo con los datos anteriores a cada año.</p>
+
+  <h3>4. El seguimiento en vivo todavía se recalcula</h3>
+  <p>Cada noche la curva en vivo se reconstruye desde el backtest completo, así que un valor ya publicado puede cambiar si Yahoo corrige un precio o si la vela de BTC no había cerrado. Ejemplo, del historial de git de <code>docs/data.json</code>: el valor de ROC60 en BTC del 30/09/2026 se publicó como 1,0550, al día siguiente era 1,0570 y desde el 02/10 es 1,0561. Hasta que exista un registro de solo añadir, tómalo como seguimiento, no como track record auditado.</p>
+
+  <h3>5. Detalles menores</h3>
+  <ul>
+    <li>En Bitcoin el cash devenga 2 %/252 cada día natural (365 al año), es decir, algo más de un 2,9 % anual: un sesgo pequeño a favor de las estrategias de BTC cuando están en cash.</li>
+    <li>MSCI World usa URTH, que solo tiene datos desde 2012.</li>
+  </ul>
+</section>
+
+<section class="panel" id="pendiente">
+  <h2>Lo que falta</h2>
+  <ul>
+    <li>Un registro en vivo de solo añadir (una fila por señal con fecha, hora y commit) para que el seguimiento sea un track record verificable.</li>
+    <li>Universos "point-in-time" (por ejemplo, los mayores semiconductores por capitalización en cada fecha) para quitar el sesgo de supervivencia.</li>
+    <li>Un walk-forward real que elija los parámetros solo con datos pasados.</li>
+  </ul>
+</section>
+
+</main>
+<footer>
+  <p><span id="gen"></span></p>
+  <p>Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</p>
+</footer>
+<script>
+const fmtP = v => v == null ? '–' : (v > 0 ? '+' : '') + Number(v).toLocaleString('es-ES', {maximumFractionDigits: 0}) + ' %';
+const fmtS = v => v == null ? '–' : Number(v).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const fmtD = v => v == null ? '–' : Number(v).toLocaleString('es-ES', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' %';
+function row(label, s) {
+  return '<tr><td>' + label + '</td><td class="n">' + fmtP(s.total_return) + '</td><td class="n">' + fmtS(s.sharpe) + '</td><td class="n">' + fmtD(s.max_dd) + '</td></tr>';
+}
+function table(rows) {
+  return '<table><thead><tr><th>Variante (10 años)</th><th class="n">Rent. total</th><th class="n">Sharpe</th><th class="n">Max DD</th></tr></thead><tbody>' + rows.join('') + '</tbody></table>';
+}
+fetch('sensibilidad.json').then(r => r.json()).then(d => {
+  const t = [];
+  for (const [k, name] of [['semis', 'Semis'], ['semis8', 'Semis8']]) {
+    const x = d[k]; if (!x) continue;
+    t.push(row('<b>' + name + '</b>, lista publicada', x.publicada.strategy));
+    t.push(row(name + ' sin NVDA', x.sin_nvda.strategy));
+    t.push(row('<span class="muted">Buy &amp; hold sin NVDA</span>', x.sin_nvda.buy_hold));
+  }
+  document.getElementById('t-semis').innerHTML = t.length ? table(t) : '<p class="muted">Sin datos.</p>';
+  if (d.mag7) {
+    document.getElementById('t-mag7').innerHTML = table([
+      row('<b>Niveles actuales</b> (85; 87/75/79)', d.mag7.config),
+      row('RSI 70 en todos (la regla original)', d.mag7.rsi70),
+      row('RSI 85 en todos', d.mag7.rsi85)]);
+  }
+  document.getElementById('gen').textContent = 'Pruebas de sensibilidad generadas por scripts/sensibilidad.py el ' +
+    new Date(d.generated_at).toLocaleString('es-ES', {timeZone: 'Europe/Madrid', dateStyle: 'short', timeStyle: 'short'}) + ' (hora de Madrid).';
+}).catch(e => {
+  document.getElementById('t-semis').innerHTML = document.getElementById('t-mag7').innerHTML = '<p class="muted">No se pudieron cargar las pruebas (' + e + ').</p>';
+});
+fetch('../mag7/mag7.json').then(r => r.json()).then(d => {
+  let closed = 0, open = 0;
+  Object.values(d.assets || {}).forEach(a => (a.trades || []).forEach(t => t.open ? open++ : closed++));
+  document.getElementById('mag7-trades').textContent = 'Además hay muy pocas operaciones: en 10 años, entre los 11 activos, ' + closed +
+    ' operaciones cerradas y ' + open + ' abiertas. Con tan pocos casos, cualquier cifra es frágil.';
+}).catch(() => {});
+</script>
+</body>
+</html>

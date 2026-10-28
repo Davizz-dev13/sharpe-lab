@@ -97,15 +97,15 @@
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav"><a href="../btc/" class="on">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a></nav>
+  <nav class="stratnav"><a href="../btc/" class="on">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../metodologia/">Metodología</a></nav>
   <h1>Bitcoin</h1>
   <div class="sub" id="updated">Cargando datos...</div>
   <div class="sub" style="margin-top:4px">SMA200W+RSI es la estrategia propia: entrada cuando el cierre semanal cruza a la baja la SMA200 semanal; salida cuando el RSI(14) semanal supera el nivel configurado (85 genérico; oro 87, S&P 500 75, Nasdaq 79) y luego el precio cae más de un 5% desde el máximo. ROC60 y Donchian20 son diarias.</div>
 </header>
 <main>
   <div class="panel">
-    <h2>Paper trading en vivo: Bitcoin<span class="tag lv">TRACK RECORD REAL</span></h2>
-    <p class="note" id="live-note">Dinero ficticio siguiendo en tiempo real las señales que genera el motor cada noche. Nada de backtest ni simulación: cada día se registra la posición (largo o cash) y la rentabilidad acumulada desde el go-live, comparada con buy &amp; hold, y todo se reconcilia con la hoja "Quant Tracker". Es el único resultado que cuenta: real, fuera de muestra y sin retoques.</p>
+    <h2>Paper trading en vivo: Bitcoin<span class="tag lv">SEGUIMIENTO EN VIVO</span></h2>
+    <p class="note" id="live-note">Dinero ficticio siguiendo las señales que genera el motor cada noche desde el go-live: la posición (largo o cash) y la rentabilidad acumulada, comparada con buy &amp; hold. Las reglas ya estaban fijadas antes del go-live, así que es lo más parecido a operarlo de verdad. Ojo: hoy la curva se recalcula cada noche y algún valor pasado ha cambiado después de publicarse, así que todavía no es un track record auditado (<a href="../metodologia/#sesgos">metodología</a>).</p>
     <p class="note" style="margin-bottom:6px"><b style="color:var(--text)">Estrategias en seguimiento ahora mismo:</b></p>
     <ul class="live-list">
       <li><b>BTC-USD</b> - ROC60 y Donchian20 (el gráfico de abajo) · go-live 7 sep 2026</li>
@@ -163,7 +163,7 @@
   </div>
 
 </main>
-<footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
+<footer>Datos diarios vía yfinance. Backtests con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
 <script>
 const COLORS = ['#2f6fd0','#b6bc86','#c94f8d','#c98a12','#5b93c9','#e07b4e','#7c5cbf','#4ca372'];
 let DATA = null, mainChart = null, ytdChart = null, liveChart = null;

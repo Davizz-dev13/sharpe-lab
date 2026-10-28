@@ -97,7 +97,7 @@
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/" class="on">MSCI</a><a href="../mag7/">Mag7</a></nav>
+  <nav class="stratnav"><a href="../btc/">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/" class="on">MSCI</a><a href="../mag7/">Mag7</a><a href="../metodologia/">Metodología</a></nav>
   <h1>MSCI World</h1>
   <div class="sub" id="updated">Cargando datos...</div>
 </header>
@@ -123,7 +123,7 @@
     <div class="chart-wrap"><canvas id="msci-chart"></canvas></div>
   </div>
 </main>
-<footer>Datos diarios vía yfinance. Backtest y walk-forward con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
+<footer>Datos diarios vía yfinance. Backtests con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
 <script>
 let MSCI = null, msciChart = null, tfCur = 'ALL';
 

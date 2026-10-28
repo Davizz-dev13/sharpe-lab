@@ -79,7 +79,7 @@ def main():
     last_year = max(r.index[-1].year for r in rets.values())
     years = list(range(START_YEAR, last_year + 1))
     out = {"generated_at": pd.Timestamp.utcnow().isoformat(), "start_year": START_YEAR,
-           "note": "Estrategias de reglas fijas: cada pliego anual es out-of-sample respecto a todo lo anterior.",
+           "note": "Backtest partido por anos naturales. Las reglas se eligieron con todo el historico a la vista, asi que los pliegues son dentro de muestra (no out-of-sample).",
            "strategies": {}, "errors": errors}
 
     for s in STRATEGIES:
