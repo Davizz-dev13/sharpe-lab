@@ -77,11 +77,13 @@
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../theme.css">
+<script src="../frescura.js" defer></script>
 </head>
 <body>
 <div class="top"><a href="../">&larr; Sharpe Lab</a></div>
 <header>
   <h1>Deudas de BTC</h1>
+  <p class="fresh" data-fresh-src="deudas.json" data-fresh-field="updated" data-fresh-max-h="3" aria-live="polite">Comprobando la fecha de los datos…</p>
   <div class="sub">Zonas que el precio todavía no ha cruzado. La diaria se calcula cada día con la vela de 5 minutos de las 23:55 a las 00:00 (hora de Nueva York) del BTC-USD spot de Coinbase. Semanal, mensual y acumulación se actualizan a mano.</div>
 </header>
 <main>
@@ -106,6 +108,7 @@
     <div class="note" id="upd"></div>
   </div>
 </main>
+<aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
 <script>
 const f = n => n == null ? '' : Number(n).toLocaleString('es-ES', {maximumFractionDigits: 2});
 let rows = [], manual = [], prices = [], selected = null, windowDays = 40, focusZone = false;
@@ -125,7 +128,7 @@ async function carga() {
   document.getElementById('vivas').innerHTML = html;
   document.querySelectorAll('.card').forEach((el,i) => el.onclick = () => selectZone(i === 0 ? rows[0] : manual[i-1]));
   pintaFilas(false);
-  document.getElementById('chart-fresh').textContent = 'BTC-USD spot Coinbase · velas de 1 hora (UTC) · instantánea: ' + d.updated + '. Se actualiza con el dashboard; no es tiempo real.';
+  document.getElementById('chart-fresh').textContent = 'BTC-USD spot Coinbase · velas de 1 hora (UTC) · instantánea: ' + d.updated + '. Se recalcula cada 30 min aproximadamente; no es tiempo real.';
   drawChart();
   document.getElementById('upd').textContent = 'Diaria actualizada: ' + d.updated + '. Niveles manuales: ' + n.updated + '.';
 }

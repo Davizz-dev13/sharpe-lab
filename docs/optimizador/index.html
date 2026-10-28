@@ -72,10 +72,12 @@
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../theme.css">
+<script src="../frescura.js" defer></script>
 </head>
 <body>
 <header>
   <h1>Portfolio optimizer &middot; min CVaR</h1>
+  <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
   <div class="sub">Pick assets, limits and a return target. The optimizer minimizes the average loss of the worst stretch of historical days (CVaR) for that target, solving a linear program. It compares against your portfolio and the max-CAGR corner.</div>
 </header>
 <main>
@@ -156,6 +158,7 @@
   <a class="back" href="../">&larr; Back to Sharpe Lab</a>
 </main>
 <footer id="foot"></footer>
+<aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
 <script>
 const COLORS = {"Cash":"rgba(255,255,255,.56)","Gold":"#eab619","Commodities":"#b6bc86","S&P 500":"#2f6fd0","Bitcoin":"#f7931a","MSCI World":"#9467bd","Emerging":"#17a2b8","Silver":"#8f9ba8"};
 const DEFAULT_CUR = {"Cash":0,"Gold":25,"Commodities":0,"S&P 500":0,"Bitcoin":15,"MSCI World":50,"Emerging":10,"Silver":0};
@@ -597,6 +600,7 @@ async function switchWindow(w){
 fetch('optimizador.json').then(r=>r.json()).then(d=>{
   DATA=d; DATA5=d;
   calibrate();
+  (window.SLFresh ? SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36) : document.addEventListener('DOMContentLoaded', () => SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36)));
   d.assets.forEach(a=>TICK[a.short]=a.ticker);
   document.getElementById('foot').textContent='Data: '+d.assets.map(a=>a.ticker).join(', ')+' · '+d.dates.length+' days · Generated: '+d.generated_at;
   buildTables();

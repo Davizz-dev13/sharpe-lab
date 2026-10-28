@@ -94,12 +94,14 @@
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../theme.css">
+<script src="../frescura.js" defer></script>
 </head>
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
   <nav class="stratnav"><a href="../btc/" class="on">Bitcoin</a><a href="../semis/">Semiconductors</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../metodologia/">Metodología</a></nav>
   <h1>Bitcoin</h1>
+  <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
   <div class="sub" id="updated">Cargando datos...</div>
   <div class="sub" style="margin-top:4px">SMA200W+RSI es la estrategia propia: entrada cuando el cierre semanal cruza a la baja la SMA200 semanal; salida cuando el RSI(14) semanal supera el nivel configurado (85 genérico; oro 87, S&P 500 75, Nasdaq 79) y luego el precio cae más de un 5% desde el máximo. ROC60 y Donchian20 son diarias.</div>
 </header>
@@ -177,6 +179,7 @@
 
 </main>
 <footer>Datos diarios vía yfinance. Backtests con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
+<aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
 <script>
 const COLORS = ['#2f6fd0','#b6bc86','#c94f8d','#c98a12','#5b93c9','#e07b4e','#7c5cbf','#4ca372'];
 let DATA = null, mainChart = null, ytdChart = null, liveChart = null;
@@ -310,9 +313,9 @@ function renderYtd() {
 
 fetch('../data.json').then(r => r.json()).then(d => {
   DATA = d;
+  (window.SLFresh ? SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36) : document.addEventListener('DOMContentLoaded', () => SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36)));
   document.getElementById('updated').textContent =
-    'Actualizado: ' + new Date(d.generated_at).toLocaleString('es-ES') +
-    ' · ' + d.universe.length + ' activos · ' + Object.keys(d.strategies).length + ' estrategias · go-live ' + d.go_live;
+    d.universe.length + ' activos · ' + Object.keys(d.strategies).length + ' estrategias · go-live ' + d.go_live;
   const sel = document.getElementById('asset-select');
   d.universe.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
   sel.value = 'BTC-USD';
