@@ -56,7 +56,7 @@
 <body>
 <header>
   <div class="sub" style="margin-bottom:6px"><a href="../">&larr; Sharpe Lab</a></div>
-  <nav class="stratnav" aria-label="Secciones"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../semis8/">Semis8</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/" class="on" aria-current="page">Metodología</a><a href="../sobre-mi/">Sobre mí</a></nav>
+  <nav class="stratnav" aria-label="Secciones"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/" class="on" aria-current="page">Metodología</a><a href="../sobre-mi/">Sobre mí</a></nav>
   <h1>Metodología</h1>
   <p class="fresh" data-fresh-src="sensibilidad.json" aria-live="polite">Comprobando la fecha de los datos…</p>
   <p class="sub">Cómo se calcula todo lo que ves en Sharpe Lab, de dónde salen los datos y qué limitaciones tiene. Si una cifra de la web no se entiende con esta página, es un fallo de la página.</p>
@@ -72,7 +72,7 @@
     <li>Todas las estrategias son <b>reglas fijas</b>: la señal se calcula con el cierre y la posición se toma desde la barra siguiente, con un coste del 0,1 % por cambio de posición y el cash remunerado al 2 % anual.</li>
     <li>Las curvas de 10 años son <b>backtests</b>. Las reglas y sus parámetros se eligieron mirando ese mismo histórico, así que los resultados son <b>dentro de muestra</b>, también los de la tabla "por años".</li>
     <li>Desde cada fecha de go-live (septiembre de 2026) las estrategias se <b>siguen en vivo con dinero ficticio</b>. Hoy esa curva se recalcula cada noche; todavía no es un registro inmutable.</li>
-    <li>Los universos de Semis, Semis8 y Mag7 son <b>las listas de hoy</b> aplicadas al pasado: hay sesgo de supervivencia. Más abajo está cuánto cambia el resultado sin el mejor valor.</li>
+    <li>Los universos de Semis y Mag7 son <b>las listas de hoy</b> aplicadas al pasado: hay sesgo de supervivencia. Más abajo está cuánto cambia el resultado sin el mejor valor.</li>
     <li>El Sharpe se calcula sobre la rentabilidad <b>en exceso del cash</b> y se anualiza con los días reales de cotización de cada serie.</li>
   </ul>
 </section>
@@ -87,7 +87,7 @@
       <tr><td><b>Seguimiento en vivo (paper)</b></td><td>Dinero ficticio que sigue las señales del motor desde la fecha de go-live de cada estrategia.</td><td>Es lo más parecido a operarlo de verdad, porque las reglas ya estaban fijadas. Pero hoy la curva se recalcula entera cada noche (ver <a href="#sesgos">sesgos</a>), y lleva pocas semanas.</td></tr>
     </tbody>
   </table>
-  <p class="muted">Fechas de go-live: Bitcoin (ROC60, Donchian20 y SMA200W+RSI) 07/09/2026 · Mag7 08/09/2026 · Semis 09/09/2026 · MSCI World 10/09/2026 · Semis8 18/09/2026.</p>
+  <p class="muted">Fechas de go-live: Bitcoin (ROC60, Donchian20 y SMA200W+RSI) 07/09/2026 · Mag7 08/09/2026 · Semis 09/09/2026 · MSCI World 10/09/2026.</p>
 </section>
 
 <section class="panel" id="reglas">
@@ -100,7 +100,6 @@
       <tr><td><b>ROC60</b></td><td>Panel de Bitcoin (11 activos)</td><td>Largo si la rentabilidad de los últimos 60 días es positiva; si no, cash.</td><td>100 % o cash, por activo.</td></tr>
       <tr><td><b>Donchian20</b></td><td>Panel de Bitcoin (11 activos)</td><td>Entra cuando el cierre supera el máximo de los 20 días anteriores y sale cuando cae por debajo del mínimo de los 20 días anteriores.</td><td>100 % o cash, por activo.</td></tr>
       <tr><td><b>Semis</b> (roc126 top2)</td><td>NVDA, AVGO, AMD, TSM y ASML</td><td>Cada día compra los 2 valores con mejor rentabilidad a 126 días, solo si es positiva; si ninguno lo es, 100 % cash.</td><td>Reparto a partes iguales; cada pata escalada por min(1; 0,10 / volatilidad de 20 días).</td></tr>
-      <tr><td><b>Semis8</b> (ensemble top1)</td><td>NVDA, AVGO, AMD, TSM, ASML, MU, ON e INTC</td><td>Rentabilidad a 63, 126, 189 y 252 días; cada horizonte se normaliza (z-score) entre los 8 y se promedian. Compra solo el mejor, y solo si su puntuación es positiva.</td><td>Una sola pata, escalada por min(1; 0,25 / volatilidad de 20 días).</td></tr>
       <tr><td><b>Mag7</b></td><td>AAPL, MSFT, NVDA, AMZN, META, GOOGL, TSLA, GLD, BTC-USD, SPY y QQQ (son 11, no 7)</td><td>SMA200W+RSI semanal en cada activo; la cartera es la media equiponderada.</td><td>1/11 por activo, cada uno largo o en cash.</td></tr>
       <tr><td><b>MSCI World</b> (MomVol)</td><td>URTH (ETF del MSCI World, datos desde 2012)</td><td>Largo si la rentabilidad a 126 días es positiva; si no, cash.</td><td>min(1; 0,10 / volatilidad de 20 días).</td></tr>
     </tbody>
@@ -111,7 +110,7 @@
     <li><b>Deudas BTC</b>: el rango de la vela de 5 minutos de las 23:55 (hora de Nueva York) de BTC-USD en Coinbase, y si el precio ya ha vuelto a pasar por él.</li>
     <li><b>Interés compuesto</b>: una calculadora con tipo constante. No usa datos de mercado.</li>
   </ul>
-  <p class="muted">El código de cada regla está en el repositorio: <code>core/signals.py</code>, <code>scripts/mag7w_core.py</code>, <code>scripts/semis_core.py</code>, <code>scripts/semis8_core.py</code> y <code>scripts/generate_msci.py</code>.</p>
+  <p class="muted">El código de cada regla está en el repositorio: <code>core/signals.py</code>, <code>scripts/mag7w_core.py</code>, <code>scripts/semis_core.py</code> y <code>scripts/generate_msci.py</code>.</p>
 </section>
 
 <section class="panel" id="costes">
@@ -150,7 +149,7 @@
 <section class="panel" id="sesgos">
   <h2>Sesgos conocidos</h2>
 
-  <h3>1. Supervivencia y selección en Semis y Semis8</h3>
+  <h3>1. Supervivencia y selección en Semis</h3>
   <p>Los valores se eligieron en 2026, cuando ya se sabía cuáles habían ganado. Aplicar esa lista a los últimos 10 años favorece a la estrategia. Una forma de medirlo es repetir el backtest sin el mejor valor del periodo (NVDA):</p>
   <div id="t-semis"><p class="muted">Cargando…</p></div>
 
@@ -198,7 +197,7 @@ function table(rows) {
 }
 fetch('sensibilidad.json').then(r => r.json()).then(d => {
   const t = [];
-  for (const [k, name] of [['semis', 'Semis'], ['semis8', 'Semis8']]) {
+  for (const [k, name] of [['semis', 'Semis']]) {
     const x = d[k]; if (!x) continue;
     t.push(row('<b>' + name + '</b>, lista publicada', x.publicada.strategy));
     t.push(row(name + ' sin NVDA', x.sin_nvda.strategy));
