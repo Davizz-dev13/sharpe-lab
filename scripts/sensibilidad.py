@@ -2,10 +2,10 @@
 """Pruebas de sensibilidad para la pagina de metodologia (sesgos conocidos).
 
 Salida: docs/metodologia/sensibilidad.json. Usa exactamente el mismo motor que los
-generadores de cada estrategia (semis8_core, semis_core, mag7w_core), la misma
+generadores de cada estrategia (semis_core, mag7w_core), la misma
 ventana de 10 anos, costes y cash de config/settings.yaml, y el Sharpe de core/stats.py.
 
-1. Semis8 y Semis "sin NVDA": las listas de valores son las de hoy aplicadas a 10
+1. Semis "sin NVDA": las listas de valores son las de hoy aplicadas a 10
    anos (sesgo de supervivencia/seleccion). Quitar al mejor valor del periodo
    muestra cuanto depende el resultado de haberlo elegido a posteriori.
 2. Mag7 con otros niveles de RSI: los niveles 85/87/75/79 se fijaron mirando todo
@@ -23,7 +23,6 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from core.stats import sharpe_ratio
-import scripts.semis8_core as s8
 import scripts.semis_core as s5
 from scripts.mag7w_core import weekly_frame, weekly_position, weekly_backtest
 
@@ -88,8 +87,6 @@ def main():
     out = {"generated_at": pd.Timestamp.now('UTC').isoformat(), "window_years": WINDOW_YEARS,
            "cash_rate": CASH, "cost": COST, "errors": []}
     try:
-        out["semis8"] = {"publicada": rotation(s8, list(s8.SEMIS8)),
-                         "sin_nvda": rotation(s8, [t for t in s8.SEMIS8 if t != "NVDA"])}
         out["semis"] = {"publicada": rotation(s5, list(s5.SEMIS)),
                         "sin_nvda": rotation(s5, [t for t in s5.SEMIS if t != "NVDA"])}
     except Exception as e:  # noqa: BLE001
