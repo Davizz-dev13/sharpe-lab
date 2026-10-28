@@ -37,17 +37,17 @@
   .q{position:absolute;z-index:2;left:50%;bottom:10svh;width:min(880px,calc(100% - 48px));margin:0;transform:translateX(-50%);text-align:center;opacity:var(--qa,0);filter:blur(var(--qb,16px))}
   .q p{margin:0 0 14px;font-family:var(--serif);font-size:clamp(22px,2.9vw,40px);line-height:1.2;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.8)}
   .ttl{position:absolute;z-index:2;left:0;right:0;top:34%;text-align:center;padding:0 24px;opacity:var(--ta,1);filter:blur(calc((1 - var(--ta,1))*10px))}
-  .ttl h1{margin:0 0 12px;font-size:clamp(56px,12vw,120px);line-height:1;text-shadow:0 4px 40px rgba(0,0,0,.6)}
+  .ttl h1,.ttl h2{margin:0 0 12px;font-size:clamp(56px,12vw,120px);line-height:1;text-shadow:0 4px 40px rgba(0,0,0,.6)}
   .ttl p{margin:0 auto;max-width:34ch;font-size:17px;color:rgba(243,241,237,.78)}
   .hint{position:absolute;z-index:5;left:50%;bottom:26px;transform:translateX(-50%);width:42px;height:42px;display:grid;place-items:center;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);color:var(--text);font-size:18px;opacity:var(--ha,1);animation:bob 2s ease-in-out infinite}
   @keyframes bob{50%{transform:translate(-50%,6px)}}
   .bar{position:absolute;z-index:5;left:0;top:0;height:2px;width:calc(var(--g,0)*100%);background:rgba(243,241,237,.55)}
-  .tools{position:relative;padding:22vh 24px 10vh;z-index:0}
+  .tools{position:relative;display:block;padding:56px 24px 12vh;z-index:0}
   .tools-in{position:relative;z-index:2;max-width:1180px;margin:0 auto;text-align:center}
   .tools .bg{position:absolute;inset:0;background:url(img/end.webp) center/cover;opacity:.35}
   .tools .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(#15110d,rgba(21,17,13,.5) 30%,rgba(21,17,13,.6) 70%,#15110d)}
-  .tools h2{margin:0 0 14px;font-size:clamp(40px,7vw,84px);line-height:1.04}
-  .tools .lede{margin:0 auto 48px;max-width:42ch;font-size:17px;color:rgba(243,241,237,.72)}
+  .tools h1{margin:0 0 14px;font-size:clamp(44px,6vw,76px);line-height:1.04}
+  .tools .lede{margin:0 auto 40px;max-width:42ch;font-size:17px;color:rgba(243,241,237,.72)}
   .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;text-align:left}
   .card{display:flex;flex-direction:column;border:1px solid #463a2d;border-radius:18px;overflow:hidden;background:rgba(31,25,19,.86);text-decoration:none;color:var(--text);transition:transform .3s,border-color .3s}
   .card:hover{transform:translateY(-4px);border-color:#7a6850}
@@ -74,40 +74,49 @@
     .q{opacity:1 !important;filter:none !important}.fr::before{background:linear-gradient(rgba(21,17,13,0) 25%,rgba(21,17,13,.72) 78%)}
     .hint,.bar{display:none}.tools{margin-top:0}.rv{opacity:1;filter:none;transform:none;transition:none}
   }
+  .topbar{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:12px;max-width:1180px;margin:0 auto;padding:16px 24px 0}
+  .topbar .brand{font-family:var(--serif);font-size:20px;text-decoration:none;color:var(--text)}
+  .topbar nav{display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+  .topbar nav a{font-size:14px;color:var(--muted);text-decoration:none}
+  .topbar nav a:hover{color:var(--text)}
+  .backtop{text-align:center;margin:0;padding:28px 24px 48px}
+  .backtop a{color:var(--muted);font-size:14px}
+  @media (max-width:560px){.topbar{padding:12px 16px 0}.topbar nav{gap:10px}.topbar nav a{font-size:13px}.tools{padding:28px 16px 10vh}}
 </style>
 </head>
 <body>
-<main class="seq" id="seq">
-  <div class="pin">
-    <div class="bar"></div>
-    <div class="fr" style="z-index:1"><img src="img/s01.webp" alt="" width="1672" height="941"><div class="ttl"><h1>Sharpe Lab</h1><p>Cada estrategia que estudio, probada con costes y seguida en vivo.</p></div>
-      </div>
-    <div class="fr" style="z-index:2"><img src="img/s02.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Today's noise is tomorrow's silence.</p></blockquote></div>
-    <div class="fr" style="z-index:3"><img src="img/s03.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Whoever knows their limit outlasts the storm.</p></blockquote></div>
-    <div class="fr" style="z-index:4"><img src="img/s04.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>The first step doesn't take you where you want to be. It takes you out of where you were.</p></blockquote></div>
-    <div class="fr" style="z-index:5"><img src="img/s05.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Dreams aren't what you see while you sleep. They're what keeps you awake.</p></blockquote></div>
-    <div class="fr olive" style="z-index:6"><picture><source media="(max-aspect-ratio: 1/1)" srcset="img/s06m.webp"><img src="img/s06-wide.webp" alt="" width="1672" height="941" loading="lazy"></picture>
-      <blockquote class="q"><p>A man who fears pain more than failure will taste both.</p></blockquote></div>
-    <div class="fr" style="z-index:7"><img src="img/s07.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Discipline makes every day look the same. Its absence makes every year look the same.</p></blockquote></div>
-    <a class="hint" href="#tools" aria-label="Bajar">&darr;</a>
-  </div>
-</main>
-<section class="tools" id="tools">
+<header class="topbar"><a class="brand" href="./">Sharpe Lab</a><nav aria-label="Principal"><a href="#tools">Herramientas</a><a href="metodologia/">Metodología</a><a href="sobre-mi/">Sobre mí</a></nav></header>
+<main class="tools" id="tools">
   <div class="bg" aria-hidden="true"></div>
   <div class="tools-in">
-    <h2 class="rv">Sharpe Lab</h2>
-    <p class="lede rv" style="--d:.1s">Estrategias, un optimizador y algunas calculadoras, todo construido y seguido a la vista.</p>
-    <p class="fresh" data-fresh-src="walkforward.json" aria-live="polite" style="margin:-28px 0 36px">Comprobando la fecha de los datos…</p>
-    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Bitcoin</span><span class="cd">Paper trading con señales reales cada noche.</span></a><a class="card rv" style="--d:0.12s" href="semis8/"><span class="th"><img src="img/semis8.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Semis8</span><span class="cd">Ocho chips, un líder cada vez.</span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Mag7</span><span class="cd">Siete gigantes y una regla semanal.</span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Optimizador CVaR</span><span class="cd">La mezcla menos arriesgada para la rentabilidad que buscas.</span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Interés compuesto</span><span class="cd">Intereses que generan intereses.</span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Deudas BTC</span><span class="cd">Zonas que el precio aún no ha cruzado.</span></a></div>
-    <div class="pills rv"><a class="pill" href="semis/">Semiconductores</a><a class="pill" href="msci/">MSCI</a><a class="pill" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
-    <small class="rv">Paper trading en vivo y backtests con costes. La rentabilidad pasada no garantiza rentabilidades futuras. Nada de esto es asesoramiento de inversión.</small>
+    <h1 class="rv">Sharpe Lab</h1>
+    <p class="lede rv" style="--d:.1s">Cada estrategia que estudio, probada con costes y seguida en vivo. Además, un optimizador de carteras y algunas calculadoras.</p>
+    <p class="fresh" data-fresh-src="walkforward.json" aria-live="polite" style="margin:-24px 0 32px">Comprobando la fecha de los datos…</p>
+    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Bitcoin</span><span class="cd">Paper trading con señales reales cada noche.</span></a><a class="card rv" style="--d:0.12s" href="semis8/"><span class="th"><img src="img/semis8.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Semis8</span><span class="cd">Ocho chips, un líder cada vez.</span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Mag7</span><span class="cd">Once activos y una regla semanal.</span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Optimizador CVaR</span><span class="cd">La mezcla menos arriesgada para la rentabilidad que buscas.</span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Interés compuesto</span><span class="cd">Intereses que generan intereses.</span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="1700"></span><span class="ct">Deudas BTC</span><span class="cd">Zonas que el precio aún no ha cruzado.</span></a></div>
+    <div class="pills rv"><a class="pill" href="semis/">Semis</a><a class="pill" href="msci/">MSCI World</a><a class="pill" href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a><a class="pill" href="metodologia/">Metodología</a><a class="pill" href="sobre-mi/">Sobre mí</a></div>
+    <small class="rv">Paper trading en vivo y backtests con costes. Sharpe Lab es un proyecto personal de aprendizaje: nada de esto es asesoramiento de inversión, y la rentabilidad pasada no garantiza rentabilidades futuras.</small>
+  </div>
+</main>
+<section class="seq" id="seq" aria-label="Frases">
+  <div class="pin">
+    <div class="bar"></div>
+    <div class="fr" style="z-index:1"><img src="img/s01.webp" alt="" width="1672" height="941"><div class="ttl"><h2>Frases</h2></div>
+      </div>
+    <div class="fr" style="z-index:2"><img src="img/s02.webp" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>El ruido de hoy es el silencio de mañana.</p></blockquote></div>
+    <div class="fr" style="z-index:3"><img src="img/s03.webp" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Quien conoce su límite sobrevive a la tormenta.</p></blockquote></div>
+    <div class="fr" style="z-index:4"><img src="img/s04.webp" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>El primer paso no te lleva a donde quieres estar. Te saca de donde estabas.</p></blockquote></div>
+    <div class="fr" style="z-index:5"><img src="img/s05.webp" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>Los sueños no son lo que ves mientras duermes. Son lo que no te deja dormir.</p></blockquote></div>
+    <div class="fr olive" style="z-index:6"><picture><source media="(max-aspect-ratio: 1/1)" srcset="img/s06m.webp"><img src="img/s06-wide.webp" alt="" width="1672" height="941" loading="lazy"></picture>
+      <blockquote class="q"><p>Quien teme más al dolor que al fracaso acabará probando los dos.</p></blockquote></div>
+    <div class="fr" style="z-index:7"><img src="img/s07.webp" alt="" width="1672" height="941" loading="lazy">
+      <blockquote class="q"><p>La disciplina hace que todos los días se parezcan. Su ausencia hace que se parezcan todos los años.</p></blockquote></div>
   </div>
 </section>
+<p class="backtop"><a href="#tools">&uarr; Volver a las herramientas</a></p>
 <script>
 (function(){
   var seq=document.getElementById('seq'), fr=[].slice.call(document.querySelectorAll('.fr')), N=fr.length;
