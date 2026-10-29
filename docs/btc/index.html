@@ -26,7 +26,6 @@
 
 
 <style>
-  :root { --bg:#f4ecd8; --card:#faf5e7; --border:#d8cdb2; --text:#1f1913; --muted:rgba(255,255,255,.56); --accent:#d96b2a; --live:#2d6a3e; }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font-family:'CMU',Georgia,serif; }
   header { padding:28px 24px 8px; max-width:1200px; margin:0 auto; }
@@ -97,9 +96,10 @@
 
 <script src="../frescura.js" defer></script>
 <link rel="stylesheet" href="../theme.css">
+<script src="/sharpe-lab/site.js"></script>
 </head>
 <body class="has-topnav">
-<nav class="topnav" aria-label="Secciones"><div class="nav-in"><a class="nav-name" href="../">Sharpe Lab</a><div class="nav-links"><a href="../btc/" class="on" aria-current="page">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group has-on"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/" class="on" aria-current="page">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/">RSI 30</a></div></div><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="/sharpe-lab/optimizador/">Optimizador CVaR</a><a href="/sharpe-lab/interes/">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <header>
     <h1>Bitcoin</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
@@ -110,13 +110,7 @@
   <div class="panel">
     <h2>Paper trading en vivo: Bitcoin<span class="tag lv">SEGUIMIENTO EN VIVO</span></h2>
     <p class="note" id="live-note">Dinero ficticio siguiendo las señales que genera el motor cada noche desde el go-live: la posición (largo o cash) y la rentabilidad acumulada, comparada con buy &amp; hold. Las reglas ya estaban fijadas antes del go-live, así que es lo más parecido a operarlo de verdad. Ojo: hoy la curva se recalcula cada noche y algún valor pasado ha cambiado después de publicarse, así que todavía no es un track record auditado (<a href="../metodologia/#sesgos">metodología</a>).</p>
-    <p class="note" style="margin-bottom:6px"><b style="color:var(--text)">Estrategias en seguimiento ahora mismo:</b></p>
-    <ul class="live-list">
-      <li><b>BTC-USD</b> - ROC60 y Donchian20 (el gráfico de abajo) · go-live 7 sep 2026</li>
-      <li><b>Rotación Semis</b> sobre NVDA, AVGO, AMD, TSM y ASML (<a href="../semis/">apartado completo</a>) · go-live 9 sep 2026</li>
-      <li><b>SMA200W+RSI semanal Mag7</b> (<a href="../mag7/">apartado completo</a>) · go-live 8 sep 2026</li>
-      <li><b>MomVol MSCI World</b> sobre URTH (<a href="../msci/">apartado completo</a>) · go-live 10 sep 2026</li>
-    </ul>
+    <p class="note">En seguimiento aquí: <b>ROC60 y Donchian20 sobre BTC-USD</b> (el gráfico de abajo) · go-live 7 sep 2026. El resto de estrategias en seguimiento están en la <a href="../#seguimiento">portada</a>.</p>
     <div class="chart-wrap short" id="live-wrap"><canvas id="live-chart"></canvas></div>
     <div class="empty" id="live-empty" style="display:none">El seguimiento en vivo arranca con el primer cierre tras el go-live - vuelve mañana.</div>
   </div>
@@ -178,9 +172,10 @@
     <p class="note" style="margin-top:12px">La lectura interesante: en los días que el filtro está en cash, BTC ganó de media un +2,8% anual frente al 1,4% del cash. Es decir, el filtro no esquiva tramos de rentabilidad esperada negativa - el "premio de parada" es ligeramente negativo (-0,35 pp/año). Todo el beneficio llega por el otro canal: menos volatilidad, y por tanto mejor capitalización compuesta (de ahí los +4,7 pp/año geométricos con la aritmética prácticamente igual). Esto es justo lo que predice el marco de Kaminski y Lo (<i>When Do Stop-Loss Rules Stop Losses?</i>, Journal of Financial Markets, 2014): una salida a cash solo suma rentabilidad esperada cuando hay momentum suficiente (autocorrelación &ge; Sharpe a la misma frecuencia) o detecta un régimen de media negativa; en BTC la autocorrelación mensual (0,05) queda muy por debajo del Sharpe mensual (0,24), así que lo que hay que vender de este filtro es la medida de riesgo, no la cura. Fuentes: datos propios (optimizador, generado 20 oct 2026) y <a href="https://doi.org/10.1016/j.finmar.2013.07.001">doi.org/10.1016/j.finmar.2013.07.001</a>.</p>
   </div>
 
+  <p class="pagenote">Datos diarios vía yfinance. Backtests con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker".</p>
 </main>
-<footer>Datos diarios vía yfinance. Backtests con costes de transacción y rentabilidad del cash según <code>config/settings.yaml</code>. El Sharpe se calcula sobre la rentabilidad en exceso del cash (la tasa libre de riesgo, la misma que remunera el cash) y se anualiza con las barras por año reales de cada serie. El paper trading en vivo aplica las posiciones del motor desde el go-live y se reconcilia con la hoja "Quant Tracker". Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
-<aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
+<footer class="site-foot"><p class="foot-legal"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</p><p class="foot-links"><a href="/sharpe-lab/">Inicio</a><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a href="https://github.com/Davizz-dev13/sharpe-lab">Código en GitHub</a><a href="https://davizz-dev13.github.io/">David Gallardo</a></p><p class="foot-sig">Sharpe Lab &middot; David Gallardo &middot; Madrid, España</p></footer>
+
 <script>
 const COLORS = ['#1a3f8b','#2d6a3e','#c94f8d','#b5651d','#5b93c9','#e07b4e','#7c5cbf','#4ca372'];
 let DATA = null, mainChart = null, ytdChart = null, liveChart = null;

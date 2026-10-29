@@ -25,7 +25,6 @@
 
 
 <style>
-  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1f1913; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#2d6a3e; --yellow:#d4a85a; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:'CMU',Georgia,serif; background:var(--bg); color:var(--fg); }
   header { padding:24px 28px 8px; }
@@ -70,9 +69,10 @@
 
 
 <link rel="stylesheet" href="../theme.css">
+<script src="/sharpe-lab/site.js"></script>
 </head>
 <body class="has-topnav">
-<nav class="topnav" aria-label="Secciones"><div class="nav-in"><a class="nav-name" href="../">Sharpe Lab</a><div class="nav-links"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/" class="on" aria-current="page">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/">RSI 30</a></div></div><div class="nav-group has-on"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="/sharpe-lab/optimizador/">Optimizador CVaR</a><a href="/sharpe-lab/interes/" class="on" aria-current="page">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <header>
     <h1>Interés compuesto</h1>
   <div class="sub">La fuerza más aburrida y más potente de las finanzas: intereses que generan intereses. Juega con los números.</div>
@@ -140,11 +140,10 @@
     <h2>Año a año</h2>
     <div class="twrap"><table><thead><tr><th>Año</th><th>Aportado</th><th>Intereses</th><th>Saldo</th><th>% intereses</th></tr></thead><tbody id="y-table"></tbody></table></div>
   </div>
-
-  <a class="back" href="../">&larr; Volver a Sharpe Lab</a>
+  <p class="pagenote">Simulación con un tipo constante: la realidad no va en línea recta.</p>
 </main>
-<footer>Simulación con un tipo constante: la realidad no va en línea recta. Nada de esto es asesoramiento de inversión.</footer>
-<aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
+<footer class="site-foot"><p class="foot-legal"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</p><p class="foot-links"><a href="/sharpe-lab/">Inicio</a><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a href="https://github.com/Davizz-dev13/sharpe-lab">Código en GitHub</a><a href="https://davizz-dev13.github.io/">David Gallardo</a></p><p class="foot-sig">Sharpe Lab &middot; David Gallardo &middot; Madrid, España</p></footer>
+
 <script>
 const fmtEUR = v => v.toLocaleString('es-ES',{maximumFractionDigits:0})+' \u20ac';
 const MONTHS=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
