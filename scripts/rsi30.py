@@ -56,6 +56,19 @@ CRYPTO = {"BTC-USD", "ETH-USD"}
 RSI_ENTRY = 30.0
 
 
+def _clean_json(o):
+    """NaN/inf de float -> None: la web solo lee JSON estricto (json.dumps escribe NaN)."""
+    if isinstance(o, dict):
+        return {k: _clean_json(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_clean_json(v) for v in o]
+    if isinstance(o, float) and not math.isfinite(o):
+        return None
+    if isinstance(o, np.generic):
+        return _clean_json(o.item())
+    return o
+
+
 # ---------------------------------------------------------------- datos
 def download(t: str, cache: Path, refresh: bool = False) -> pd.DataFrame:
     cache.mkdir(parents=True, exist_ok=True)
@@ -459,7 +472,7 @@ def export_json(df: pd.DataFrame, sel: pd.DataFrame, res: dict, out: Path, rules
                      .round(4).replace({np.nan: None}).to_dict("records"),
         }
     blob["selection"] = sel.round(4).replace({np.nan: None}).to_dict("records")
-    (out / "rsi30.json").write_text(json.dumps(blob, ensure_ascii=False))
+    (out / "rsi30.json").write_text(json.dumps(_clean_json(blob), ensure_ascii=False, allow_nan=False))
 
 
 def main():

@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core.data import history
+from core.jsonsafe import clean  # NaN/inf -> null: la web solo lee JSON estricto
 from core.stats import sharpe_ratio
 from core.signals import strategy_position
 from core.backtest import backtest_strategy, buy_and_hold_backtest
@@ -67,12 +68,14 @@ def main():
     for t in UNIVERSE:
         try:
             df = history(t, "10y", "1d", refresh=True)
+            # la vela del dia en curso puede venir sin cierre (NaN): fuera
+            df = df.dropna(subset=["Close"])
             closes[t] = df["Close"]
             bh_rets[t] = df["Close"].pct_change().fillna(0.0)
             for s in STRATEGIES:
                 if s == DAVID_STRATEGY:
                     # historico completo para calentar la SMA200W; metricas en la ventana 10y
-                    df_full = history(t, "max", "1d", refresh=True)
+                    df_full = history(t, "max", "1d", refresh=True).dropna(subset=["Close"])
                     r_full, _ = david_weekly_daily_returns(
                         df_full, COST, CASH, RSI_BY_ASSET.get(t, RSI_DEFAULT))
                     rets[(t, s)] = r_full.reindex(df.index).fillna(0.0)
@@ -155,7 +158,7 @@ def main():
     out["ytd_start"] = f"{year}-01-01"
 
     p = ROOT / "docs" / "data.json"
-    p.write_text(json.dumps(out))
+    p.write_text(json.dumps(clean(out), allow_nan=False))
     print(f"wrote {p} ({p.stat().st_size} bytes), errors: {errors}")
 
 

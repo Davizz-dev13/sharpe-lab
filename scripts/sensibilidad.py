@@ -23,6 +23,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from core.stats import sharpe_ratio
+from core.jsonsafe import clean  # NaN/inf -> null: la web solo lee JSON estricto
 import scripts.semis_core as s5
 from scripts.mag7w_core import weekly_frame, weekly_position, weekly_backtest
 
@@ -99,7 +100,7 @@ def main():
         out["errors"].append(f"mag7: {e}")
     p = ROOT / "docs" / "metodologia" / "sensibilidad.json"
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(out, ensure_ascii=False))
+    p.write_text(json.dumps(clean(out), ensure_ascii=False, allow_nan=False))
     print(json.dumps(out, ensure_ascii=False, indent=1))
 
 
