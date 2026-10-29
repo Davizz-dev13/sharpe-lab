@@ -22,91 +22,64 @@
 
 <script src="intro.js"></script>
 <script src="frescura.js" defer></script>
-<style>
-  /* Portada formal: misma columna, letra y filetes que davizz-dev13.github.io */
-  main.tools{max-width:720px;margin:0 auto;padding:40px 24px 30px}
-  .hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin:26px 0 10px}
-  .hero h1{margin:0 0 10px;font-size:40px;font-weight:700;letter-spacing:.5px}
-  .role{color:var(--muted);font-size:15px;line-height:1.55;font-style:italic}
-  .titlerule{width:120px;border-top:1px solid var(--rule);margin:22px auto 0}
-  .statement{font-size:17px;line-height:1.65;font-style:italic;text-align:center;margin:22px 0 6px}
-  .hero .fresh{margin:16px 0 0}
-  section.sec{padding:30px 0 6px;scroll-margin-top:80px}
-  section.sec h2{font-size:19px;font-weight:700;margin:0 0 14px}
-  .secno{margin-right:10px}
-  .grid{display:block}
-  nav.topnav .nav-in{max-width:720px}
-  .grid .card{display:flex !important;gap:18px;align-items:flex-start;padding:16px 0 !important;border:0 !important;border-top:1px solid var(--soft) !important;text-decoration:none;color:var(--ink) !important;background:none !important}
-  .grid .card:last-child{border-bottom:1px solid var(--soft) !important}
-  .grid .card .th{flex:0 0 132px;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--rule);display:block}
-  .card .th img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block}
-  .card .tx{display:flex;flex-direction:column;min-width:0}
-  .ct{font-size:16.5px;font-weight:700;margin:2px 0 4px;transition:color .25s ease}
-  .card:hover .ct{color:var(--link)}
-  .cd{font-size:15px;line-height:1.6;color:var(--ink);text-align:justify;hyphens:auto}
-  .go{display:inline-block;align-self:flex-start;margin-top:10px;padding:6px 16px;border:1px solid var(--rule);font-size:13.5px;font-variant:small-caps;transition:background .25s ease,color .25s ease}
-  .card:hover .go{background:var(--ink);color:var(--paper)}
-  .item{padding:10px 0;border-top:1px solid var(--soft);font-size:15px;line-height:1.6}
-  .item:last-child{border-bottom:1px solid var(--soft)}
-  .item a{color:var(--ink);font-weight:700;text-decoration:none;margin-right:8px;transition:color .25s ease}
-  .item a:hover{color:var(--link)}
-  .disc{font-size:15px;line-height:1.7;text-align:justify;hyphens:auto;margin:0}
-  .rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease var(--d,0s),transform .6s ease var(--d,0s)}
-  .rv.in{opacity:1;transform:none}
-  .backtop{text-align:center;margin:0;padding:26px 24px 10px;font-size:14px}
-  .backtop a{color:var(--link);text-decoration:none;border-bottom:1px solid var(--link)}
-  footer.foot{max-width:720px !important}
-  @media (max-width:900px){main.tools{padding-top:36px}}
-  @media (max-width:540px){
-    nav.topnav .nav-links{justify-content:space-between;gap:8px}
-    nav.topnav .nav-links a{font-size:12.5px !important}
-    main.tools{padding-top:30px}
-    .hero h1{font-size:32px}
-    .card{gap:14px}
-    .grid .card .th{flex-basis:96px}
-    .cd{text-align:left}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .rv{opacity:1;transform:none;transition:none}
-  }
-</style>
+<script src="/sharpe-lab/site.js"></script>
 <link rel="stylesheet" href="theme.css">
 </head>
-<body>
-<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="./">Sharpe Lab</a><div class="nav-links"><a href="#tools">Herramientas</a><a href="metodologia/">Metodología</a><a href="sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
-<main class="tools">
-  <div class="hero">
+<body class="home">
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/" aria-current="page">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/">RSI 30</a></div></div><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="/sharpe-lab/optimizador/">Optimizador CVaR</a><a href="/sharpe-lab/interes/">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+<main id="contenido">
+  <header class="hero">
     <h1>Sharpe Lab</h1>
     <div class="role">Estrategias cuantitativas &middot; backtests con costes<br>Paper trading en vivo</div>
     <div class="titlerule"></div>
+    <p class="statement">Cada estrategia que estudio, probada con costes y seguida en vivo. Además, un optimizador de carteras y algunas calculadoras.</p>
+    <ul class="toc" aria-label="En esta página">
+      <li><a href="#estrategias"><span class="n">1.</span>Estrategias</a></li>
+      <li><a href="#seguimiento"><span class="n">2.</span>En seguimiento</a></li>
+      <li><a href="#herramientas"><span class="n">3.</span>Herramientas</a></li>
+      <li><a href="#metodo"><span class="n">4.</span>Metodología</a></li>
+    </ul>
+  </header>
+
+  <section class="sec" id="estrategias">
+    <h2><span class="secno">1.</span>Estrategias</h2>
+    <div class="cards"><a class="item rv" style="--d:0.00s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Bitcoin <span class="tag lv">paper en vivo</span></span><span class="cd">Paper trading con señales reales cada noche.</span></span><span class="go">Abrir &rarr;</span></a><a class="item rv" style="--d:0.08s" href="semis/"><span class="th"><img src="img/semis.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Semis <span class="tag lv">paper en vivo</span></span><span class="cd">Los dos chips con más impulso, con la volatilidad a raya.</span></span><span class="go">Abrir &rarr;</span></a><a class="item rv" style="--d:0.16s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Mag7 <span class="tag lv">paper en vivo</span></span><span class="cd">Once activos y una regla semanal.</span></span><span class="go">Abrir &rarr;</span></a><a class="item rv" style="--d:0.24s" href="msci/"><span class="th"><img src="img/msci.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">MSCI World <span class="tag lv">paper en vivo</span></span><span class="cd">MomVol sobre el MSCI World (proxy URTH): largo con ROC de 126 días positivo; si no, cash.</span></span><span class="go">Abrir &rarr;</span></a><a class="item rv" style="--d:0.32s" href="rsi30/"><span class="th"><img src="img/rsi30.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">RSI 30 <span class="tag">backtest fuera de muestra</span></span><span class="cd">Compra cuando el RSI(14) cierra en 30 o menos, sobre SPY, oro y Bitcoin.</span></span><span class="go">Abrir &rarr;</span></a></div>
+  </section>
+
+  <section class="sec rv" id="seguimiento">
+    <h2><span class="secno">2.</span>En seguimiento</h2>
+    <p class="lede">Dinero ficticio siguiendo las señales que genera el motor cada noche desde el go-live.</p>
     <p class="fresh" data-fresh-src="walkforward.json" aria-live="polite">Comprobando la fecha de los datos…</p>
-  </div>
-  <p class="statement">Cada estrategia que estudio, probada con costes y seguida en vivo. Además, un optimizador de carteras y algunas calculadoras.</p>
-
-  <section class="sec" id="tools">
-    <h2><span class="secno">1.</span>Herramientas</h2>
-    <div class="grid"><a class="card rv" style="--d:0.0s" href="btc/"><span class="th"><img src="img/btc.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Bitcoin</span><span class="cd">Paper trading con señales reales cada noche.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.12s" href="semis/"><span class="th"><img src="img/semis.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Semis</span><span class="cd">Los dos chips con más impulso, con la volatilidad a raya.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.24s" href="mag7/"><span class="th"><img src="img/mag7.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Mag7</span><span class="cd">Once activos y una regla semanal.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.36s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Optimizador CVaR</span><span class="cd">La mezcla menos arriesgada para la rentabilidad que buscas.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.48s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Interés compuesto</span><span class="cd">Intereses que generan intereses.</span><span class="go">Abrir &rarr;</span></span></a><a class="card rv" style="--d:0.6s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Deudas BTC</span><span class="cd">Zonas que el precio aún no ha cruzado.</span><span class="go">Abrir &rarr;</span></span></a></div>
+    <div class="tscroll"><table class="live-table">
+      <thead><tr><th>Estrategia</th><th>Universo</th><th>Go-live</th></tr></thead>
+      <tbody>
+        <tr><td><a href="btc/">ROC60 y Donchian20</a></td><td>BTC-USD</td><td class="d">7 sep 2026</td></tr>
+        <tr><td><a href="mag7/">SMA200W+RSI semanal</a></td><td>Mag7: 11 activos</td><td class="d">8 sep 2026</td></tr>
+        <tr><td><a href="semis/">Rotación Semis</a></td><td>NVDA, AVGO, AMD, TSM y ASML</td><td class="d">9 sep 2026</td></tr>
+        <tr><td><a href="msci/">MomVol MSCI World</a></td><td>URTH</td><td class="d">10 sep 2026</td></tr>
+      </tbody>
+    </table></div>
   </section>
 
-  <section class="sec rv" id="mas">
-    <h2><span class="secno">2.</span>Más</h2>
-    <div class="item"><a href="msci/">MSCI World</a></div>
-    <div class="item"><a href="rsi30/">RSI 30</a></div>
-    <div class="item"><a href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></div>
-    <div class="item"><a href="metodologia/">Metodología</a></div>
-    <div class="item"><a href="sobre-mi/">Sobre mí</a></div>
+  <section class="sec" id="herramientas">
+    <h2><span class="secno">3.</span>Herramientas</h2>
+    <div class="cards"><a class="item rv" style="--d:0.00s" href="optimizador/"><span class="th"><img src="img/optimizador.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Optimizador CVaR</span><span class="cd">La mezcla menos arriesgada para la rentabilidad que buscas.</span></span><span class="go">Abrir &rarr;</span></a><a class="item rv" style="--d:0.08s" href="interes/"><span class="th"><img src="img/interes.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Interés compuesto</span><span class="cd">Intereses que generan intereses.</span></span><span class="go">Abrir &rarr;</span></a><a class="item rv" style="--d:0.16s" href="deudas/"><span class="th"><img src="img/deudas.webp" alt="" loading="lazy" width="1200" height="900"></span><span class="tx"><span class="ct">Deudas BTC</span><span class="cd">Zonas que el precio aún no ha cruzado.</span></span><span class="go">Abrir &rarr;</span></a></div>
+    <p class="ext">Otro proyecto: <a href="https://davizz-dev13.github.io/small-cap-radar/">Small Cap Radar</a></p>
   </section>
 
-  <section class="sec rv" id="aviso">
-    <h2><span class="secno">3.</span>Aviso</h2>
-    <p class="disc">Paper trading en vivo y backtests con costes. Sharpe Lab es un proyecto personal de aprendizaje: nada de esto es asesoramiento de inversión, y la rentabilidad pasada no garantiza rentabilidades futuras.</p>
+  <section class="sec rv" id="metodo">
+    <h2><span class="secno">4.</span>Metodología y autor</h2>
+    <div class="more">
+      <a class="mi" href="metodologia/"><b>Metodología</b><span>Cómo se calcula todo lo que ves en Sharpe Lab, de dónde salen los datos y qué limitaciones tiene.</span></a>
+      <a class="mi" href="sobre-mi/"><b>Sobre mí</b><span>Soy David, estudiante de Ingeniería Informática en la UC3M.</span></a>
+    </div>
   </section>
 </main>
-<p class="backtop"><a href="#tools">&uarr; Volver a las herramientas</a></p>
-<footer class="foot">Sharpe Lab &middot; David Gallardo &middot; Madrid, España</footer>
+<footer class="site-foot"><p class="foot-legal"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</p><p class="foot-links"><a href="/sharpe-lab/">Inicio</a><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a href="https://github.com/Davizz-dev13/sharpe-lab">Código en GitHub</a><a href="https://davizz-dev13.github.io/">David Gallardo</a></p><p class="foot-sig">Sharpe Lab &middot; David Gallardo &middot; Madrid, España</p></footer>
 <script>
 (function(){
-  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.2});
+  if(!('IntersectionObserver' in window)){document.querySelectorAll('.rv').forEach(function(el){el.classList.add('in')});return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
   document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
 })();
 </script>

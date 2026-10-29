@@ -28,7 +28,6 @@
 
 
 <style>
-  :root { --bg:#f4ecd8; --panel:#faf5e7; --border:#d8cdb2; --fg:#1f1913; --mut:rgba(255,255,255,.56); --acc:#d96b2a; --green:#2d6a3e; --red:#a8322d; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:'CMU',Georgia,serif; background:var(--bg); color:var(--fg); }
   header { padding:24px 28px 8px; }
@@ -45,7 +44,7 @@
   th { color:var(--mut); font-weight:600; text-align:right; }
   th:first-child, td:first-child { text-align:left; }
   .pos { color:var(--green); } .neg { color:var(--red); }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr)); gap:16px; margin-top:16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr)); gap:16px; margin-top:16px; }
   .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
   .card h3 { margin:0 0 6px; font-size:14px; }
   .card .meta { font-size:11.5px; color:var(--mut); margin-bottom:8px; }
@@ -74,9 +73,10 @@
 
 <script src="../frescura.js" defer></script>
 <link rel="stylesheet" href="../theme.css">
+<script src="/sharpe-lab/site.js"></script>
 </head>
 <body class="has-topnav">
-<nav class="topnav" aria-label="Secciones"><div class="nav-in"><a class="nav-name" href="../">Sharpe Lab</a><div class="nav-links"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/" class="on" aria-current="page">Mag7</a><a href="../rsi30/">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group has-on"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/" class="on" aria-current="page">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/">RSI 30</a></div></div><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="/sharpe-lab/optimizador/">Optimizador CVaR</a><a href="/sharpe-lab/interes/">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <header>
     <h1>Estrategia Semanal &middot; SMA200W + RSI / Recorte 5%</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
@@ -101,7 +101,7 @@
   </div>
 
   <div class="panel">
-    <h2>Backtest completo (referencia) <span class="badge ref">no garantiza resultados futuros</span></h2>
+    <h2>Backtest completo (referencia)</h2>
     <div class="kpis" id="bt-kpis"></div>
     <div style="max-width:640px;height:260px;margin-bottom:14px"><canvas id="bt-chart"></canvas></div>
     <table id="bt-table"><thead><tr><th>Activo</th><th>Estrategia</th><th>B&amp;H</th><th>Sharpe</th><th>Sharpe B&amp;H</th><th>Max DD</th><th>Max DD B&amp;H</th><th>Operaciones</th><th>% ganadoras</th><th>Media/op.</th><th>Exposici&oacute;n</th></tr></thead><tbody></tbody></table>
@@ -115,9 +115,10 @@
     <div class="sla-controls"><label for="sla-asset" class="sla-note" style="margin:0">Activo</label><select id="sla-asset"><option value="">Todos</option></select></div>
     <div id="sla-trades"></div>
   </div>
+  <p class="pagenote" id="foot"></p>
 </main>
-<footer id="foot"></footer>
-<aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
+<footer class="site-foot"><p class="foot-legal"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</p><p class="foot-links"><a href="/sharpe-lab/">Inicio</a><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a href="https://github.com/Davizz-dev13/sharpe-lab">Código en GitHub</a><a href="https://davizz-dev13.github.io/">David Gallardo</a></p><p class="foot-sig">Sharpe Lab &middot; David Gallardo &middot; Madrid, España</p></footer>
+
 <script>
 const fmtPct = v => (v==null?'-':(v>0?'+':'')+Number(v).toFixed(2)+'%');
 const cls = v => v==null?'':(v>=0?'pos':'neg');

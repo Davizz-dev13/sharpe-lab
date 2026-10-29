@@ -19,7 +19,6 @@
 <script src="../analytics.js"></script>
 
 <style>
-  :root { --bg:#f4ecd8; --card:#faf5e7; --border:#d8cdb2; --text:#1f1913; --muted:rgba(255,255,255,.56); --accent:#d96b2a; --live:#2d6a3e; }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font-family:'CMU',Georgia,serif; }
   header { padding:28px 24px 8px; max-width:1200px; margin:0 auto; }
@@ -55,9 +54,10 @@
 
 <script src="../frescura.js" defer></script>
 <link rel="stylesheet" href="../theme.css">
+<script src="/sharpe-lab/site.js"></script>
 </head>
 <body class="has-topnav">
-<nav class="topnav" aria-label="Secciones"><div class="nav-in"><a class="nav-name" href="../">Sharpe Lab</a><div class="nav-links"><a href="../btc/">Bitcoin</a><a href="../semis/">Semis</a><a href="../msci/">MSCI</a><a href="../mag7/">Mag7</a><a href="../rsi30/" class="on" aria-current="page">RSI 30</a><a href="../optimizador/">Optimizador</a><a href="../interes/">Interés</a><a href="../deudas/">Deudas BTC</a><a href="../metodologia/">Metodología</a><a href="../sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group has-on"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/" class="on" aria-current="page">RSI 30</a></div></div><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="/sharpe-lab/optimizador/">Optimizador CVaR</a><a href="/sharpe-lab/interes/">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <header>
     <h1>RSI 30</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
@@ -105,9 +105,10 @@
       <li>Más detalle sobre costes, fuentes y sesgos en la <a href="../metodologia/">metodología</a>.</li>
     </ul>
   </div>
+  <p class="pagenote">Datos diarios vía yfinance. Costes y rentabilidad del cash según <code>config/settings.yaml</code>; los datos los genera <code>scripts/rsi30.py</code>.</p>
 </main>
-<footer>Datos diarios vía yfinance. Costes y rentabilidad del cash según <code>config/settings.yaml</code>; los datos los genera <code>scripts/rsi30.py</code>. Rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</footer>
-<aside class="legal" role="note"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</aside>
+<footer class="site-foot"><p class="foot-legal"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</p><p class="foot-links"><a href="/sharpe-lab/">Inicio</a><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a href="https://github.com/Davizz-dev13/sharpe-lab">Código en GitHub</a><a href="https://davizz-dev13.github.io/">David Gallardo</a></p><p class="foot-sig">Sharpe Lab &middot; David Gallardo &middot; Madrid, España</p></footer>
+
 <script>
 const NAMES = {'SPY': 'SPY (S&P 500)', 'GC=F': 'Oro (GC=F)', 'BTC-USD': 'Bitcoin'};
 const ORDER = ['SPY_1d', 'GC=F_1d', 'BTC-USD_1d'];
