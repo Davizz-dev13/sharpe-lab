@@ -82,8 +82,8 @@ def main():
     out = {"generated_at": pd.Timestamp.utcnow().isoformat(), "universe": UNIVERSE,
            "go_live": GO_LIVE, "rules": {
                "entry": "Cruce a la baja de la SMA200 semanal (cierre semanal)",
-               "exit": "RSI(14) semanal supera el nivel que arma la salida (85 generico; oro 87, S&P500 75, Nasdaq 79); venta al caer >5% desde el maximo posterior",
-               "execution": "Senal al cierre de la semana, posicion desde la semana siguiente",
+               "exit": "RSI(14) semanal supera el nivel que arma la salida (85 genérico; oro 87, S&P500 75, Nasdaq 79); venta al caer >5% desde el máximo posterior",
+               "execution": "Señal al cierre de la semana, posición desde la semana siguiente",
                "cost": COST, "cash_rate": CASH},
            "assets": {}, "portfolio": {}, "live": [], "errors": []}
 
@@ -161,7 +161,7 @@ def main():
 
     p = ROOT / "docs" / "mag7" / "mag7.json"
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(clean(out), allow_nan=False))
+    p.write_text(json.dumps(clean(out), ensure_ascii=False, allow_nan=False), encoding="utf-8")
     print(f"wrote {p} ({p.stat().st_size} bytes)")
     for t, a in out["assets"].items():
         print(t, a["stats"])

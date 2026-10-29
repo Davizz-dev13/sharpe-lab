@@ -80,7 +80,7 @@ def main():
     last_year = max(r.index[-1].year for r in rets.values())
     years = list(range(START_YEAR, last_year + 1))
     out = {"generated_at": pd.Timestamp.utcnow().isoformat(), "start_year": START_YEAR,
-           "note": "Backtest partido por anos naturales. Las reglas se eligieron con todo el historico a la vista, asi que los pliegues son dentro de muestra (no out-of-sample).",
+           "note": "Backtest partido por años naturales. Las reglas se eligieron con todo el histórico a la vista, así que los pliegues son dentro de muestra (no out-of-sample).",
            "strategies": {}, "errors": errors}
 
     for s in STRATEGIES:
@@ -115,7 +115,7 @@ def main():
         }
 
     p = ROOT / "docs" / "walkforward.json"
-    p.write_text(json.dumps(clean(out), allow_nan=False))
+    p.write_text(json.dumps(clean(out), ensure_ascii=False, allow_nan=False), encoding="utf-8")
     print(f"wrote {p} ({p.stat().st_size} bytes), errors: {errors}")
 
 

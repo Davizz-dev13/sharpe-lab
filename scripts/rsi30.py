@@ -455,7 +455,7 @@ def export_json(df: pd.DataFrame, sel: pd.DataFrame, res: dict, out: Path, rules
     blob = {"generated_at": pd.Timestamp.now("UTC").isoformat(), "cost": COST, "cash_rate": CASH,
             "last_bar": {f"{t}_{tf}": str(d[rules[0]][0].index[-1].date()) for (t, tf), d in res.items()},
             "rules_shown": rules,
-            "method": "Senal RSI14<=30 al cierre, ejecucion apertura siguiente; parametros elegidos con la primera mitad (IS), segunda mitad (OOS) aparte",
+            "method": "Señal RSI14<=30 al cierre, ejecución apertura siguiente; parámetros elegidos con la primera mitad (IS), segunda mitad (OOS) aparte",
             "series": {}}
     for (t, tf), d in res.items():
         k = f"{t}_{tf}"
@@ -472,7 +472,7 @@ def export_json(df: pd.DataFrame, sel: pd.DataFrame, res: dict, out: Path, rules
                      .round(4).replace({np.nan: None}).to_dict("records"),
         }
     blob["selection"] = sel.round(4).replace({np.nan: None}).to_dict("records")
-    (out / "rsi30.json").write_text(json.dumps(_clean_json(blob), ensure_ascii=False, allow_nan=False))
+    (out / "rsi30.json").write_text(json.dumps(_clean_json(blob), ensure_ascii=False, allow_nan=False), encoding="utf-8")
 
 
 def main():

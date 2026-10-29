@@ -117,9 +117,9 @@ def main():
         "universe": SEMIS, "go_live": GO_LIVE,
         "rules": {
             "name": "roc126 top2 vol-escalada",
-            "selection": "Top-2 por ROC de 126 dias, solo si ROC > 0 (si ninguno, 100% cash)",
+            "selection": "Top-2 por ROC de 126 días, solo si ROC > 0 (si ninguno, 100% cash)",
             "sizing": "Reparto equitativo entre patas; cada pata escalada por min(1, 0.10/vol20)",
-            "execution": "Senal al cierre, posicion desde la barra siguiente",
+            "execution": "Señal al cierre, posición desde la barra siguiente",
             "cost": COST, "cash_rate": CASH},
         "dates": [str(d.date()) for d in Cw.index],
         "equity": [round(float(v), 4) for v in eq],
@@ -139,7 +139,7 @@ def main():
 
     p = ROOT / "docs" / "semis" / "semis.json"
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(clean(out), allow_nan=False))
+    p.write_text(json.dumps(clean(out), ensure_ascii=False, allow_nan=False), encoding="utf-8")
     print(f"wrote {p} ({p.stat().st_size} bytes)")
     print("stats:", out["stats"])
     print("bh:", out["bh_stats"])
