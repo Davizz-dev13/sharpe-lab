@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core.data import history
+from core.jsonsafe import clean  # NaN/inf -> null: la web solo lee JSON estricto
 from core.stats import sharpe_ratio, periods_per_year
 from core.backtest import backtest_strategy
 from scripts.david_sma200w import david_weekly_daily_returns
@@ -63,10 +64,10 @@ def main():
     errors = []
     for t in UNIVERSE:
         try:
-            df = history(t, "10y", "1d")  # cache del generator; sin refresh
+            df = history(t, "10y", "1d").dropna(subset=["Close"])  # cache del generator; sin refresh
             for s in STRATEGIES:
                 if s == DAVID_STRATEGY:
-                    df_full = history(t, "max", "1d")  # calentamiento SMA200W
+                    df_full = history(t, "max", "1d").dropna(subset=["Close"])  # calentamiento SMA200W
                     r_full, _ = david_weekly_daily_returns(
                         df_full, COST, CASH, RSI_BY_ASSET.get(t, RSI_DEFAULT))
                     rets[(t, s)] = r_full.reindex(df.index).fillna(0.0)
@@ -114,7 +115,7 @@ def main():
         }
 
     p = ROOT / "docs" / "walkforward.json"
-    p.write_text(json.dumps(out))
+    p.write_text(json.dumps(clean(out), allow_nan=False))
     print(f"wrote {p} ({p.stat().st_size} bytes), errors: {errors}")
 
 

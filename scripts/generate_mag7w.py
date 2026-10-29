@@ -14,6 +14,7 @@ import yaml
 import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from core.jsonsafe import clean  # NaN/inf -> null: la web solo lee JSON estricto
 from core.stats import sharpe_ratio  # Sharpe sobre exceso de rentabilidad (cash = tasa libre de riesgo)
 
 from scripts.mag7w_core import weekly_frame, weekly_position, trades_from_position, weekly_backtest
@@ -38,7 +39,7 @@ def download(t: str) -> pd.DataFrame:
         df.columns = df.columns.get_level_values(0)
     df.columns = [c.title() for c in df.columns]
     df.index = pd.to_datetime(df.index)
-    return df
+    return df.dropna(subset=["Close"])  # vela sin cierre (NaN) fuera
 
 
 def _r2(x):
@@ -160,7 +161,7 @@ def main():
 
     p = ROOT / "docs" / "mag7" / "mag7.json"
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(out))
+    p.write_text(json.dumps(clean(out), allow_nan=False))
     print(f"wrote {p} ({p.stat().st_size} bytes)")
     for t, a in out["assets"].items():
         print(t, a["stats"])

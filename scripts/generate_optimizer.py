@@ -12,6 +12,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from core.data import history
+from core.jsonsafe import clean  # NaN/inf -> null: la web solo lee JSON estricto
 
 ASSETS = [
     {"ticker": "BIL",     "name": "Cash (T-bill ETF)",  "short": "Cash"},
@@ -52,7 +53,7 @@ LONG_NAME = {"PDBC": "Commodities (DBC)"}
 def main():
     closes = {}
     for a in ASSETS:
-        df = history(a["ticker"], PERIOD, "1d", refresh=True)
+        df = history(a["ticker"], PERIOD, "1d", refresh=True).dropna(subset=["Close"])
         closes[a["ticker"]] = df["Close"]
 
     # Calendario union (BTC cotiza 365, los ETFs solo dias laborables):
@@ -73,7 +74,7 @@ def main():
     dest = ROOT / "docs" / "optimizador"
     dest.mkdir(parents=True, exist_ok=True)
     with open(dest / "optimizador.json", "w") as f:
-        json.dump(out, f, separators=(",", ":"))
+        json.dump(clean(out), f, separators=(",", ":"), allow_nan=False)
     print(f"optimizador.json: {len(dates)} dias x {len(ASSETS)} activos, {dest/'optimizador.json'}")
 
 
@@ -88,7 +89,7 @@ def main_long():
             o["ticker"] = LONG_TICKER[a["ticker"]]
             o["name"] = LONG_NAME[a["ticker"]]
         assets.append(o)
-        df = history(o["ticker"], LONG_PERIOD, "1d", refresh=True)
+        df = history(o["ticker"], LONG_PERIOD, "1d", refresh=True).dropna(subset=["Close"])
         closes[o["ticker"]] = df["Close"]
 
     cal = pd.Index(sorted(set().union(*[s.index for s in closes.values()])))
@@ -128,7 +129,7 @@ def main_long():
     }
     dest = ROOT / "docs" / "optimizador"
     with open(dest / "optimizador-long.json", "w") as f:
-        json.dump(out, f, separators=(",", ":"))
+        json.dump(clean(out), f, separators=(",", ":"), allow_nan=False)
     print(f"optimizador-long.json: {len(dates)} dias x {len(assets)} activos")
 
 

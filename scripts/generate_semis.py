@@ -15,6 +15,7 @@ import yaml
 import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from core.jsonsafe import clean  # NaN/inf -> null: la web solo lee JSON estricto
 from core.benchmark import benchmark_equity, BENCHMARK
 from core.stats import sharpe_ratio  # Sharpe sobre exceso de rentabilidad (cash = tasa libre de riesgo)
 
@@ -72,7 +73,7 @@ def download(t: str) -> pd.Series:
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
     df.index = pd.to_datetime(df.index)
-    return df["Close"]
+    return df["Close"].dropna()  # vela sin cierre (NaN) fuera
 
 
 def main():
@@ -138,7 +139,7 @@ def main():
 
     p = ROOT / "docs" / "semis" / "semis.json"
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(out))
+    p.write_text(json.dumps(clean(out), allow_nan=False))
     print(f"wrote {p} ({p.stat().st_size} bytes)")
     print("stats:", out["stats"])
     print("bh:", out["bh_stats"])
