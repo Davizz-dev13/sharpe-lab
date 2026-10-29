@@ -98,8 +98,8 @@ try{
   #intro.out{opacity:0;transform:scale(1.04);pointer-events:none}
   #intro .in-title{font-family:'CMU',Georgia,serif;color:#fff;font-size:clamp(34px,6vw,56px);letter-spacing:.12em;font-variant:small-caps;opacity:0;filter:blur(14px);animation:inmark 1.5s ease .25s forwards}
   @keyframes inmark{to{opacity:1;filter:blur(0)}}
-  #intro .in-skip{position:absolute;top:max(12px,env(safe-area-inset-top));right:14px;background:none;border:0;color:#9a9a9a;font:500 14px/1 inherit;font-family:inherit;letter-spacing:.12em;padding:12px;cursor:pointer}
-  #intro .in-skip:hover,#intro .in-skip:focus-visible{color:#fff}
+  #intro .in-skip{position:absolute;top:max(12px,env(safe-area-inset-top));right:14px;background:none !important;border:0 !important;color:#9a9a9a !important;font-family:inherit !important;font-weight:500;font-size:14px;letter-spacing:.12em;padding:12px;cursor:pointer}
+  #intro .in-skip:hover,#intro .in-skip:focus-visible{color:#fff !important;background:none !important}
   @media (prefers-reduced-motion:reduce){
     .seq{height:auto}.pin{position:relative;height:auto;overflow:visible}
     .fr{position:relative;height:70svh;opacity:1 !important}.fr>img,.fr>picture>img{transform:none !important}.fr>video{display:none !important}
