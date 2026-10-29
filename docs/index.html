@@ -20,6 +20,13 @@
 <meta name="twitter:description" content="Estrategias cuantitativas estudiadas a la vista: backtests, seguimiento en vivo (paper), optimizador de cartera y calculadoras. Proyecto personal, no es asesoramiento.">
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
+<script>
+try{
+  var _rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var _seen=sessionStorage.getItem('sl_in')==='1';
+  if(!_rm&&!_seen){document.documentElement.classList.add('in-on');sessionStorage.setItem('sl_in','1');}
+}catch(e){}
+</script>
 <script src="frescura.js" defer></script>
 <style>
   /* Portada formal: misma columna, letra y filetes que davizz-dev13.github.io */
@@ -83,16 +90,27 @@
     .cd{text-align:left}
     .q{bottom:8svh}.q p{font-size:clamp(19px,5.6vw,26px)}
   }
+  /* Entrada sobre negro: la marca se aclara y se disuelve en la primera escena (una vez por sesión) */
+  #intro{display:none}
+  html.in-on #intro{display:flex;position:fixed;inset:0;z-index:100;background:#000;align-items:center;justify-content:center;transition:opacity .65s ease,transform .65s ease}
+  html.in-on,html.in-on body{overflow:hidden}
+  html.in-on body>*:not(#intro){visibility:hidden}
+  #intro.out{opacity:0;transform:scale(1.04);pointer-events:none}
+  #intro .in-title{font-family:'CMU',Georgia,serif;color:#fff;font-size:clamp(34px,6vw,56px);letter-spacing:.12em;font-variant:small-caps;opacity:0;filter:blur(14px);animation:inmark 1.5s ease .25s forwards}
+  @keyframes inmark{to{opacity:1;filter:blur(0)}}
+  #intro .in-skip{position:absolute;top:max(12px,env(safe-area-inset-top));right:14px;background:none;border:0;color:#9a9a9a;font:500 14px/1 inherit;font-family:inherit;letter-spacing:.12em;padding:12px;cursor:pointer}
+  #intro .in-skip:hover,#intro .in-skip:focus-visible{color:#fff}
   @media (prefers-reduced-motion:reduce){
     .seq{height:auto}.pin{position:relative;height:auto;overflow:visible}
     .fr{position:relative;height:70svh;opacity:1 !important}.fr>img,.fr>picture>img{transform:none !important}.fr>video{display:none !important}
     .q{opacity:1 !important;filter:none !important}.fr::before{background:linear-gradient(rgba(0,0,0,0) 25%,rgba(0,0,0,.7) 78%)}
-    .hint,.bar{display:none}.rv{opacity:1;transform:none;transition:none}
+    .hint,.bar,#intro{display:none !important}.rv{opacity:1;transform:none;transition:none}
   }
 </style>
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
+<div id="intro" role="dialog" aria-label="Entrada"><div class="in-title">Sharpe Lab</div><button class="in-skip" type="button">Saltar &rsaquo;</button></div>
 <nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="./">Sharpe Lab</a><div class="nav-links"><a href="#tools">Herramientas</a><a href="metodologia/">Metodología</a><a href="sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <section class="seq" id="seq" aria-label="Frases">
   <div class="pin">
@@ -100,15 +118,15 @@
     <div class="hint" aria-hidden="true">&darr;</div>
     <div class="fr" style="z-index:1"><img src="img/s01.webp" alt="" width="1672" height="941" fetchpriority="high"></div>
     <div class="fr" style="z-index:2"><img src="img/s02.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>El ruido de hoy es el silencio de mañana.</p></blockquote></div>
+      <blockquote class="q" lang="en"><p>Today's noise is tomorrow's silence.</p></blockquote></div>
     <div class="fr" style="z-index:3"><img src="img/s03.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>Quien conoce su límite sobrevive a la tormenta.</p></blockquote></div>
+      <blockquote class="q" lang="en"><p>Whoever knows their limit outlasts the storm.</p></blockquote></div>
     <div class="fr" style="z-index:4"><img src="img/s04.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>El primer paso no te lleva a donde quieres estar. Te saca de donde estabas.</p></blockquote></div>
+      <blockquote class="q" lang="en"><p>The first step doesn't take you where you want to be. It takes you out of where you were.</p></blockquote></div>
     <div class="fr olive" style="z-index:5"><picture><source media="(max-aspect-ratio: 1/1)" srcset="img/s06m.webp"><img src="img/s06-wide.webp" alt="" width="1672" height="941" loading="lazy"></picture>
-      <blockquote class="q"><p>Quien teme más al dolor que al fracaso acabará probando los dos.</p></blockquote></div>
+      <blockquote class="q" lang="en"><p>A man who fears pain more than failure will taste both.</p></blockquote></div>
     <div class="fr" style="z-index:6"><img src="img/s07.webp" alt="" width="1672" height="941" loading="lazy">
-      <blockquote class="q"><p>La disciplina hace que todos los días se parezcan. Su ausencia hace que se parezcan todos los años.</p></blockquote></div>
+      <blockquote class="q" lang="en"><p>Discipline makes every day look the same. Its absence makes every year look the same.</p></blockquote></div>
   </div>
 </section>
 <main class="tools">
@@ -200,6 +218,22 @@
   addEventListener('scroll',req,{passive:true});addEventListener('resize',req);run();
   var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.2});
   document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
+})();
+</script>
+<script>
+(function(){
+  var de=document.documentElement, intro=document.getElementById('intro');
+  if(!intro) return;
+  if(!de.classList.contains('in-on')){ intro.parentNode.removeChild(intro); return; }
+  var done=false;
+  function exit(){
+    if(done) return; done=true;
+    intro.classList.add('out'); de.classList.remove('in-on');
+    setTimeout(function(){ if(intro.parentNode) intro.parentNode.removeChild(intro); },700);
+  }
+  intro.querySelector('.in-skip').addEventListener('click',exit);
+  document.addEventListener('keydown',function k(e){ if(e.key==='Escape'){ exit(); document.removeEventListener('keydown',k); } });
+  setTimeout(exit,2400);
 })();
 </script>
 </body>
