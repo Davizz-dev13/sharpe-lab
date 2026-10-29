@@ -52,12 +52,15 @@
   .disc{font-size:15px;line-height:1.7;text-align:justify;hyphens:auto;margin:0}
   .rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease var(--d,0s),transform .6s ease var(--d,0s)}
   .rv.in{opacity:1;transform:none}
-  /* Entrada: fotos en blanco y negro con las frases en la letra de la web */
+  /* Entrada: fotos animadas en color con las frases en la letra de la web */
   .seq{position:relative;height:calc(var(--n)*125svh + 30svh);--n:6;border-bottom:1px solid var(--rule)}
   .pin{position:sticky;top:0;height:100svh;overflow:hidden;background:#1a1a1a}
   .fr{position:absolute;inset:0;opacity:0}
   .fr:first-child{opacity:1}
-  .fr>img,.fr>picture>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.1);transform-origin:50% 50%;will-change:transform;backface-visibility:hidden;filter:grayscale(1) contrast(1.05)}
+  .fr>img,.fr>picture>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.1);transform-origin:50% 50%;will-change:transform;backface-visibility:hidden}
+  .fr>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.04);transform-origin:50% 50%;will-change:transform;backface-visibility:hidden;opacity:0;transition:opacity .6s ease;background:transparent}
+  .fr>video.on{opacity:1}
+  .fr.olive>video{object-fit:contain;object-position:center;transform:none}
   .fr.olive>picture>img{object-fit:contain;object-position:center;transform:none}
   .fr.olive{background:#1a1a1a}
   .fr::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,0) 30%,rgba(0,0,0,calc(var(--qa,0)*.6)) 82%),radial-gradient(120% 100% at 50% 40%,transparent 60%,rgba(0,0,0,.35))}
@@ -82,7 +85,7 @@
   }
   @media (prefers-reduced-motion:reduce){
     .seq{height:auto}.pin{position:relative;height:auto;overflow:visible}
-    .fr{position:relative;height:70svh;opacity:1 !important}.fr>img,.fr>picture>img{transform:none !important}
+    .fr{position:relative;height:70svh;opacity:1 !important}.fr>img,.fr>picture>img{transform:none !important}.fr>video{display:none !important}
     .q{opacity:1 !important;filter:none !important}.fr::before{background:linear-gradient(rgba(0,0,0,0) 25%,rgba(0,0,0,.7) 78%)}
     .hint,.bar{display:none}.rv{opacity:1;transform:none;transition:none}
   }
@@ -95,16 +98,16 @@
   <div class="pin">
     <div class="bar"></div>
     <div class="hint" aria-hidden="true">&darr;</div>
-    <div class="fr" style="z-index:1"><img src="img/s01.webp" alt="" width="1672" height="941" fetchpriority="high"></div>
-    <div class="fr" style="z-index:2"><img src="img/s02.webp" alt="" width="1672" height="941" loading="lazy">
+    <div class="fr" style="z-index:1"><img src="img/s01.webp" alt="" width="1672" height="941" fetchpriority="high"><video muted loop playsinline preload="none" poster="img/s01.webp" data-v="vid/s01" aria-hidden="true"></video></div>
+    <div class="fr" style="z-index:2"><img src="img/s02.webp" alt="" width="1672" height="941" loading="lazy"><video muted loop playsinline preload="none" poster="img/s02.webp" data-v="vid/s02" aria-hidden="true"></video>
       <blockquote class="q"><p>El ruido de hoy es el silencio de mañana.</p></blockquote></div>
-    <div class="fr" style="z-index:3"><img src="img/s03.webp" alt="" width="1672" height="941" loading="lazy">
+    <div class="fr" style="z-index:3"><img src="img/s03.webp" alt="" width="1672" height="941" loading="lazy"><video muted loop playsinline preload="none" poster="img/s03.webp" data-v="vid/s03" aria-hidden="true"></video>
       <blockquote class="q"><p>Quien conoce su límite sobrevive a la tormenta.</p></blockquote></div>
-    <div class="fr" style="z-index:4"><img src="img/s04.webp" alt="" width="1672" height="941" loading="lazy">
+    <div class="fr" style="z-index:4"><img src="img/s04.webp" alt="" width="1672" height="941" loading="lazy"><video muted loop playsinline preload="none" poster="img/s04.webp" data-v="vid/s04" aria-hidden="true"></video>
       <blockquote class="q"><p>El primer paso no te lleva a donde quieres estar. Te saca de donde estabas.</p></blockquote></div>
-    <div class="fr olive" style="z-index:5"><picture><source media="(max-aspect-ratio: 1/1)" srcset="img/s06m.webp"><img src="img/s06-wide.webp" alt="" width="1672" height="941" loading="lazy"></picture>
+    <div class="fr olive" style="z-index:5"><picture><source media="(max-aspect-ratio: 1/1)" srcset="img/s06m.webp"><img src="img/s06-wide.webp" alt="" width="1672" height="941" loading="lazy"></picture><video muted loop playsinline preload="none" poster="img/s06-wide.webp" data-v="vid/s06-wide" data-vm="vid/s06m" data-pm="img/s06m.webp" aria-hidden="true"></video>
       <blockquote class="q"><p>Quien teme más al dolor que al fracaso acabará probando los dos.</p></blockquote></div>
-    <div class="fr" style="z-index:6"><img src="img/s07.webp" alt="" width="1672" height="941" loading="lazy">
+    <div class="fr" style="z-index:6"><img src="img/s07.webp" alt="" width="1672" height="941" loading="lazy"><video muted loop playsinline preload="none" poster="img/s07.webp" data-v="vid/s07" aria-hidden="true"></video>
       <blockquote class="q"><p>La disciplina hace que todos los días se parezcan. Su ausencia hace que se parezcan todos los años.</p></blockquote></div>
   </div>
 </section>
@@ -145,10 +148,29 @@
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, raf=0;
   seq.style.setProperty('--n',N);
   function cl(v){return Math.min(1,Math.max(0,v))}
-  // Movimiento por foto (zoom + desplazamiento, cada una en una dirección): [zoom inicial, zoom final, x0, x1, y0, y1] en %
-  var MOV=[[1.06,1.17,0,-3,0,-1.5],[1.17,1.07,-3,2.5,.5,-.5],[1.08,1.19,2,-1.5,2.5,-2.5],[1.19,1.08,0,1,-3,2],[1.07,1.18,3,-2.5,-1,1.5],[1.18,1.07,-2,2,2,-1.5]];
-  var OLIVE=[1,1.09,0,0,1.2,-1.2];
+  // Movimiento suave por foto encima del clip (zoom + desplazamiento, cada una en una dirección): [zoom inicial, zoom final, x0, x1, y0, y1] en %
+  var MOV=[[1.03,1.08,0,-1.2,0,-.6],[1.08,1.03,-1.2,1,.2,-.2],[1.03,1.08,.8,-.6,1,-1],[1.08,1.03,0,.4,-1.2,.8],[1.03,1.08,1.2,-1,-.4,.6],[1.08,1.03,-.8,.8,.8,-.6]];
+  var OLIVE=[1,1.04,0,0,.5,-.5];
   var img=fr.map(function(f){return f.querySelector('img')});
+  // Clips animados: se cargan al acercarse y solo se reproduce el que está a la vista
+  var vid=fr.map(function(f){return f.querySelector('video')});
+  var tall=matchMedia('(max-aspect-ratio: 1/1)').matches;
+  var canWebm=document.createElement('video').canPlayType('video/webm; codecs="vp9"')!=='';
+  function load(v){
+    if(!v||v.dataset.ok) return; v.dataset.ok=1;
+    var b=(tall&&v.dataset.vm)?v.dataset.vm:v.dataset.v;
+    if(tall&&v.dataset.pm) v.poster=v.dataset.pm;
+    v.addEventListener('playing',function(){v.classList.add('on')});
+    v.src=b+(canWebm?'.webm':'.mp4');
+    v.addEventListener('error',function(){if(canWebm&&v.src.slice(-5)==='.webm'){v.src=b+'.mp4';v.load()}},{once:true});
+  }
+  function want(v,on){
+    if(!v) return;
+    if(on){load(v); if(v.paused){var pr=v.play(); if(pr&&pr.catch) pr.catch(function(){});}}
+    else if(!v.paused) v.pause();
+  }
+  var seqVis=true;
+  new IntersectionObserver(function(es){seqVis=es[0].isIntersecting; req()}).observe(seq);
   var mv=fr.map(function(f,k){return f.classList.contains('olive')?OLIVE:MOV[k%MOV.length]});
   function lerp(a,b,p){return a+(b-a)*p}
   function run(){
@@ -160,12 +182,14 @@
     for(var k=0;k<N;k++){
       var f=fr[k], u=t-k;
       var a = k===0 ? 1 : cl((u+.18)/.3);
+      if(!reduce){ if(u>-1.3&&u<1.2) load(vid[k]); want(vid[k], seqVis&&u>-.3&&u<1.2); }
       if(u>1.2||u<-.3){ f.style.opacity=u>1.2&&k<N-1?0:(k===0?1:0); if(u>1.2){f.style.display='none';continue} }
       f.style.display='';
       f.style.opacity=a.toFixed(3);
       var m=mv[k], p=cl((u+.25)/1.45); p=p*p*(3-2*p)*.6+p*.4;
       var sc=lerp(m[0],m[1],p), lim=(sc-1)*45, x=Math.max(-lim,Math.min(lim,lerp(m[2],m[3],p))), y=Math.max(-lim,Math.min(lim,lerp(m[4],m[5],p)));
-      img[k].style.transform='translate3d('+x.toFixed(3)+'%,'+y.toFixed(3)+'%,0) scale('+sc.toFixed(4)+')';
+      var tf='translate3d('+x.toFixed(3)+'%,'+y.toFixed(3)+'%,0) scale('+sc.toFixed(4)+')';
+      img[k].style.transform=tf; if(vid[k]) vid[k].style.transform=tf;
       f.style.setProperty('--qy',(26-40*cl((u-.2)/1)).toFixed(1)+'px');
       var qin=cl((u-.2)/.4), qout=k===N-1?1:1-cl((u-.9)/.12);
       f.style.setProperty('--qa',(Math.min(.12+qin*.88,1)*qout*(u>.2?1:cl(u/.2))).toFixed(3));
