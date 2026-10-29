@@ -135,11 +135,11 @@ def main():
         "ticker": TICKER, "go_live": GO_LIVE,
         "rules": {
             "name": "MomVol",
-            "selection": f"Largo si ROC de {ROC_DAYS} dias > 0; si no, cash",
+            "selection": f"Largo si ROC de {ROC_DAYS} días > 0; si no, cash",
             "sizing": f"Peso min(1, {TARGET_VOL:.2f}/vol20)",
-            "execution": "Senal al cierre, posicion desde la barra siguiente",
+            "execution": "Señal al cierre, posición desde la barra siguiente",
             "cost": COST, "cash_rate": CASH,
-            "note": "Proxy URTH (iShares MSCI World), datos desde 2012 - ventana mas corta que el resto del terminal"},
+            "note": "Proxy URTH (iShares MSCI World), datos desde 2012 - ventana más corta que el resto del terminal"},
         "dates": [str(d.date()) for d in c.index],
         "equity": [round(float(v), 4) for v in eq],
         "bh_equity": [round(float(v), 4) for v in bh_eq],
@@ -161,7 +161,7 @@ def main():
 
     p = ROOT / "docs" / "msci" / "msci.json"
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(clean(out), allow_nan=False))
+    p.write_text(json.dumps(clean(out), ensure_ascii=False, allow_nan=False), encoding="utf-8")
     print(f"wrote {p} ({p.stat().st_size} bytes)")
     print("stats:", out["stats"])
     print("bh:", out["bh_stats"])
