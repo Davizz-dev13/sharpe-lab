@@ -25,6 +25,11 @@
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
 <script src="vendor/solver.js"></script>
+<script src="cvar.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script>function slMath(){ if(window.renderMathInElement) renderMathInElement(document.querySelector('main'),{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false}); }</script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="slMath()"></script>
 
 
 <style>
@@ -70,6 +75,11 @@
   .back:hover { color:var(--fg); }
   .winbtn{padding:4px 10px;border:1px solid var(--border);background:var(--panel);color:var(--fg);font-family:'CMU',Georgia,serif;font-size:12px;cursor:pointer;margin-right:2px}
   .winbtn.active{background:var(--yellow)}
+  .chartbox.ef { height:460px; }
+  @media (max-width:860px){ .chartbox.ef { height:400px; } }
+  .expl .katex-display { overflow-x:auto; overflow-y:hidden; padding:4px 0; margin:10px 0 14px; }
+  .expl h3 { font-size:15px; margin:18px 0 6px; }
+  .ef-note b { color:var(--fg); }
 </style>
 
 
@@ -82,7 +92,7 @@
 <header>
     <h1>Optimizador de carteras &middot; mínimo CVaR</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
-  <div class="sub">Elige activos, límites y una rentabilidad objetivo. El optimizador minimiza la pérdida media de los peores días históricos (CVaR) para ese objetivo resolviendo un programa lineal, y lo compara con tu cartera y con la esquina de máximo CAGR.</div>
+  <div class="sub">Elige activos, límites y una rentabilidad objetivo. El optimizador minimiza la pérdida media de los peores días históricos (CVaR) para ese objetivo resolviendo un programa lineal, con todos los días de la ventana, y lo compara con tu cartera, con la cartera tangente (máxima rentabilidad en exceso por unidad de CVaR) y con la de máxima rentabilidad media.</div>
 </header>
 <main>
   <div class="grid2">
@@ -101,7 +111,7 @@
         <div class="note" id="custom-status">El universo incluye las acciones, ETF, materias primas y criptos habituales. Otras criptos se cargan aquí en directo (pares USD de Coinbase); cualquier otra cosa se puede añadir a los datos nocturnos si me la pides.</div>
       </div>
       <div style="margin-top:12px;font-size:13px">
-        Rentabilidad objetivo: <input type="number" id="ret-obj" min="0" max="50" step="0.5" value="5" style="width:58px"> % anual
+        Rentabilidad objetivo \(\hat\mu\): <input type="number" id="ret-obj" min="0" max="200" step="0.5" value="5" style="width:58px"> % anual (media aritmética)
       </div>
       <div style="margin-top:10px;font-size:13px">
         Confianza del CVaR:
@@ -118,9 +128,9 @@
         <button class="winbtn" data-win="20">20A</button>
       </div>
       <div class="note" id="win-note" style="display:none"></div>
-      <div class="note" id="mean-note">Sin objetivo, el mínimo CVaR siempre es 100 % cash: minimizar el riesgo sin pedir nada a cambio no es una estrategia. La rentabilidad esperada de cada activo es su media histórica de 5 años.</div>
+      <div class="note" id="mean-note">Si el cash está permitido al 100 %, el mínimo CVaR sin objetivo es casi todo cash: minimizar el riesgo sin pedir nada a cambio no es una estrategia. La rentabilidad esperada de cada activo es su media histórica de 5 años (media diaria × días por año).</div>
       <button class="bigbtn" id="solve-btn">Optimizar</button>
-      <span id="spinner">resolviendo el programa lineal&hellip;</span>
+      <span id="spinner">resolviendo los programas lineales&hellip;</span>
       <div class="err" id="err-box"></div>
     </div>
   </div>
@@ -129,17 +139,18 @@
     <div class="panel">
       <h2>Pesos óptimos <span class="badge" id="res-badge"></span></h2>
       <div class="chartbox"><canvas id="alloc-chart"></canvas></div>
-      <div class="twrap"><table id="w-table"><thead><tr><th>Activo</th><th>Tu cartera</th><th>Min CVaR</th><th>Max CAGR</th><th>Recomendada</th></tr></thead><tbody></tbody></table></div>
+      <div class="twrap"><table id="w-table"><thead><tr><th>Activo</th><th>Tu cartera</th><th>Mín. CVaR global</th><th>Mín. CVaR (objetivo)</th><th>Tangente</th><th>Máx. media</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
       <h2>Métricas (<span id="m-span">5 años</span>, datos históricos) <span class="badge">la rentabilidad pasada no garantiza la futura</span></h2>
-      <div class="twrap"><table id="m-table"><thead><tr><th>Cartera</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th><th>CVaR diario</th></tr></thead><tbody></tbody></table></div>
-      <p style="font-size:12px;color:var(--mut);margin:8px 0 0">El Sharpe se calcula sobre la rentabilidad en exceso del cash (BIL / letra del Tesoro a 3 meses) del mismo día; CAGR y Sharpe se anualizan con los días reales por año de la ventana.</p>
+      <div class="twrap"><table id="m-table"><thead><tr><th>Cartera</th><th>μ anual</th><th>CAGR</th><th>Sharpe</th><th>Máx. DD</th><th>CVaR diario</th></tr></thead><tbody></tbody></table></div>
+      <p style="font-size:12px;color:var(--mut);margin:8px 0 0">μ es la media aritmética anualizada (la del eje vertical de la frontera y la de la restricción del LP); el CAGR es la tasa compuesta realizada, que con volatilidad es menor. El Sharpe se calcula sobre la rentabilidad en exceso del cash (BIL / letra del Tesoro a 3 meses) del mismo día; CAGR y Sharpe se anualizan con los días reales por año de la ventana. El CVaR es el del LP (Rockafellar–Uryasev, con la fracción del día frontera).</p>
     </div>
     <div class="panel">
-      <h2>Frontera eficiente <span class="badge" id="ef-badge"></span></h2>
-      <div class="chartbox tall"><canvas id="ef-chart"></canvas></div>
-      <div class="note">Cada punto de la curva es la cartera menos arriesgada que el programa lineal puede construir para un objetivo de rentabilidad, con tus activos y límites. La curva es el mejor equilibrio posible: el riesgo en el eje horizontal (pérdida media de los peores días; cuanto menos, más segura) y la rentabilidad anual esperada en el vertical. Los marcadores indican dónde está cada una de las cuatro carteras. El punto Recomendada, con anillo, es donde una recta trazada desde el nivel de rentabilidad de Min CVaR tocaría la curva con más pendiente: la mejor rentabilidad extra por unidad de riesgo extra sobre la cartera segura. Los puntos se resuelven con días muestreados para ir rápido, así que la curva es un esbozo cercano, no el programa lineal exacto del resultado principal.</div>
+      <h2>Región factible y frontera eficiente <span class="badge" id="ef-badge"></span></h2>
+      <div class="chartbox ef"><canvas id="ef-chart"></canvas></div>
+      <div class="note ef-note" id="ef-note"></div>
+      <div class="note">Plano (CVaR, μ): riesgo en el eje horizontal (CVaR diario, pérdida media del peor β de los días; cuanto menos, mejor) y rentabilidad media anual en el vertical. Nube gris: carteras aleatorias que cumplen tus límites (la región factible vista en este plano). Línea negra: frontera eficiente, el valor óptimo \(v(m)\) del LP para cada rentabilidad \(m\) (41 LP resueltos con todos los días y unidos por segmentos rectos, porque \(v\) es lineal a trozos). Discontinua gris: rama ineficiente. Azul discontinua: recta desde \(r_f\) tangente a la frontera en la cartera tangente. Pulsa en la leyenda para ocultar o mostrar cada serie.</div>
     </div>
     <div class="panel">
       <h2>Crecimiento de 1 &euro;</h2>
@@ -151,13 +162,23 @@
     </div>
   </div>
 
-  <div class="panel expl">
+  <div class="panel expl" id="como-funciona">
     <h2>Cómo funciona</h2>
-    <p>La varianza trata igual las ganancias que las pérdidas, pero nadie llora por ganar. El <b>CVaR</b> (Conditional Value at Risk) solo mira lo que duele: la pérdida media de los peores días. Con un 95 % de confianza, es la media del peor 5 % de los escenarios históricos.</p>
-    <p>Minimizar el CVaR parece un problema estadístico imposible, pero Rockafellar y Uryasev demostraron que se convierte <b>exactamente</b> en un programa lineal: cada día histórico es un escenario, cada escenario añade una restricción y el símplex encuentra la esquina óptima. Los pesos que salen son los que mejor habrían protegido frente a los peores tramos de la ventana elegida, dentro de tus límites.</p>
-    <p>Lo que lo hace útil es la <b>rentabilidad objetivo</b>: sin ella, la respuesta matemáticamente correcta es aburrida (100 % cash, que casi nunca pierde). Al exigir una rentabilidad esperada mínima, el programa lineal tiene que asumir riesgo, y el símplex encuentra la esquina que lo hace con el menor dolor posible. Es la frontera eficiente de siempre, pero midiendo el riesgo por el lado que importa.</p>
-    <p>Las cuatro carteras cuentan la historia. <b>Tu cartera</b> es el punto de partida. <b>Min CVaR</b> es la forma más segura de llegar a tu objetivo. <b>Max CAGR</b> es el otro extremo: llenar hasta su límite los activos que mejor lo han hecho y olvidarse del riesgo. <b>Recomendada</b> está entre ambas: el punto de la frontera con más rentabilidad extra por unidad de riesgo extra sobre la cartera segura. Comparar las cuatro enseña la diferencia entre "no se mueve", "no se hunde" y "persigue rentabilidad".</p>
-    <p class="note">Escenarios: días históricos de la ventana elegida (muestreados para que el programa lineal vaya rápido en el móvil). El cash es un ETF de letras del Tesoro de EE. UU. (BIL). Nada de esto es asesoramiento de inversión.</p>
+    <p>El riesgo se mide con el <b>CVaR</b> (Conditional Value at Risk) al nivel de confianza \(1-\beta\): la pérdida media del peor \(\beta\) de los días de la ventana (con un 95 %, el peor 5 %). A diferencia de la varianza, solo penaliza las pérdidas.</p>
+    <h3>Es un programa lineal</h3>
+    <p>Cada día histórico \(s=1,\dots,S\) es un escenario con rentabilidades \(r_s\in\mathbb{R}^n\). Rockafellar y Uryasev (2000) demostraron que minimizar el CVaR equivale exactamente al siguiente programa lineal, con los pesos \(w\), una variable libre \(\alpha\) (en el óptimo, el VaR) y una variable auxiliar \(u_s\ge 0\) por escenario:</p>
+    \[\begin{aligned} v(m)\;=\;\min_{w,\,\alpha,\,u}\;\; & \alpha+\frac{1}{\beta S}\sum_{s=1}^{S}u_s\\ \text{s.a.}\;\; & u_s\ \ge\ -r_s^{\top}w-\alpha,\qquad u_s\ \ge\ 0,\qquad s=1,\dots,S\\ & \mathbf{1}^{\top}w=1,\qquad 0\le w_i\le c_i\\ & \hat\mu^{\top}w=m \end{aligned}\]
+    <p>Aquí \(c_i\) son los límites que eliges y \(\hat\mu\) es la rentabilidad media histórica anualizada (media aritmética diaria × días por año). El objetivo y todas las restricciones son lineales: es un LP, no un QP. Si el riesgo fuera la varianza \(w^{\top}\Sigma w\) de Markowitz, el objetivo sería cuadrático (programación cuadrática) y la frontera, una curva suave (una hipérbola en el plano \(\sigma\)–\(\mu\) sin límites por activo).</p>
+    <h3>Por qué la frontera es una poligonal, y no un área ni una recta</h3>
+    <p>El poliedro factible del LP vive en \(\mathbb{R}^{n+1+S}\) (pesos, \(\alpha\) y una \(u_s\) por día), no en el gráfico. El gráfico es el plano (CVaR, μ): cada cartera factible es un punto y la nube gris es la región factible vista en ese plano. Fijar \(m\) es cortar la nube por la horizontal \(\mu=m\); las curvas de nivel de la función objetivo son entonces verticales (CVaR constante) y el LP desplaza esa vertical hacia la izquierda hasta el último punto factible: ese es \(v(m)\). Repitiendo para cada \(m\) sale la frontera.</p>
+    <p>Por la teoría de sensibilidad del LP, \(v(m)\) es <b>convexa y lineal a trozos</b> en \(m\): su pendiente es el precio sombra de la restricción \(\hat\mu^{\top}w=m\) y solo cambia cuando cambia la base óptima. Por eso la frontera es una poligonal cóncava en el plano (CVaR, μ). El tramo que sube desde la cartera de mínimo CVaR global es la frontera eficiente; el que baja (discontinuo) es la rama ineficiente: el mismo riesgo mínimo para rentabilidades que no compensan.</p>
+    <h3>La recta: análoga a la Capital Market Line</h3>
+    <p>Sale del tipo sin riesgo \(r_f\) y toca la frontera en la <b>cartera tangente</b> \(T\), la que maximiza la rentabilidad en exceso por unidad de CVaR (ratio STARR). Aquí la recta es exacta: el CVaR es invariante por traslación y positivamente homogéneo, así que mezclar \(T\) con un activo sin riesgo da \(\mathrm{CVaR}\big(tR_T+(1-t)r_f\big)=t\,\mathrm{CVaR}(R_T)-(1-t)\,r_f\), una recta en el plano. \(T\) se obtiene con un único LP mediante la transformación de Charnes–Cooper (\(y=\kappa w\)):</p>
+    \[\max_{w}\ \frac{\hat\mu^{\top}w-r_f}{\mathrm{CVaR}_\beta(R_w)+r_f^{\mathrm{d}}}\quad\Longleftrightarrow\quad \min_{y,\ \kappa\ge 0}\ \mathrm{CVaR}_\beta(R_y)+r_f^{\mathrm{d}}\,\kappa\ \ \text{s.a.}\ \ (\hat\mu-r_f\mathbf{1})^{\top}y=1,\ \ \mathbf{1}^{\top}y=\kappa,\ \ 0\le y_i\le c_i\kappa\]
+    <p>donde \(r_f^{\mathrm{d}}\) es el tipo sin riesgo diario. A la derecha de \(T\) la recta exigiría endeudarse a \(r_f\), algo que aquí no se permite (\(\mathbf{1}^{\top}w=1\), \(w\ge 0\)), así que ahí la frontera queda por debajo.</p>
+    <h3>Cómo se resuelve</h3>
+    <p>En el navegador y con <b>todos</b> los días de la ventana. En lugar de las \(S\) variables \(u_s\) se usa el método de planos de corte de Künzi-Bay y Mayer: \(\mathrm{CVaR}_\beta(w)=\max_q\sum_s q_s(-r_s^{\top}w)\) con \(0\le q_s\le 1/(\beta S)\) y \(\sum_s q_s=1\), de modo que cada iteración añade un corte lineal y el LP maestro (\(n+1\) variables) se resuelve con el símplex hasta que las cotas inferior y superior coinciden (tolerancia relativa \(10^{-7}\)). El resultado es el óptimo del LP completo; se ha contrastado con el solver HiGHS sobre el LP completo y coincide hasta la sexta cifra.</p>
+    <p class="note"><b>Es una estimación dentro de la muestra, no una previsión.</b> \(\hat\mu\) y los escenarios son los de la ventana elegida: la tangente es la mejor cartera a toro pasado y con otros años sería otra. \(r_f\) es la rentabilidad media de BIL (ETF de letras del Tesoro de EE. UU.) en la misma ventana. Nada de esto es asesoramiento de inversión.</p>
   </div>
   <p class="pagenote" id="foot"></p>
 </main>
@@ -184,7 +205,11 @@ function calibrate(){
   const cash = DATA.assets.find(a => a.short === 'Cash');
   const r = cash ? DATA.returns[cash.ticker] : null;
   RF = r ? r.map(v => v == null ? 0 : v) : null;
+  // tipo sin riesgo constante para la recta (en %): media diaria de BIL y su anualización
+  RF_D = RF ? RF.reduce((a,b)=>a+b,0)/RF.length*100 : 0;
+  RF_A = RF_D*DAYS_YR;
 }
+let RF_D = 0, RF_A = 0;
 let DATA = null;
 let TICK = {};
 let charts = [];
@@ -204,80 +229,78 @@ function portReturns(weights, tickers){
 }
 function metrics(rets, alpha){
   const n = rets.length;
-  let eq=1, peak=1, mdd=0, sum=0, sum2=0;
+  let eq=1, peak=1, mdd=0, sum=0, sum2=0, sum0=0;
   const sorted = new Float64Array(n);
   for(let i=0;i<n;i++){
-    const r=rets[i], x=r-(RF?RF[i]:0); sum+=x; sum2+=x*x; sorted[i]=r;
+    const r=rets[i], x=r-(RF?RF[i]:0); sum+=x; sum2+=x*x; sum0+=r; sorted[i]=r;
     eq*=(1+r); if(eq>peak)peak=eq; const dd=eq/peak-1; if(dd<mdd)mdd=dd;
   }
   // Sharpe sobre el exceso de rentabilidad frente al cash (BIL) del mismo día
   const mean=sum/n, varr=sum2/n-mean*mean, sd=Math.sqrt(Math.max(varr,0));
   const sharpe = sd>1e-9 ? mean/sd*Math.sqrt(DAYS_YR) : null;
   const cagr = Math.pow(eq, DAYS_YR/n)-1;
-  const k = Math.max(1, Math.floor(n*alpha));
-  const arr = Array.from(sorted).sort((a,b)=>a-b);
-  let cv=0; for(let i=0;i<k;i++) cv+=arr[i]; cv/=k;
-  return {cagr, sharpe, mdd, cvar:-cv};
+  // CVaR de Rockafellar–Uryasev (el mismo que minimiza el LP), en fracción
+  const cvar = CVaRLP.cvarOf(Array.from(sorted, v=>v*100), alpha)/100;
+  return {cagr, sharpe, mdd, cvar, mu: sum0/n*DAYS_YR};
 }
-function scenarioSample(tickers, maxS){
-  const n = DATA.dates.length;
-  const step = Math.max(1, Math.floor(n/maxS));
-  const idx = [];
-  for(let i=0;i<n;i+=step) idx.push(i);
-  return idx.map(i => tickers.map(t => DATA.returns[TICK[t]][i]));
+// ---- Optimización: LP de mínimo CVaR exacto (cvar.js) sobre todos los días ----
+function muAnnualPct(t){ const r=DATA.returns[TICK[t]]; let a=0; for(const v of r) a+=(v||0); return a/r.length*DAYS_YR*100; }
+function buildProblem(tickers, maxW, alpha){
+  const cols = tickers.map(t=>Float64Array.from(DATA.returns[TICK[t]], v=>100*(v||0)));
+  const mu = tickers.map(muAnnualPct), caps = tickers.map(t=>maxW[t]);
+  return { tickers, alpha, cols, mu, caps, P: CVaRLP.make(cols, mu, caps, alpha, RF_D, RF_A) };
 }
-function solveCVaR(tickers, maxW, alpha, maxS, muReq){
-  const scen = scenarioSample(tickers, maxS);
-  const S = scen.length, C = 0.10;
-  const n = DATA.dates.length;
-  const constraints = { sumw:{equal:1} };
-  if(muReq>0) constraints.__ret = {min:muReq};
-  const variables = {};
-  tickers.forEach((t,i)=>{
-    const r = DATA.returns[TICK[t]];
-    const mu = r.reduce((a,b)=>a+b,0)/n;
-    const v = { obj:0, sumw:1, __ret:mu };
-    constraints['max_'+i] = {max:maxW[t]};
-    v['max_'+i] = 1;
-    scen.forEach((row,s)=>{ v['sc_'+s] = row[i]; });
-    variables['w_'+i] = v;
-  });
-  const av = { obj:1 };
-  scen.forEach((_,s)=>{ av['sc_'+s]=1; });
-  variables.__alpha = av;
-  scen.forEach((row,s)=>{
-    constraints['sc_'+s] = {min:C};
-    const z = { obj:1/(S*alpha) }; z['sc_'+s]=1;
-    variables['z_'+s] = z;
-  });
-  const model = { optimize:'obj', opType:'min', constraints, variables };
-  const res = solver.Solve(model);
-  if(!res.feasible) return null;
-  const w = {};
-  tickers.forEach((t,i)=>{ w[t]=Math.max(0,res['w_'+i]||0); });
-  const tot = Object.values(w).reduce((a,b)=>a+b,0)||1;
-  tickers.forEach(t=>w[t]/=tot);
-  if(muReq>0){
-    // the daily-return constraint has tiny coefficients and the solver's
-    // feasibility tolerance can silently violate it: verify it explicitly
-    let m=0;
-    tickers.forEach(t=>{ const wgt=w[t]||0; if(!wgt) return; m+=wgt*DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n; });
-    if(m < muReq*0.999) return null;
-  }
-  return w;
-}
-function solveMaxCAGR(tickers, maxW){
-  // exact for max expected return with long-only caps: fill from highest mean down
-  const n=DATA.dates.length;
-  const mus=tickers.map(t=>({t, mu:DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n, cap:maxW[t]}));
-  mus.sort((a,b)=>b.mu-a.mu);
-  let rem=1; const w={};
-  mus.forEach(a=>{ const x=Math.max(0,Math.min(a.cap,rem)); w[a.t]=x; rem-=x; });
-  const tot=Object.values(w).reduce((a,b)=>a+b,0)||1;
-  tickers.forEach(t=>w[t]=(w[t]||0)/tot);
-  return w;
-}
+const toObj = (tickers, arr) => { const o={}; tickers.forEach((t,i)=>o[t]=arr[i]); return o; };
+function pointOf(pr, w){ return { x: CVaRLP.cvarOf(CVaRLP.portSeries(pr.cols, w), pr.alpha), y: CVaRLP.dot(pr.mu, w) }; }
+function greedyFill(pr, order){ const w=Array(pr.mu.length).fill(0); let rem=1; for(const i of order){ const x=Math.max(0,Math.min(pr.caps[i],rem)); w[i]=x; rem-=x; } return w; }
+// máx. μ con 0<=w<=c, Σw=1: exacto llenando por orden de μ (mochila fraccionaria)
+const maxMeanW = pr => greedyFill(pr, pr.mu.map((_,i)=>i).sort((a,b)=>pr.mu[b]-pr.mu[a]));
+const minMeanW = pr => greedyFill(pr, pr.mu.map((_,i)=>i).sort((a,b)=>pr.mu[a]-pr.mu[b]));
 
+// Frontera: v(m) = min CVaR s.a. μ·w = m. Rama eficiente m ∈ [μ(mín. CVaR global), μ_max] (41 LP);
+// rama ineficiente m ∈ [μ_min, μ(mín. CVaR global)] (15 LP). Se trocea para no bloquear la página.
+function computeFrontier(pr, wG, onProgress, done){
+  const muG=CVaRLP.dot(pr.mu,wG), wHi=maxMeanW(pr), wLo=minMeanW(pr);
+  const muHi=CVaRLP.dot(pr.mu,wHi), muLo=CVaRLP.dot(pr.mu,wLo);
+  const NE=40, NI=14, eps=1e-7, jobs=[];
+  for(let i=0;i<=NE;i++) jobs.push({br:'e', i, m: muG+(muHi-muG)*i/NE});
+  for(let i=0;i<NI;i++) jobs.push({br:'i', i, m: muLo+(muG-muLo)*i/NI});
+  const eff=[], ineff=[]; let k=0;
+  function step(){
+    const t0=performance.now();
+    while(k<jobs.length && performance.now()-t0<40){
+      const j=jobs[k++]; let w=null;
+      if(j.br==='e' && j.i===0) w=wG;
+      else if(j.br==='e' && muHi-muG<1e-9) w=null;
+      else if(j.br==='i' && muG-muLo<1e-9) w=null;
+      else{
+        const m = (j.br==='e' && j.i===NE) ? muHi-eps : (j.br==='i' && j.i===0) ? muLo+eps : j.m;
+        const r = pr.P.minCVaR(m,'eq');
+        w = r ? r.w : (j.br==='e' && j.i===NE ? wHi : (j.br==='i' && j.i===0 ? wLo : null));
+      }
+      if(w){ const p=pointOf(pr,w); p.w=w; p.m=j.m; (j.br==='e'?eff:ineff).push(p); }
+    }
+    onProgress(k, jobs.length);
+    if(k<jobs.length) setTimeout(step,0);
+    else { const p=pointOf(pr,wG); p.w=wG; ineff.push(p); done({eff, ineff, muG, muHi, muLo}); }
+  }
+  step();
+}
+// Región factible vista en (CVaR, μ): combinaciones convexas aleatorias de vértices del poliedro
+// {Σw=1, 0<=w<=c} (cada vértice = llenar hasta el límite en un orden aleatorio). Todas son factibles.
+function feasibleCloud(pr, N){
+  const n=pr.mu.length, pts=[]; let seed=20261029;
+  const rnd=()=>{ seed=(Math.imul(seed,1664525)+1013904223)>>>0; return seed/4294967296; };
+  const vertex=()=>{ const o=[...Array(n).keys()]; for(let i=n-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); const t=o[i]; o[i]=o[j]; o[j]=t; } return greedyFill(pr,o); };
+  for(let k=0;k<N;k++){
+    const m=1+Math.floor(rnd()*4), lam=[]; let tot=0;
+    for(let j=0;j<m;j++){ const e=-Math.log(1-rnd()); lam.push(e); tot+=e; }
+    const w=Array(n).fill(0);
+    for(let j=0;j<m;j++){ const v=vertex(); for(let i=0;i<n;i++) w[i]+=lam[j]/tot*v[i]; }
+    pts.push(pointOf(pr,w));
+  }
+  return pts;
+}
 function addAssetRow(a){
   const s=a.short;
   const curT = document.querySelector('#cur-table tbody');
@@ -310,117 +333,47 @@ function readCur(tickers){
   if(dropped>0.5) note += (note?' ':'') + dropped.toFixed(0)+'% de tu cartera está en activos sin historia completa en esta ventana; se ha normalizado sobre el resto.';
   return {w, note};
 }
-function render(wCur, wOpt, wMax, wRec, tickers, alpha){
+// SETS: [{name, w (obj por activo), color, chart (sale en barras/curvas)}]
+function render(SETS, tickers, alpha){
   document.getElementById('results').style.display='block';
   charts.forEach(c=>c.destroy()); charts=[];
-  const names = ['Tu cartera','Min CVaR','Max CAGR','Recomendada'];
-  const sets = [wCur,wOpt,wMax,wRec];
-  const pc = ['#b5651d','#8b1a1a','#1a3f8b','#2d6a3e'];
-
   const wt=document.querySelector('#w-table tbody'); wt.innerHTML='';
   tickers.forEach(t=>{
     const tr=document.createElement('tr');
-    tr.innerHTML='<td><span class="dot" style="background:'+colorOf(t)+'"></span>'+t+'</td>'+sets.map(w=>'<td>'+fmtW(w[t]||0)+'</td>').join('');
+    tr.innerHTML='<td><span class="dot" style="background:'+colorOf(t)+'"></span>'+t+'</td>'+SETS.map(S=>'<td>'+fmtW(S.w[t]||0)+'</td>').join('');
     wt.appendChild(tr);
   });
+  const trs=document.createElement('tr');
+  trs.innerHTML='<td><i>Suma</i></td>'+SETS.map(S=>'<td><i>'+fmtW(tickers.reduce((a,t)=>a+(S.w[t]||0),0))+'</i></td>').join('');
+  wt.appendChild(trs);
 
   const mt=document.querySelector('#m-table tbody'); mt.innerHTML='';
-  const mets = sets.map(w=>metrics(portReturns(w,tickers),alpha));
-  sets.forEach((w,i)=>{
-    const m=mets[i], tr=document.createElement('tr');
-    tr.innerHTML='<td>'+names[i]+'</td><td class="'+(m.cagr>=0?'pos':'neg')+'">'+fmtPct(m.cagr)+'</td><td>'+(m.sharpe==null?'-':m.sharpe.toFixed(2))+'</td><td class="neg">'+fmtPct(m.mdd)+'</td><td class="neg">-'+(m.cvar*100).toFixed(2)+'%</td>';
+  SETS.forEach(S=>{
+    const m=metrics(portReturns(S.w,tickers),alpha); S.met=m;
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+S.name+'</td><td>'+fmtPct(m.mu)+'</td><td class="'+(m.cagr>=0?'pos':'neg')+'">'+fmtPct(m.cagr)+'</td><td>'+(m.sharpe==null?'-':m.sharpe.toFixed(2))+'</td><td class="neg">'+fmtPct(m.mdd)+'</td><td class="neg">-'+(m.cvar*100).toFixed(2)+'%</td>';
     mt.appendChild(tr);
   });
 
+  const CS=SETS.filter(S=>S.chart);
   charts.push(new Chart(document.getElementById('alloc-chart'),{type:'bar',
-    data:{labels:tickers, datasets:names.map((nm,i)=>({label:nm, data:tickers.map(t=>(sets[i][t]||0)*100), backgroundColor:pc[i], borderColor:'#ffffff', borderWidth:1}))},
+    data:{labels:tickers, datasets:CS.map(S=>({label:S.name, data:tickers.map(t=>(S.w[t]||0)*100), backgroundColor:S.color, borderColor:'#ffffff', borderWidth:1}))},
     options:{maintainAspectRatio:false, scales:{x:{ticks:{color:'#555'},grid:{display:false}}, y:{ticks:{color:'#555',callback:v=>v+'%'},grid:{color:'#e8e8e8'},max:100}},
     plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}}}}}));
 
-  const eqs = sets.map(w=>{let e=1; return portReturns(w,tickers).map(r=>e*=(1+r));});
-  charts.push(new Chart(document.getElementById('eq-chart'),{data:{datasets:names.map((nm,i)=>({type:'line',label:nm,data:DATA.dates.map((d,j)=>({x:d,y:eqs[i][j]})),borderColor:pc[i],borderWidth:1.6,pointRadius:0}))},
+  const eqs = CS.map(S=>{let e=1; return portReturns(S.w,tickers).map(r=>e*=(1+r));});
+  charts.push(new Chart(document.getElementById('eq-chart'),{data:{datasets:CS.map((S,i)=>({type:'line',label:S.name,data:DATA.dates.map((d,j)=>({x:d,y:eqs[i][j]})),borderColor:S.color,borderWidth:1.6,pointRadius:0}))},
     options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:8},grid:{color:'#e8e8e8'}},
             y:{type:'logarithmic',ticks:{color:'#555'},grid:{color:'#e8e8e8'}}},
     plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'#555',boxWidth:10,font:{size:10}}}}}}));
 
   const dds = eqs.map(eq=>{let p=0; return eq.map(e=>{if(e>p)p=e;return (e/p-1)*100;});});
-  charts.push(new Chart(document.getElementById('dd-chart'),{data:{datasets:names.map((nm,i)=>({type:'line',label:nm,data:DATA.dates.map((d,j)=>({x:d,y:dds[i][j]})),borderColor:pc[i],borderWidth:1.3,pointRadius:0,fill:false}))},
+  charts.push(new Chart(document.getElementById('dd-chart'),{data:{datasets:CS.map((S,i)=>({type:'line',label:S.name,data:DATA.dates.map((d,j)=>({x:d,y:dds[i][j]})),borderColor:S.color,borderWidth:1.3,pointRadius:0,fill:false}))},
     options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:8},grid:{color:'#e8e8e8'}},
             y:{ticks:{color:'#555',callback:v=>v+'%'},grid:{color:'#e8e8e8'}}},
     plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'#555',boxWidth:10,font:{size:10}}}}}}));
-}
-
-function annReturn(weights, tickers){
-  const n=DATA.dates.length; let m=0;
-  tickers.forEach(t=>{ const w=weights[t]||0; if(!w)return; m+=w*DATA.returns[TICK[t]].reduce((a,b)=>a+b,0)/n; });
-  return m*DAYS_YR;
-}
-function solveRecommended(tickers, maxW, alpha, r0Daily){
-  // tangency of the frontier seen from (0, r0): maximize (annReturn-r0)/CVaR,
-  // floored at the Min CVaR return level. Scored on the LP's own sampled scenarios.
-  const r0An=r0Daily*DAYS_YR;
-  const scen=scenarioSample(tickers,350), S=scen.length;
-  const score=w=>{
-    if(!w) return -1e9;
-    const rets=scen.map(row=>tickers.reduce((s2,t,i)=>s2+(w[t]||0)*row[i],0));
-    rets.sort((x,y)=>x-y);
-    const k=Math.max(1,Math.floor(S*alpha));
-    let cv=0; for(let i=0;i<k;i++) cv+=rets[i]; cv/=k;
-    if(-cv<1e-9) return -1e9;
-    return (rets.reduce((a,b)=>a+b,0)/S*DAYS_YR - r0An)/(-cv);
-  };
-  const solve=mu=>solveCVaR(tickers,maxW,alpha,350,mu);
-  const lo=r0Daily, hi=greedyMaxReturn(tickers,maxW);
-  if(!(hi>lo)) return null;
-  const N=12, step=(hi-lo)/N;
-  let bestMu=lo, bestS=-1e9;
-  for(let i=0;i<=N;i++){
-    const mu=lo+step*i, sc=score(solve(mu));
-    if(sc>bestS){ bestS=sc; bestMu=mu; }
-  }
-  let a=Math.max(lo,bestMu-step), b=Math.min(hi,bestMu+step);
-  const gr=(Math.sqrt(5)-1)/2;
-  let c=b-gr*(b-a), d=a+gr*(b-a);
-  let sc=score(solve(c)), sd=score(solve(d));
-  for(let i=0;i<10;i++){
-    if(sc<sd){ a=c; c=d; sc=sd; d=a+gr*(b-a); sd=score(solve(d)); }
-    else { b=d; d=c; sd=sc; c=b-gr*(b-a); sc=score(solve(c)); }
-  }
-  return solve((a+b)/2);
-}
-function greedyMaxReturn(tickers, maxW){
-  return annReturn(solveMaxCAGR(tickers,maxW),tickers)/DAYS_YR;
-}
-function computeFrontier(tickers, maxW, alpha, onProgress, done){
-  const w0=solveCVaR(tickers,maxW,alpha,350,0);
-  if(!w0){ done(null); return; }
-  const lo=annReturn(w0,tickers)/DAYS_YR;
-  const gMax=greedyMaxReturn(tickers,maxW);
-  if(!(gMax>lo+0.00005)){ done(null); return; }
-  // trim the top of the sweep to what the solver actually satisfies, so a
-  // hard-to-reach edge does not wipe out the whole frontier
-  let fa=lo, fb=gMax;
-  for(let it=0; it<8; it++){
-    const mid=(fa+fb)/2;
-    if(solveCVaR(tickers,maxW,alpha,350,mid)) fa=mid; else fb=mid;
-  }
-  const hi=fa*0.999;
-  if(!(hi>lo+0.00005)){ done(null); return; }
-  const N=15, pts=[];
-  let i=0;
-  function step(){
-    const mu=lo+(hi-lo)*i/(N-1);
-    const w=solveCVaR(tickers,maxW,alpha,350,mu);
-    if(w){
-      pts.push({x:metrics(portReturns(w,tickers),alpha).cvar*100, y:annReturn(w,tickers)*100});
-    }
-    i++;
-    if(i<N){ onProgress(i,N); setTimeout(step,10); }
-    else done(pts);
-  }
-  step();
 }
 function flashDataset(chart, idx){
   const ds=chart.data.datasets[idx];
@@ -437,25 +390,57 @@ function flashDataset(chart, idx){
   }
   requestAnimationFrame(tick);
 }
-function renderFrontier(pts, markers){
-  const pc=['#b5651d','#8b1a1a','#1a3f8b','#2d6a3e'];
-  let xMax=0; pts.forEach(p=>{if(p.x>xMax)xMax=p.x;}); markers.forEach(m=>{if(m.x>xMax)xMax=m.x;});
-  xMax=Math.max(0.1, xMax*1.15);
-  const sets=[{type:'line',label:'Frontera eficiente',data:pts,borderColor:'#1a1a1a',backgroundColor:'#1a1a1a',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#1a1a1a',tension:0.15,fill:false}];
-  markers.forEach((m,i)=>{
-    // sticker halo: bigger cream disc behind the colored marker
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:pc[i],borderColor:'#ffffff',borderWidth:2.5,pointRadius:8,pointStyle:'circle',pointHoverRadius:10});
-    sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'#ffffff',borderColor:'#ffffff',borderWidth:2,pointRadius:13,pointStyle:'circle',showLine:false,_halo:true});
-    if(i===3){ // recommended: outer orange ring
-      sets.push({type:'scatter',label:m.label,data:[m],backgroundColor:'rgba(0,0,0,0)',borderColor:'#8b1a1a',borderWidth:2.5,pointRadius:16,pointStyle:'circle',showLine:false,_halo:true});
-    }
+const fmtN=(v,d)=>v.toFixed(d).replace('.',',');
+// Etiquetas de texto junto a los puntos (activos individuales y carteras destacadas)
+const labelPlugin={id:'slLabels',afterDatasetsDraw(chart){
+  const ctx=chart.ctx, area=chart.chartArea; ctx.save(); ctx.font=(chart.width<520?'9.5px':'11px')+' CMU, Georgia, serif'; ctx.fillStyle='#333'; ctx.textBaseline='middle';
+  chart.data.datasets.forEach((ds,di)=>{
+    if(!ds._labels || !chart.isDatasetVisible(di)) return;
+    chart.getDatasetMeta(di).data.forEach((el,k)=>{
+      const p=ds.data[k]; if(!p || !p.label) return;
+      if(chart.width<520 && !ds._key) return;   // en móvil solo se rotulan la tangente y el mínimo CVaR con objetivo
+      if(el.x<area.left||el.x>area.right||el.y<area.top||el.y>area.bottom) return;
+      const w=ctx.measureText(p.label).width, right=el.x+8+w<area.right;
+      ctx.textAlign=right?'left':'right'; const lx=right?el.x+8:el.x-8, ly=el.y-(ds._dy||0); ctx.strokeStyle='rgba(255,255,255,0.92)'; ctx.lineWidth=3; ctx.lineJoin='round'; ctx.strokeText(p.label,lx,ly); ctx.fillText(p.label,lx,ly);
+    });
   });
-  charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},
-    options:{maintainAspectRatio:false,
-    scales:{x:{type:'linear',min:0,suggestedMax:xMax,title:{display:true,text:'CVaR diario % (pérdida media de los peores días; menos = más seguro)',color:'#555',font:{size:10}},ticks:{color:'#555',callback:v=>(Math.round(v*10)/10)+'%'},grid:{color:'#e8e8e8'}},
-            y:{title:{display:true,text:'Rentabilidad anual esperada %',color:'#555',font:{size:10}},ticks:{color:'#555',callback:v=>v+'%'},grid:{color:'#e8e8e8'}}},
-    plugins:{legend:{onClick:(e,it,lg)=>flashDataset(lg.chart,it.datasetIndex),labels:{color:'#555',boxWidth:10,font:{size:10},filter:(it,ch)=>!ch.datasets[it.datasetIndex]._halo}},
-      tooltip:{filter:c=>!c.dataset._halo,callbacks:{label:c=>c.dataset.label+': return '+c.parsed.y.toFixed(1)+'% / daily CVaR '+c.parsed.x.toFixed(2)+'%'}}}}}));
+  ctx.restore();
+}};
+function renderFrontier(F){
+  const {fr, cloud, T, marks, assets} = F;
+  // Límites de los ejes: la región factible, la frontera y las carteras destacadas.
+  const xs=[...cloud.map(p=>p.x), ...fr.eff.map(p=>p.x), ...fr.ineff.map(p=>p.x), ...marks.map(m=>m.x), -RF_D];
+  const ys=[...cloud.map(p=>p.y), ...fr.eff.map(p=>p.y), ...fr.ineff.map(p=>p.y), ...marks.map(m=>m.y), RF_A];
+  const xRef=Math.max(...xs);
+  assets.forEach(p=>{ if(p.x<=1.6*xRef){ xs.push(p.x); ys.push(p.y); } });
+  let xMin=Math.min(...xs), xMax=Math.max(...xs), yMin=Math.min(...ys), yMax=Math.max(...ys);
+  const px=(xMax-xMin)*0.04, py=(yMax-yMin)*0.06; xMin-=px; xMax+=px*2.5; yMin-=py; yMax+=py;
+  const nice=r=>{ const e=Math.pow(10,Math.floor(Math.log10(r))), f=r/e; return (f<1.5?1:f<3?2:f<7?5:10)*e; };
+  const sx=nice((xMax-xMin)/6), sy=nice((yMax-yMin)/6);
+  xMin=Math.floor(xMin/sx)*sx; xMax=Math.ceil(xMax/sx)*sx; yMin=Math.floor(yMin/sy)*sy; yMax=Math.ceil(yMax/sy)*sy;
+  const inView=a=>a.x<=xMax && a.x>=xMin && a.y>=yMin && a.y<=yMax;
+  const sets=[];
+  sets.push({type:'scatter',label:'Región factible (carteras aleatorias)',data:cloud,backgroundColor:'rgba(26,26,26,0.13)',borderWidth:0,pointRadius:1.6,pointHoverRadius:1.6,order:20,_cloud:true});
+  if(fr.ineff.length>=2) sets.push({type:'line',label:'Rama ineficiente',data:fr.ineff.slice().sort((a,b)=>a.y-b.y),borderColor:'#888',borderDash:[5,4],borderWidth:1.6,pointRadius:0,tension:0,fill:false,order:9});
+  if(T){
+    const slope=T.ratio, cml=[{x:-RF_D,y:RF_A},{x:xMax,y:RF_A+slope*(xMax+RF_D)}];
+    sets.push({type:'line',label:'Recta desde rf (tangente)',data:cml,borderColor:'#1a3f8b',borderDash:[7,5],borderWidth:1.5,pointRadius:0,tension:0,fill:false,order:6});
+    sets.push({type:'scatter',label:'rf (sin riesgo)',data:[{x:-RF_D,y:RF_A,label:'rf'}],backgroundColor:'#1a3f8b',pointStyle:'rect',pointRadius:4,order:2,_labels:true,_dy:11});
+  }
+  sets.push({type:'line',label:'Frontera eficiente',data:fr.eff,borderColor:'#1a1a1a',borderWidth:2.4,pointRadius:1.8,pointBackgroundColor:'#1a1a1a',tension:0,fill:false,order:7});
+  // un activo que coincide con una cartera destacada (p. ej. 100 % cash = mínimo CVaR global) no se etiqueta dos veces
+  const av=assets.filter(inView).map(a=>marks.some(m=>Math.abs(m.x-a.x)<1e-6&&Math.abs(m.y-a.y)<1e-6)?{x:a.x,y:a.y,label:''}:a);
+  if(av.length) sets.push({type:'scatter',label:'Activos (100 %)',data:av,backgroundColor:'#ffffff',borderColor:'#555',borderWidth:1.4,pointStyle:'triangle',pointRadius:5,order:3,_labels:true});
+  marks.forEach(m=>{
+    sets.push({type:'scatter',label:m.label,data:[{x:m.x,y:m.y,label:m.short}],backgroundColor:m.color,borderColor:m.style==='crossRot'?m.color:'#ffffff',borderWidth:m.style==='crossRot'?2.2:1.5,pointStyle:m.style,pointRadius:m.r||7,pointHoverRadius:(m.r||7)+2,order:1,_labels:true,_dy:m.dy||0,_key:!!m.key});
+  });
+  charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},plugins:[labelPlugin],
+    options:{maintainAspectRatio:false,animation:false,
+    scales:{x:{type:'linear',min:xMin,max:xMax,title:{display:true,text:'CVaR diario (%)',color:'#555',font:{size:11}},ticks:{color:'#555',stepSize:sx,callback:v=>fmtN(v,sx<0.1?2:1)+'%'},grid:{color:'#eeeeee'}},
+            y:{min:yMin,max:yMax,title:{display:true,text:'μ: rentabilidad media anual (%)',color:'#555',font:{size:11}},ticks:{color:'#555',stepSize:sy,callback:v=>fmtN(v,sy<1?1:0)+'%'},grid:{color:'#eeeeee'}}},
+    plugins:{legend:{position:'bottom',labels:{color:'#555',boxWidth:12,usePointStyle:true,font:{size:10.5},generateLabels:ch=>Chart.defaults.plugins.legend.labels.generateLabels(ch).map(l=>{const ds=ch.data.datasets[l.datasetIndex]; if(ds.type==='line'){ l.pointStyle='line'; l.lineWidth=2; l.strokeStyle=ds.borderColor; l.lineDash=ds.borderDash||[]; } return l;})}},
+      tooltip:{filter:c=>!c.dataset._cloud,callbacks:{label:c=>{const p=c.raw; return (p.label&&c.dataset.label!==p.label?p.label+' · ':'')+c.dataset.label+': μ '+fmtN(c.parsed.y,2)+' %, CVaR '+fmtN(c.parsed.x,3)+' %';}}}}}}));
+  return assets.filter(a=>!inView(a));
 }
 function saveCustom(sym){
   try{
@@ -584,7 +569,7 @@ async function switchWindow(w){
     document.getElementById('results').style.display='none';
     document.getElementById('foot').textContent='Datos: '+DATA.assets.map(a=>a.ticker).join(', ')+' · '+DATA.dates.length+' días · Generado: '+DATA.generated_at;
     document.getElementById('m-span').textContent=w+' años';
-    document.getElementById('mean-note').textContent='Sin objetivo, el mínimo CVaR siempre es 100 % cash: minimizar el riesgo sin pedir nada a cambio no es una estrategia. La rentabilidad esperada de cada activo es su media histórica de '+w+' años.';
+    document.getElementById('mean-note').textContent='Si el cash está permitido al 100 %, el mínimo CVaR sin objetivo es casi todo cash: minimizar el riesgo sin pedir nada a cambio no es una estrategia. La rentabilidad esperada de cada activo es su media histórica de '+w+' años (media diaria × días por año).';
     if(w===5){ note.style.display='none'; note.textContent=''; }
     else{
       const excl=DATA.assets.filter(a=>!ok[a.short]).map(a=>a.short);
@@ -629,24 +614,53 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
       try{
         const {w:wCur,note}=readCur(tickers);
         document.getElementById('cur-note').textContent=note;
-        const retAn=Math.max(0,parseFloat(document.getElementById('ret-obj').value)||0)/100;
-        const muReq=Math.pow(1+retAn,1/DAYS_YR)-1;
-        const gDaily=greedyMaxReturn(tickers,maxW);
-        const wOpt=solveCVaR(tickers,maxW,alpha,350,muReq);
-        if(!wOpt){ err.textContent='Sin solución: ese objetivo es demasiado alto para estos activos, límites y ventana. Máximo alcanzable ahora: ~'+(gDaily*DAYS_YR*100).toFixed(1)+' % anual. Baja el objetivo o sube algún máximo.'; err.style.display='block'; return; }
-        if(muReq>0.85*gDaily){ const cn=document.getElementById('cur-note'); cn.textContent=(cn.textContent?cn.textContent+' ':'')+'Ojo: este objetivo está cerca del máximo alcanzable (~'+(gDaily*DAYS_YR*100).toFixed(1)+' % anual), así que Min CVaR tiene que irse a una mezcla extrema para llegar.'; }
-        const wMax=solveMaxCAGR(tickers,maxW);
-        document.getElementById('res-badge').textContent='objetivo '+(retAn*100).toFixed(1)+' % anual · CVaR '+(100-alpha*100).toFixed(0)+' % · '+tickers.length+' activos · ventana de '+WINDOW+' años';
-        const r0Daily=annReturn(wOpt,tickers)/DAYS_YR;
-        const wRec=solveRecommended(tickers,maxW,alpha,r0Daily)||wOpt;
-        render(wCur,wOpt,wMax,wRec,tickers,alpha);
+        const target=Math.max(0,parseFloat(document.getElementById('ret-obj').value)||0);  // % anual, media aritmética
+        const pr=buildProblem(tickers,maxW,alpha);
+        const wHi=maxMeanW(pr), muHi=CVaRLP.dot(pr.mu,wHi);
+        if(target>muHi+1e-9){ err.textContent='Sin solución: con estos activos, límites y ventana la rentabilidad media máxima alcanzable es '+fmtN(muHi,1)+' % anual. Baja el objetivo o sube algún máximo.'; err.style.display='block'; return; }
+        const G=pr.P.minCVaR(0,null);
+        if(!G){ err.textContent='El solver no encontró solución para esta selección.'; err.style.display='block'; return; }
+        const muG=CVaRLP.dot(pr.mu,G.w);
+        let wOpt=G.w;
+        if(target>muG){ const r=pr.P.minCVaR(Math.min(target,muHi-1e-7),'ge'); wOpt = r ? r.w : wHi; }
+        const T=pr.P.tangency();
+        if(target>0.85*muHi){ const cn=document.getElementById('cur-note'); cn.textContent=(cn.textContent?cn.textContent+' ':'')+'Ojo: este objetivo está cerca del máximo alcanzable ('+fmtN(muHi,1)+' % anual), así que el mínimo CVaR tiene que irse a una mezcla extrema para llegar.'; }
+        document.getElementById('res-badge').textContent='objetivo μ = '+fmtN(target,1)+' % anual · CVaR '+(100-alpha*100).toFixed(0)+' % · '+tickers.length+' activos · ventana de '+WINDOW+' años';
+        const SETS=[
+          {name:'Tu cartera', w:wCur, color:'#b5651d', chart:true, short:'Tu cartera', style:'crossRot', r:8},
+          {name:'Mín. CVaR global', w:toObj(tickers,G.w), color:'#555555', chart:false, short:'Mín. CVaR global', style:'rect', r:6, dy:-11},
+          {name:'Mín. CVaR (objetivo)', w:toObj(tickers,wOpt), color:'#8b1a1a', chart:true, short:'Mín. CVaR (μ = '+fmtN(target,1)+' %)', style:'circle', r:6, dy:-12, key:true},
+        ];
+        if(T) SETS.push({name:'Tangente', w:toObj(tickers,T.w), color:'#1a3f8b', chart:true, short:'T (tangente)', style:'circle', r:7, dy:13, key:true});
+        SETS.push({name:'Máx. media', w:toObj(tickers,wHi), color:'#2d6a3e', chart:true, short:'Máx. media', style:'rectRot', r:7});
+        render(SETS,tickers,alpha);
+        // aviso si el objetivo está por debajo del mínimo CVaR global (restricción inactiva)
         const efBadge=document.getElementById('ef-badge');
-        efBadge.textContent='calculando la frontera...';
-        const mk=(w,label)=>({x:metrics(portReturns(w,tickers),alpha).cvar*100, y:annReturn(w,tickers)*100, label});
-        computeFrontier(tickers,maxW,alpha,(i,N)=>{efBadge.textContent='calculando la frontera '+i+'/'+N+'...';},pts=>{
-          if(!pts||pts.length<3){ efBadge.textContent='frontera no disponible para esta selección'; return; }
-          efBadge.textContent='';
-          renderFrontier(pts,[mk(wCur,'Tu cartera'),mk(wOpt,'Min CVaR'),mk(wMax,'Max CAGR'),mk(wRec,'Recomendada')]);
+        efBadge.style.display=''; efBadge.textContent='calculando la frontera…';
+        const cloud=feasibleCloud(pr, 1500);
+        const assets=tickers.map((t,i)=>{ const p=pointOf(pr, tickers.map((_,k)=>k===i?1:0)); return {x:p.x,y:p.y,label:t}; });
+        computeFrontier(pr,G.w,(k,N)=>{efBadge.textContent='calculando la frontera '+k+'/'+N+'…';},fr=>{
+          efBadge.textContent=''; efBadge.style.display='none';
+          const marks=SETS.map(S=>{ const w=tickers.map(t=>S.w[t]||0); const p=pointOf(pr,w); return {x:p.x,y:p.y,label:S.name,short:S.short,color:S.color,style:S.style,r:S.r,dy:S.dy||0,key:!!S.key}; });
+          const out=renderFrontier({fr, cloud, T, marks, assets});
+          // nota con los números de esta ejecución
+          const d0=DATA.dates[0], d1=DATA.dates[DATA.dates.length-1];
+          let txt='Ventana: '+d0+' a '+d1+' ('+DATA.dates.length+' días, '+fmtN(DAYS_YR,1)+' días/año). Tipo sin riesgo <b>r<sub>f</sub> = '+fmtN(RF_A,2)+' % anual</b> (media de BIL en la ventana; '+fmtN(RF_D,4)+' % diario). ';
+          if(T){
+            const pT=pointOf(pr,T.w);
+            txt+='Cartera tangente: μ = '+fmtN(pT.y,2)+' %, CVaR = '+fmtN(pT.x,3)+' %, ratio (μ − r<sub>f</sub>)/(CVaR + r<sub>f</sub><sup>d</sup>) = <b>'+fmtN(T.ratio,2)+'</b>. ';
+            // tramo de la frontera que (casi) coincide con la recta: ratio a menos del 0,5 % del máximo
+            const near=fr.eff.filter(p=>(p.y-RF_A)/(p.x+RF_D) >= T.ratio*0.995);
+            if(near.length>=3){ const lo=Math.min(...near.map(p=>p.y)), hi=Math.max(...near.map(p=>p.y));
+              txt+='Entre μ ≈ '+fmtN(lo,1)+' % y '+fmtN(hi,1)+' % la frontera es prácticamente la propia recta'+(tickers.includes('Cash')?': son mezclas de cash con casi la misma cartera de riesgo, así que su ratio apenas cambia':'')+' (ratio a menos del 0,5 % del máximo). ';
+            }
+          } else txt+='Ningún activo supera a r<sub>f</sub> en media: no hay cartera tangente. ';
+          if(fr.eff.length<2) txt+='La frontera eficiente se reduce a un punto: con estos límites, la cartera de mínimo CVaR global es también la de máxima μ. ';
+          if(fr.ineff.length<2) txt+='Aquí no hay rama ineficiente: el activo de menor μ es también la cartera de mínimo CVaR global. ';
+          if(target<=muG) txt+='Tu objetivo ('+fmtN(target,1)+' %) queda por debajo de la μ del mínimo CVaR global ('+fmtN(muG,2)+' %): la restricción no se activa y ambas carteras coinciden. ';
+          if(out.length) txt+='Fuera del gráfico (CVaR demasiado alto para la escala): '+out.map(a=>a.label+' (CVaR '+fmtN(a.x,2)+' %, μ '+fmtN(a.y,1)+' %)').join(', ')+'. ';
+          document.getElementById('ef-note').innerHTML=txt;
+          window.__opt={pr, G, T, fr, cloud, SETS, marks, tickers, target, RF_D, RF_A};
         });
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
