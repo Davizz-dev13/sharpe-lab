@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sharpe Lab · Optimizador de carteras (mínimo CVaR)</title>
-<meta name="description" content="Optimizador de carteras que minimiza el CVaR para una rentabilidad objetivo: límites por activo, frontera eficiente y comparación con tu cartera.">
+<title>Sharpe Lab · Optimizador de carteras (mínimo CVaR, máximo Sharpe y paridad de riesgo)</title>
+<meta name="description" content="Optimizador de carteras: mínimo CVaR para una rentabilidad objetivo, máximo Sharpe y paridad de riesgo (L-BFGS-B), con límites por activo, frontera eficiente y comparación con tu cartera.">
 <link rel="icon" type="image/svg+xml" href="/sharpe-lab/favicon.svg">
 <link rel="canonical" href="https://davizz-dev13.github.io/sharpe-lab/optimizador/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Sharpe Lab">
-<meta property="og:title" content="Sharpe Lab · Optimizador de carteras (mínimo CVaR)">
-<meta property="og:description" content="Optimizador de carteras que minimiza el CVaR para una rentabilidad objetivo: límites por activo, frontera eficiente y comparación con tu cartera.">
+<meta property="og:title" content="Sharpe Lab · Optimizador de carteras (mínimo CVaR, máximo Sharpe y paridad de riesgo)">
+<meta property="og:description" content="Optimizador de carteras: mínimo CVaR para una rentabilidad objetivo, máximo Sharpe y paridad de riesgo (L-BFGS-B), con límites por activo, frontera eficiente y comparación con tu cartera.">
 <meta property="og:url" content="https://davizz-dev13.github.io/sharpe-lab/optimizador/">
 <meta property="og:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Sharpe Lab · Optimizador de carteras (mínimo CVaR)">
-<meta name="twitter:description" content="Optimizador de carteras que minimiza el CVaR para una rentabilidad objetivo: límites por activo, frontera eficiente y comparación con tu cartera.">
+<meta name="twitter:title" content="Sharpe Lab · Optimizador de carteras (mínimo CVaR, máximo Sharpe y paridad de riesgo)">
+<meta name="twitter:description" content="Optimizador de carteras: mínimo CVaR para una rentabilidad objetivo, máximo Sharpe y paridad de riesgo (L-BFGS-B), con límites por activo, frontera eficiente y comparación con tu cartera.">
 <meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -26,6 +26,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
 <script src="vendor/solver.js"></script>
 <script src="cvar.js"></script>
+<script src="lbfgsb.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script>function slMath(){ if(window.renderMathInElement) renderMathInElement(document.querySelector('main'),{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false}); }</script>
@@ -70,6 +71,18 @@
   .expl code { background:var(--bg); padding:1px 5px; font-size:12.5px; }
   .twrap { overflow-x:auto; }
   @media (max-width:860px){ th,td { padding:5px 5px; font-size:11.5px; } th { font-size:9px; } }
+  .objsel { display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 12px; }
+  .objbtn { padding:7px 14px; border:1px solid var(--border); background:var(--panel); color:var(--fg); font-family:'CMU',Georgia,serif; font-size:13px; cursor:pointer; }
+  .objbtn.active { background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .objbtn:disabled { opacity:.35; cursor:default; }
+  .ostats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+  .ost { border:1px solid var(--border); padding:8px 10px; background:var(--bg); }
+  .ost span { display:block; font-size:11px; color:#6b6155; }
+  .ost b { font-size:18px; font-weight:400; }
+  .lbox { margin-top:12px; padding:12px 14px; border-left:3px solid var(--acc); background:var(--bg); }
+  .lbox p { margin:0 0 8px; font-size:13px; line-height:1.55; }
+  .lbox p:last-child { margin:0; }
+  @media (max-width:560px){ .ostats { grid-template-columns:repeat(2,1fr); } .objbtn { flex:1 1 auto; padding:8px 8px; } }
   a { color:var(--acc); }
   .back { display:inline-block; margin-top:18px; color:var(--mut); font-size:14px; text-decoration:none; }
   .back:hover { color:var(--fg); }
@@ -90,9 +103,9 @@
 <body class="has-topnav">
 <nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/">RSI 30</a></div></div><div class="nav-group has-on"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="https://davizz-dev13.github.io/market-screen/">Market Screen</a><a href="https://davizz-dev13.github.io/big-tech/">Big Tech</a><a href="/sharpe-lab/optimizador/" class="on" aria-current="page">Optimizador CVaR</a><a href="/sharpe-lab/interes/">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/metodologia/">Metodología</a><a href="/sharpe-lab/sobre-mi/">Sobre mí</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
 <header>
-    <h1>Optimizador de carteras &middot; mínimo CVaR</h1>
+    <h1>Optimizador de carteras &middot; mínimo CVaR, máximo Sharpe y paridad de riesgo</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
-  <div class="sub">Elige activos, límites y una rentabilidad objetivo. El optimizador minimiza la pérdida media de los peores días históricos (CVaR) para ese objetivo resolviendo un programa lineal, con todos los días de la ventana, y lo compara con tu cartera, con la cartera tangente (máxima rentabilidad en exceso por unidad de CVaR) y con la de máxima rentabilidad media.</div>
+  <div class="sub">Elige activos, límites y una rentabilidad objetivo. El optimizador minimiza la pérdida media de los peores días históricos (CVaR) para ese objetivo resolviendo un programa lineal, con todos los días de la ventana, y lo compara con tu cartera, con la cartera tangente (máxima rentabilidad en exceso por unidad de CVaR) y con la de máxima rentabilidad media. Además calcula, con L-BFGS-B, la cartera de <b>máximo Sharpe</b> y la de <b>paridad de riesgo</b>, para compararlas con las mismas métricas.</div>
 </header>
 <main>
   <div class="grid2">
@@ -143,8 +156,21 @@
     </div>
     <div class="panel">
       <h2>Métricas (<span id="m-span">5 años</span>, datos históricos) <span class="badge">la rentabilidad pasada no garantiza la futura</span></h2>
-      <div class="twrap"><table id="m-table"><thead><tr><th>Cartera</th><th>μ anual</th><th>CAGR</th><th>Sharpe</th><th>Máx. DD</th><th>CVaR diario</th></tr></thead><tbody></tbody></table></div>
+      <div class="twrap"><table id="m-table"><thead><tr><th>Cartera</th><th>μ anual</th><th>Volatilidad</th><th>CAGR</th><th>Sharpe</th><th>Máx. DD</th><th>CVaR diario</th></tr></thead><tbody></tbody></table></div>
       <p style="font-size:12px;color:var(--mut);margin:8px 0 0">μ es la media aritmética anualizada (la del eje vertical de la frontera y la de la restricción del LP); el CAGR es la tasa compuesta realizada, que con volatilidad es menor. El Sharpe se calcula sobre la rentabilidad en exceso del cash (BIL / letra del Tesoro a 3 meses) del mismo día; CAGR y Sharpe se anualizan con los días reales por año de la ventana. El CVaR es el del LP (Rockafellar–Uryasev, con la fracción del día frontera).</p>
+    </div>
+    <div class="panel" id="obj-panel" style="display:none">
+      <h2>Objetivo <span class="badge">L-BFGS-B para Máx. Sharpe y paridad de riesgo</span></h2>
+      <div class="objsel" role="group" aria-label="Objetivo">
+        <button class="objbtn" type="button" data-obj="cvar">Mín. CVaR</button><button class="objbtn" type="button" data-obj="ms">Máx. Sharpe</button><button class="objbtn" type="button" data-obj="rp">Paridad de riesgo</button>
+      </div>
+      <div class="ostats" id="obj-stats"></div>
+      <div class="chartbox"><canvas id="rc-chart"></canvas></div>
+      <div class="note" id="obj-note"></div>
+      <div class="lbox">
+        <p><b>Qué es L-BFGS-B.</b> Un método cuasi-Newton: en vez de calcular la Hessiana (la curvatura), la aproxima con los últimos pasos y cambios del gradiente, y solo guarda unos pocos (memoria limitada, la «L»). La «B» es de <i>bounds</i>: admite límites por variable, como 0 ≤ peso. Converge casi tan rápido como Newton con el coste de memoria del gradiente. La suma del 100 % y tus máximos por activo no son límites de caja, así que se imponen con un Lagrangiano aumentado (detalles abajo, en «Cómo funciona»).</p>
+        <p><b>Cuidado con el Máx. Sharpe.</b> Depende de las rentabilidades medias estimadas, que son la parte más ruidosa de los datos: pequeños cambios en la ventana mueven mucho los pesos, y el Sharpe dentro de la muestra sale inflado porque la cartera se elige mirando esos mismos días. La <b>paridad de riesgo</b> no usa las rentabilidades: solo volatilidades y correlaciones, que se estiman mucho mejor. Las dos van 100 % invertidas en activos con riesgo, sin el cash.</p>
+      </div>
     </div>
     <div class="panel">
       <h2>Región factible y frontera eficiente <span class="badge" id="ef-badge"></span></h2>
@@ -178,6 +204,11 @@
     <p>donde \(r_f^{\mathrm{d}}\) es el tipo sin riesgo diario. A la derecha de \(T\) la recta exigiría endeudarse a \(r_f\), algo que aquí no se permite (\(\mathbf{1}^{\top}w=1\), \(w\ge 0\)), así que ahí la frontera queda por debajo.</p>
     <h3>Cómo se resuelve</h3>
     <p>En el navegador y con <b>todos</b> los días de la ventana. En lugar de las \(S\) variables \(u_s\) se usa el método de planos de corte de Künzi-Bay y Mayer: \(\mathrm{CVaR}_\beta(w)=\max_q\sum_s q_s(-r_s^{\top}w)\) con \(0\le q_s\le 1/(\beta S)\) y \(\sum_s q_s=1\), de modo que cada iteración añade un corte lineal y el LP maestro (\(n+1\) variables) se resuelve con el símplex hasta que las cotas inferior y superior coinciden (tolerancia relativa \(10^{-7}\)). El resultado es el óptimo del LP completo; se ha contrastado con el solver HiGHS sobre el LP completo y coincide hasta la sexta cifra.</p>
+    <h3>Máximo Sharpe y paridad de riesgo: L-BFGS-B</h3>
+    <p>Estas dos carteras no son lineales, así que no salen del símplex. Se resuelven en el navegador con <b>L-BFGS-B</b> (Byrd, Lu, Nocedal y Zhu, 1995), el mismo método que usa <code>scipy.optimize.minimize</code> cuando hay límites. Cada iteración aproxima la Hessiana con los últimos 10 pares (paso, cambio del gradiente), busca el punto de Cauchy generalizado a lo largo del gradiente proyectado sobre la caja, minimiza el modelo cuadrático en las variables libres y hace una búsqueda lineal.</p>
+    <p>L-BFGS-B solo admite límites de caja (\(l_i\le x_i\le u_i\)), y aquí hay además \(\mathbf{1}^{\top}w=1\) y \(w_i\le c_i\). Como el Sharpe y la paridad de riesgo no dependen de la escala de los pesos, se optimiza \(z\ge 0\) (una caja) y al final \(w=z/\mathbf{1}^{\top}z\):</p>
+    \[\text{Máx. Sharpe:}\ \ \min_{z\ge 0}\ \tfrac12\,z^{\top}\Sigma_x z-\mu_x^{\top}z \qquad\qquad \text{Paridad de riesgo:}\ \ \min_{z\ge 0}\ \tfrac12\,z^{\top}\Sigma z-\tfrac1n\sum_{i}\log z_i\]
+    <p>donde \(\mu_x\) y \(\Sigma_x\) son la media y la covarianza diarias de la rentabilidad en exceso del cash (el mismo Sharpe que la tabla de métricas) y \(\Sigma\) la covarianza de las rentabilidades. Sin límites, la primera da exactamente la cartera de máximo Sharpe y la segunda, la de contribuciones al riesgo iguales: en su óptimo \(z_i(\Sigma z)_i=1/n\) para todo \(i\). Los máximos \(w_i\le c_i\) equivalen a \(z_i-c_i\,\mathbf{1}^{\top}z\le 0\), lineales, y se imponen con un <b>Lagrangiano aumentado</b>: L-BFGS-B resuelve cada subproblema y los multiplicadores se actualizan hasta que la violación es menor que \(10^{-11}\). Si un límite está activo en paridad de riesgo, ese activo aporta menos riesgo que el resto. Las dos se calculan sin el cash: en paridad de riesgo, con volatilidad casi nula, se llevaría casi todo el peso, y en el Sharpe no cuenta (su exceso sobre sí mismo es cero), solo serviría para relajar los límites. Los pesos se han contrastado con <code>scipy</code> (L-BFGS-B y SLSQP) sobre los mismos datos: coinciden por debajo de 0,001 puntos porcentuales.</p>
     <p class="note"><b>Es una estimación dentro de la muestra, no una previsión.</b> \(\hat\mu\) y los escenarios son los de la ventana elegida: la tangente es la mejor cartera a toro pasado y con otros años sería otra. \(r_f\) es la rentabilidad media de BIL (ETF de letras del Tesoro de EE. UU.) en la misma ventana. Nada de esto es asesoramiento de inversión.</p>
   </div>
   <p class="pagenote" id="foot"></p>
@@ -241,7 +272,9 @@ function metrics(rets, alpha){
   const cagr = Math.pow(eq, DAYS_YR/n)-1;
   // CVaR de Rockafellar–Uryasev (el mismo que minimiza el LP), en fracción
   const cvar = CVaRLP.cvarOf(Array.from(sorted, v=>v*100), alpha)/100;
-  return {cagr, sharpe, mdd, cvar, mu: sum0/n*DAYS_YR};
+  const m0=sum0/n; let v0=0; for(let i=0;i<n;i++){ const d=rets[i]-m0; v0+=d*d; }
+  const vol=Math.sqrt(v0/n*DAYS_YR);
+  return {cagr, sharpe, mdd, cvar, vol, mu: sum0/n*DAYS_YR};
 }
 // ---- Optimización: LP de mínimo CVaR exacto (cvar.js) sobre todos los días ----
 function muAnnualPct(t){ const r=DATA.returns[TICK[t]]; let a=0; for(const v of r) a+=(v||0); return a/r.length*DAYS_YR*100; }
@@ -337,6 +370,7 @@ function readCur(tickers){
 function render(SETS, tickers, alpha){
   document.getElementById('results').style.display='block';
   charts.forEach(c=>c.destroy()); charts=[];
+  document.querySelector('#w-table thead tr').innerHTML='<th>Activo</th>'+SETS.map(S=>'<th>'+S.name+'</th>').join('');
   const wt=document.querySelector('#w-table tbody'); wt.innerHTML='';
   tickers.forEach(t=>{
     const tr=document.createElement('tr');
@@ -351,7 +385,7 @@ function render(SETS, tickers, alpha){
   SETS.forEach(S=>{
     const m=metrics(portReturns(S.w,tickers),alpha); S.met=m;
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+S.name+'</td><td>'+fmtPct(m.mu)+'</td><td class="'+(m.cagr>=0?'pos':'neg')+'">'+fmtPct(m.cagr)+'</td><td>'+(m.sharpe==null?'-':m.sharpe.toFixed(2))+'</td><td class="neg">'+fmtPct(m.mdd)+'</td><td class="neg">-'+(m.cvar*100).toFixed(2)+'%</td>';
+    tr.innerHTML='<td>'+S.name+'</td><td>'+fmtPct(m.mu)+'</td><td>'+fmtPct(m.vol).replace('+','')+'</td><td class="'+(m.cagr>=0?'pos':'neg')+'">'+fmtPct(m.cagr)+'</td><td>'+(m.sharpe==null?'-':m.sharpe.toFixed(2))+'</td><td class="neg">'+fmtPct(m.mdd)+'</td><td class="neg">-'+(m.cvar*100).toFixed(2)+'%</td>';
     mt.appendChild(tr);
   });
 
@@ -389,6 +423,69 @@ function flashDataset(chart, idx){
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
+}
+// ---- Máx. Sharpe y paridad de riesgo (L-BFGS-B, lbfgsb.js) ----
+// Ambas, 100 % invertidas en activos con riesgo. El cash no cambia el Sharpe (su exceso sobre sí mismo es 0), solo relajaría
+// los límites; en paridad de riesgo, con volatilidad casi nula, se llevaría casi todo el peso.
+function solveLBFGSB(pr){
+  const out={ms:null, rp:null, notes:[]};
+  const ri=pr.tickers.map((t,i)=>i).filter(i=>pr.tickers[i]!=='Cash');
+  if(ri.length<2){ out.notes.push('Máx. Sharpe y paridad de riesgo necesitan al menos 2 activos con riesgo.'); return out; }
+  const caps=ri.map(i=>pr.caps[i]), capSum=caps.reduce((a,b)=>a+b,0);
+  const rpOk = capSum>=0.999;
+  const rfp=RF?RF.map(v=>100*v):null;
+  const xcols=ri.map(i=>rfp?Float64Array.from(pr.cols[i],(v,s)=>v-rfp[s]):pr.cols[i]);
+  const full=w=>{ const f=pr.tickers.map(()=>0); ri.forEach((i,k)=>f[i]=w[k]); return f; };
+  const t0=performance.now();
+  const ms=rpOk ? LBFGSB.maxSharpe(xcols, caps) : null;
+  const t1=performance.now();
+  if(ms){ const w=full(ms.w); out.ms={w, wObj:toObj(pr.tickers,w), outer:ms.outer, inner:ms.inner, ms:t1-t0}; }
+  else if(rpOk) out.notes.push('Ningún activo con riesgo supera al cash en media en esta ventana: no hay cartera de máximo Sharpe.');
+  if(!rpOk){ out.notes.push('Los límites de los activos con riesgo suman '+fmtN(capSum*100,0)+' %: sin cash no llegan al 100 %, así que no se calculan Máx. Sharpe ni paridad de riesgo. Sube algún límite.'); return out; }
+  const rp=LBFGSB.riskParity(ri.map(i=>pr.cols[i]), caps);
+  const t2=performance.now();
+  const wr=full(rp.w);
+  const binding=ri.filter((i,k)=>rp.w[k]>=caps[k]-1e-7).map(i=>pr.tickers[i]);
+  out.rp={w:wr, wObj:toObj(pr.tickers,wr), outer:rp.outer, inner:rp.inner, ms:t2-t1, binding};
+  return out;
+}
+let OBJ_SEL='rp';
+function renderObjectives(SETS,tickers,pr,LB){
+  const box=document.getElementById('obj-panel'); box.style.display='block';
+  const pick={cvar:SETS.find(S=>S.key&&S.name.startsWith('Mín. CVaR')), ms:SETS.find(S=>S.name==='Máx. Sharpe'), rp:SETS.find(S=>S.name==='Paridad de riesgo')};
+  if(!pick[OBJ_SEL]) OBJ_SEL = pick.rp?'rp':'cvar';
+  document.querySelectorAll('.objbtn').forEach(b=>{ b.disabled=!pick[b.dataset.obj]; b.classList.toggle('active', b.dataset.obj===OBJ_SEL); b.onclick=()=>{ OBJ_SEL=b.dataset.obj; renderObjectives(SETS,tickers,pr,LB); }; });
+  const S=pick[OBJ_SEL], w=tickers.map(t=>S.w[t]||0), m=S.met;
+  // contribución de cada activo a la varianza de la cartera (con la covarianza de todos los días de la ventana)
+  const {C}=LBFGSB.moments(pr.cols), rc=LBFGSB.rcShares(w,C);
+  const pct=(v,d)=>fmtN(v*100,d)+' %';
+  document.getElementById('obj-stats').innerHTML=
+    '<div class="ost"><span>μ anual</span><b>'+pct(m.mu,1)+'</b></div>'+
+    '<div class="ost"><span>Volatilidad</span><b>'+pct(m.vol,1)+'</b></div>'+
+    '<div class="ost"><span>Sharpe</span><b>'+(m.sharpe==null?'-':fmtN(m.sharpe,2))+'</b></div>'+
+    '<div class="ost"><span>CVaR '+(100-pr.alpha*100).toFixed(0)+' % diario</span><b>−'+pct(m.cvar,2)+'</b></div>';
+  const live=tickers.map((t,i)=>({t,w:w[i],rc:rc[i]})).filter(o=>o.w>5e-5).sort((a,b)=>b.w-a.w);
+  const nAct=live.length;
+  let note='';
+  if(OBJ_SEL==='cvar') note='Programa lineal de Rockafellar–Uryasev (símplex). Minimiza la pérdida media del peor '+fmtN(pr.alpha*100,0)+' % de los días para tu rentabilidad objetivo; mira de dónde sale el riesgo: no tiene por qué estar repartido.';
+  if(OBJ_SEL==='ms'){ note='L-BFGS-B: '+LB.ms.inner+' iteraciones en '+LB.ms.outer+' rondas del Lagrangiano aumentado ('+fmtN(LB.ms.ms,0)+' ms). Maximiza (μ − r<sub>f</sub>)/σ con las medias históricas de la ventana: es la cartera que mejor lo habría hecho a toro pasado, no una previsión. ';
+    note+='Va 100 % invertida en activos con riesgo y con tus límites. El cash no cambia el Sharpe, pero mezclado relajaría los límites (30 % de oro con un 40 % de cash es un 50 % de la parte con riesgo) y la cartera se concentraría: en un test fuera de muestra (2017–2026, ventana de 3 años y rebalanceo mensual) eso salió peor.'; }
+  if(OBJ_SEL==='rp'){ note='L-BFGS-B: '+LB.rp.inner+' iteraciones en '+LB.rp.outer+' rondas del Lagrangiano aumentado ('+fmtN(LB.rp.ms,0)+' ms). No usa las rentabilidades medias, solo la covarianza. ';
+    note+= LB.rp.binding.length ? 'Ojo: '+LB.rp.binding.join(', ')+' '+(LB.rp.binding.length>1?'tocan su límite máximo':'toca su límite máximo')+', así que su contribución no puede llegar a la de los demás.' : 'Ningún límite está activo: cada activo aporta exactamente 1/'+nAct+' del riesgo ('+fmtN(100/nAct,1)+' %).'; }
+  document.getElementById('obj-note').innerHTML=note+(LB.notes.length?' '+LB.notes.join(' '):'');
+  if(window.__objChart) window.__objChart.destroy();
+  const lbl=live.map(o=>o.t);
+  window.__objChart=new Chart(document.getElementById('rc-chart'),{type:'bar',
+    data:{labels:lbl,datasets:[
+      {label:'Peso',data:live.map(o=>o.w*100),backgroundColor:'rgba(31,25,19,.18)',borderColor:'#1f1913',borderWidth:1},
+      {label:'Contribución al riesgo',data:live.map(o=>o.rc*100),backgroundColor:live.map(o=>colorOf(o.t)),borderColor:'#ffffff',borderWidth:1}]},
+    options:{maintainAspectRatio:false,animation:false,
+      scales:{x:{ticks:{color:'#555',autoSkip:false,maxRotation:50,font:{size:10}},grid:{display:false}},y:{beginAtZero:true,ticks:{color:'#555',callback:v=>fmtN(v,0)+' %'},grid:{color:'#e8e8e8'}}},
+      plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtN(c.parsed.y,1)+' %'}}}},
+    plugins:[{id:'eqline',afterDatasetsDraw(ch){ if(OBJ_SEL!=='rp') return; const y=ch.scales.y.getPixelForValue(100/nAct), a=ch.chartArea, x=ch.ctx;
+      x.save(); x.setLineDash([5,4]); x.strokeStyle='#17807e'; x.lineWidth=1.3; x.beginPath(); x.moveTo(a.left,y); x.lineTo(a.right,y); x.stroke();
+      x.setLineDash([]); x.fillStyle='#17807e'; x.font='10px CMU, Georgia, serif'; x.textAlign='right'; x.fillText('1/'+nAct+' = '+fmtN(100/nAct,1)+' %',a.right-2,y-4); x.restore(); }}]});
 }
 const fmtN=(v,d)=>v.toFixed(d).replace('.',',');
 // Etiquetas de texto junto a los puntos (activos individuales y carteras destacadas)
@@ -633,7 +730,11 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         ];
         if(T) SETS.push({name:'Tangente', w:toObj(tickers,T.w), color:'#1a3f8b', chart:true, short:'T (tangente)', style:'circle', r:7, dy:13, key:true});
         SETS.push({name:'Máx. media', w:toObj(tickers,wHi), color:'#2d6a3e', chart:true, short:'Máx. media', style:'rectRot', r:7});
+        const LB=solveLBFGSB(pr);
+        if(LB.ms) SETS.push({name:'Máx. Sharpe', w:LB.ms.wObj, color:'#6a3d9a', chart:true, short:'Máx. Sharpe', style:'triangle', r:8, dy:13, lb:LB.ms});
+        if(LB.rp) SETS.push({name:'Paridad de riesgo', w:LB.rp.wObj, color:'#17807e', chart:true, short:'Paridad de riesgo', style:'rectRounded', r:7, dy:-12, lb:LB.rp});
         render(SETS,tickers,alpha);
+        renderObjectives(SETS,tickers,pr,LB);
         // aviso si el objetivo está por debajo del mínimo CVaR global (restricción inactiva)
         const efBadge=document.getElementById('ef-badge');
         efBadge.style.display=''; efBadge.textContent='calculando la frontera…';
@@ -660,7 +761,7 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
           if(target<=muG) txt+='Tu objetivo ('+fmtN(target,1)+' %) queda por debajo de la μ del mínimo CVaR global ('+fmtN(muG,2)+' %): la restricción no se activa y ambas carteras coinciden. ';
           if(out.length) txt+='Fuera del gráfico (CVaR demasiado alto para la escala): '+out.map(a=>a.label+' (CVaR '+fmtN(a.x,2)+' %, μ '+fmtN(a.y,1)+' %)').join(', ')+'. ';
           document.getElementById('ef-note').innerHTML=txt;
-          window.__opt={pr, G, T, fr, cloud, SETS, marks, tickers, target, RF_D, RF_A};
+          window.__opt={pr, G, T, fr, cloud, SETS, marks, tickers, target, RF_D, RF_A, LB};
         });
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
