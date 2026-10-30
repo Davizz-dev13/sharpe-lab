@@ -105,7 +105,7 @@
 <header>
     <h1>Optimizador de carteras &middot; mínimo CVaR, máximo Sharpe y paridad de riesgo</h1>
   <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
-  <div class="sub">Elige activos, límites y una rentabilidad objetivo. El optimizador minimiza la pérdida media de los peores días históricos (CVaR) para ese objetivo resolviendo un programa lineal, con todos los días de la ventana, y lo compara con tu cartera, con la cartera tangente (máxima rentabilidad en exceso por unidad de CVaR) y con la de máxima rentabilidad media. Además calcula, con L-BFGS-B, la cartera de <b>máximo Sharpe</b> y la de <b>paridad de riesgo</b>, para compararlas con las mismas métricas.</div>
+  <div class="sub">Elige activos, límites y una rentabilidad objetivo. El optimizador minimiza la pérdida media de los peores días históricos (CVaR) para ese objetivo resolviendo un programa lineal, con todos los días de la ventana, y lo compara con tu cartera, con la cartera <b>Recomendada</b> (la que más rentabilidad añade por unidad de CVaR sobre el nivel del Mín. CVaR) y con la de máxima rentabilidad media. Además calcula, con L-BFGS-B, la cartera de <b>máximo Sharpe</b> y la de <b>paridad de riesgo</b>, para compararlas con las mismas métricas.</div>
 </header>
 <main>
   <div class="grid2">
@@ -152,7 +152,7 @@
     <div class="panel">
       <h2>Pesos óptimos <span class="badge" id="res-badge"></span></h2>
       <div class="chartbox"><canvas id="alloc-chart"></canvas></div>
-      <div class="twrap"><table id="w-table"><thead><tr><th>Activo</th><th>Tu cartera</th><th>Mín. CVaR global</th><th>Mín. CVaR (objetivo)</th><th>Tangente</th><th>Máx. media</th></tr></thead><tbody></tbody></table></div>
+      <div class="twrap"><table id="w-table"><thead><tr><th>Activo</th><th>Tu cartera</th><th>Mín. CVaR global</th><th>Mín. CVaR (objetivo)</th><th>Recomendada</th><th>Máx. media</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="panel">
       <h2>Métricas (<span id="m-span">5 años</span>, datos históricos) <span class="badge">la rentabilidad pasada no garantiza la futura</span></h2>
@@ -176,7 +176,7 @@
       <h2>Región factible y frontera eficiente <span class="badge" id="ef-badge"></span></h2>
       <div class="chartbox ef"><canvas id="ef-chart"></canvas></div>
       <div class="note ef-note" id="ef-note"></div>
-      <div class="note">Plano (CVaR, μ): riesgo en el eje horizontal (CVaR diario, pérdida media del peor β de los días; cuanto menos, mejor) y rentabilidad media anual en el vertical. Nube gris: carteras aleatorias que cumplen tus límites (la región factible vista en este plano). Línea negra: frontera eficiente, el valor óptimo \(v(m)\) del LP para cada rentabilidad \(m\) (41 LP resueltos con todos los días y unidos por segmentos rectos, porque \(v\) es lineal a trozos). Discontinua gris: rama ineficiente. Azul discontinua: recta desde \(r_f\) tangente a la frontera en la cartera tangente. Pulsa en la leyenda para ocultar o mostrar cada serie.</div>
+      <div class="note">Plano (CVaR, μ): riesgo en el eje horizontal (CVaR diario, pérdida media del peor β de los días; cuanto menos, mejor) y rentabilidad media anual en el vertical. Nube gris: carteras aleatorias que cumplen tus límites (la región factible vista en este plano). Línea negra: frontera eficiente, el valor óptimo \(v(m)\) del LP para cada rentabilidad \(m\) (41 LP resueltos con todos los días y unidos por segmentos rectos, porque \(v\) es lineal a trozos). Discontinua gris: rama ineficiente. Azul discontinua: recta que sale del nivel de rentabilidad del Mín. CVaR (objetivo), el punto \((0,\ r_0)\), y toca la frontera en la cartera Recomendada (el punto con anillo). Pulsa en la leyenda para ocultar o mostrar cada serie.</div>
     </div>
     <div class="panel">
       <h2>Crecimiento de 1 &euro;</h2>
@@ -198,10 +198,10 @@
     <h3>Por qué la frontera es una poligonal, y no un área ni una recta</h3>
     <p>El poliedro factible del LP vive en \(\mathbb{R}^{n+1+S}\) (pesos, \(\alpha\) y una \(u_s\) por día), no en el gráfico. El gráfico es el plano (CVaR, μ): cada cartera factible es un punto y la nube gris es la región factible vista en ese plano. Fijar \(m\) es cortar la nube por la horizontal \(\mu=m\); las curvas de nivel de la función objetivo son entonces verticales (CVaR constante) y el LP desplaza esa vertical hacia la izquierda hasta el último punto factible: ese es \(v(m)\). Repitiendo para cada \(m\) sale la frontera.</p>
     <p>Por la teoría de sensibilidad del LP, \(v(m)\) es <b>convexa y lineal a trozos</b> en \(m\): su pendiente es el precio sombra de la restricción \(\hat\mu^{\top}w=m\) y solo cambia cuando cambia la base óptima. Por eso la frontera es una poligonal cóncava en el plano (CVaR, μ). El tramo que sube desde la cartera de mínimo CVaR global es la frontera eficiente; el que baja (discontinuo) es la rama ineficiente: el mismo riesgo mínimo para rentabilidades que no compensan.</p>
-    <h3>La recta: análoga a la Capital Market Line</h3>
-    <p>Sale del tipo sin riesgo \(r_f\) y toca la frontera en la <b>cartera tangente</b> \(T\), la que maximiza la rentabilidad en exceso por unidad de CVaR (ratio STARR). Aquí la recta es exacta: el CVaR es invariante por traslación y positivamente homogéneo, así que mezclar \(T\) con un activo sin riesgo da \(\mathrm{CVaR}\big(tR_T+(1-t)r_f\big)=t\,\mathrm{CVaR}(R_T)-(1-t)\,r_f\), una recta en el plano. \(T\) se obtiene con un único LP mediante la transformación de Charnes–Cooper (\(y=\kappa w\)):</p>
-    \[\max_{w}\ \frac{\hat\mu^{\top}w-r_f}{\mathrm{CVaR}_\beta(R_w)+r_f^{\mathrm{d}}}\quad\Longleftrightarrow\quad \min_{y,\ \kappa\ge 0}\ \mathrm{CVaR}_\beta(R_y)+r_f^{\mathrm{d}}\,\kappa\ \ \text{s.a.}\ \ (\hat\mu-r_f\mathbf{1})^{\top}y=1,\ \ \mathbf{1}^{\top}y=\kappa,\ \ 0\le y_i\le c_i\kappa\]
-    <p>donde \(r_f^{\mathrm{d}}\) es el tipo sin riesgo diario. A la derecha de \(T\) la recta exigiría endeudarse a \(r_f\), algo que aquí no se permite (\(\mathbf{1}^{\top}w=1\), \(w\ge 0\)), así que ahí la frontera queda por debajo.</p>
+    <h3>La recta y la cartera Recomendada</h3>
+    <p>La recta no sale del tipo sin riesgo, sino del <b>nivel de rentabilidad del Mín. CVaR</b> con tu objetivo: el punto \((0,\ r_0)\) del plano, con \(r_0=\hat\mu^{\top}w_{\text{Mín. CVaR}}\), la μ de la cartera Mín. CVaR (objetivo). Desde ahí se busca la tangencia con la frontera eficiente: la cartera que más rentabilidad añade sobre \(r_0\) por cada unidad de CVaR. Ese punto se marca como <b>Recomendada</b> (con anillo en el gráfico):</p>
+    \[\max_{w}\ \frac{\hat\mu^{\top}w-r_0}{\mathrm{CVaR}_\beta(R_w)}\quad\Longleftrightarrow\quad \min_{y,\ \kappa\ge 0}\ \mathrm{CVaR}_\beta(R_y)\ \ \text{s.a.}\ \ (\hat\mu-r_0\mathbf{1})^{\top}y=1,\ \ \mathbf{1}^{\top}y=\kappa,\ \ 0\le y_i\le c_i\kappa\]
+    <p>Como el CVaR es positivamente homogéneo, la transformación de Charnes–Cooper (\(y=\kappa w\)) lo convierte en un único LP, que se resuelve con los mismos cortes que la frontera: el punto es exacto y está sobre ella, y ningún punto de la frontera queda por encima de la recta. Tiene suelo en el Mín. CVaR: solo cuentan las carteras con \(\hat\mu^{\top}w&gt;r_0\), y si ninguna lo supera, la Recomendada es el propio Mín. CVaR.</p>
     <h3>Cómo se resuelve</h3>
     <p>En el navegador y con <b>todos</b> los días de la ventana. En lugar de las \(S\) variables \(u_s\) se usa el método de planos de corte de Künzi-Bay y Mayer: \(\mathrm{CVaR}_\beta(w)=\max_q\sum_s q_s(-r_s^{\top}w)\) con \(0\le q_s\le 1/(\beta S)\) y \(\sum_s q_s=1\), de modo que cada iteración añade un corte lineal y el LP maestro (\(n+1\) variables) se resuelve con el símplex hasta que las cotas inferior y superior coinciden (tolerancia relativa \(10^{-7}\)). El resultado es el óptimo del LP completo; se ha contrastado con el solver HiGHS sobre el LP completo y coincide hasta la sexta cifra.</p>
     <h3>Máximo Sharpe y paridad de riesgo: L-BFGS-B</h3>
@@ -209,7 +209,7 @@
     <p>L-BFGS-B solo admite límites de caja (\(l_i\le x_i\le u_i\)), y aquí hay además \(\mathbf{1}^{\top}w=1\) y \(w_i\le c_i\). Como el Sharpe y la paridad de riesgo no dependen de la escala de los pesos, se optimiza \(z\ge 0\) (una caja) y al final \(w=z/\mathbf{1}^{\top}z\):</p>
     \[\text{Máx. Sharpe:}\ \ \min_{z\ge 0}\ \tfrac12\,z^{\top}\Sigma_x z-\mu_x^{\top}z \qquad\qquad \text{Paridad de riesgo:}\ \ \min_{z\ge 0}\ \tfrac12\,z^{\top}\Sigma z-\tfrac1n\sum_{i}\log z_i\]
     <p>donde \(\mu_x\) y \(\Sigma_x\) son la media y la covarianza diarias de la rentabilidad en exceso del cash (el mismo Sharpe que la tabla de métricas) y \(\Sigma\) la covarianza de las rentabilidades. Sin límites, la primera da exactamente la cartera de máximo Sharpe y la segunda, la de contribuciones al riesgo iguales: en su óptimo \(z_i(\Sigma z)_i=1/n\) para todo \(i\). Los máximos \(w_i\le c_i\) equivalen a \(z_i-c_i\,\mathbf{1}^{\top}z\le 0\), lineales, y se imponen con un <b>Lagrangiano aumentado</b>: L-BFGS-B resuelve cada subproblema y los multiplicadores se actualizan hasta que la violación es menor que \(10^{-11}\). Si un límite está activo en paridad de riesgo, ese activo aporta menos riesgo que el resto. Las dos se calculan sin el cash: en paridad de riesgo, con volatilidad casi nula, se llevaría casi todo el peso, y en el Sharpe no cuenta (su exceso sobre sí mismo es cero), solo serviría para relajar los límites. Los pesos se han contrastado con <code>scipy</code> (L-BFGS-B y SLSQP) sobre los mismos datos: coinciden por debajo de 0,001 puntos porcentuales.</p>
-    <p class="note"><b>Es una estimación dentro de la muestra, no una previsión.</b> \(\hat\mu\) y los escenarios son los de la ventana elegida: la tangente es la mejor cartera a toro pasado y con otros años sería otra. \(r_f\) es la rentabilidad media de BIL (ETF de letras del Tesoro de EE. UU.) en la misma ventana. Nada de esto es asesoramiento de inversión.</p>
+    <p class="note"><b>Es una estimación dentro de la muestra, no una previsión.</b> \(\hat\mu\) y los escenarios son los de la ventana elegida: la Recomendada es la mejor cartera a toro pasado y con otros años sería otra. El Sharpe se mide frente al cash: BIL (ETF de letras del Tesoro de EE. UU.) en la misma ventana. Nada de esto es asesoramiento de inversión.</p>
   </div>
   <p class="pagenote" id="foot"></p>
 </main>
@@ -236,7 +236,7 @@ function calibrate(){
   const cash = DATA.assets.find(a => a.short === 'Cash');
   const r = cash ? DATA.returns[cash.ticker] : null;
   RF = r ? r.map(v => v == null ? 0 : v) : null;
-  // tipo sin riesgo constante para la recta (en %): media diaria de BIL y su anualización
+  // tipo sin riesgo constante (en %): media diaria de BIL y su anualización (ancla por defecto de CVaRLP; la recta del gráfico sale de r0, la μ del Mín. CVaR)
   RF_D = RF ? RF.reduce((a,b)=>a+b,0)/RF.length*100 : 0;
   RF_A = RF_D*DAYS_YR;
 }
@@ -495,7 +495,7 @@ const labelPlugin={id:'slLabels',afterDatasetsDraw(chart){
     if(!ds._labels || !chart.isDatasetVisible(di)) return;
     chart.getDatasetMeta(di).data.forEach((el,k)=>{
       const p=ds.data[k]; if(!p || !p.label) return;
-      if(chart.width<520 && !ds._key) return;   // en móvil solo se rotulan la tangente y el mínimo CVaR con objetivo
+      if(chart.width<520 && !ds._key) return;   // en móvil solo se rotulan la Recomendada y el mínimo CVaR con objetivo
       if(el.x<area.left||el.x>area.right||el.y<area.top||el.y>area.bottom) return;
       const w=ctx.measureText(p.label).width, right=el.x+8+w<area.right;
       ctx.textAlign=right?'left':'right'; const lx=right?el.x+8:el.x-8, ly=el.y-(ds._dy||0); ctx.strokeStyle='rgba(255,255,255,0.92)'; ctx.lineWidth=3; ctx.lineJoin='round'; ctx.strokeText(p.label,lx,ly); ctx.fillText(p.label,lx,ly);
@@ -504,10 +504,10 @@ const labelPlugin={id:'slLabels',afterDatasetsDraw(chart){
   ctx.restore();
 }};
 function renderFrontier(F){
-  const {fr, cloud, T, marks, assets} = F;
+  const {fr, cloud, R, r0, marks, assets} = F;
   // Límites de los ejes: la región factible, la frontera y las carteras destacadas.
-  const xs=[...cloud.map(p=>p.x), ...fr.eff.map(p=>p.x), ...fr.ineff.map(p=>p.x), ...marks.map(m=>m.x), -RF_D];
-  const ys=[...cloud.map(p=>p.y), ...fr.eff.map(p=>p.y), ...fr.ineff.map(p=>p.y), ...marks.map(m=>m.y), RF_A];
+  const xs=[...cloud.map(p=>p.x), ...fr.eff.map(p=>p.x), ...fr.ineff.map(p=>p.x), ...marks.map(m=>m.x), 0];
+  const ys=[...cloud.map(p=>p.y), ...fr.eff.map(p=>p.y), ...fr.ineff.map(p=>p.y), ...marks.map(m=>m.y), r0];
   const xRef=Math.max(...xs);
   assets.forEach(p=>{ if(p.x<=1.6*xRef){ xs.push(p.x); ys.push(p.y); } });
   let xMin=Math.min(...xs), xMax=Math.max(...xs), yMin=Math.min(...ys), yMax=Math.max(...ys);
@@ -519,10 +519,12 @@ function renderFrontier(F){
   const sets=[];
   sets.push({type:'scatter',label:'Región factible (carteras aleatorias)',data:cloud,backgroundColor:'rgba(26,26,26,0.13)',borderWidth:0,pointRadius:1.6,pointHoverRadius:1.6,order:20,_cloud:true});
   if(fr.ineff.length>=2) sets.push({type:'line',label:'Rama ineficiente',data:fr.ineff.slice().sort((a,b)=>a.y-b.y),borderColor:'#888',borderDash:[5,4],borderWidth:1.6,pointRadius:0,tension:0,fill:false,order:9});
-  if(T){
-    const slope=T.ratio, cml=[{x:-RF_D,y:RF_A},{x:xMax,y:RF_A+slope*(xMax+RF_D)}];
-    sets.push({type:'line',label:'Recta desde rf (tangente)',data:cml,borderColor:'#1a3f8b',borderDash:[7,5],borderWidth:1.5,pointRadius:0,tension:0,fill:false,order:6});
-    sets.push({type:'scatter',label:'rf (sin riesgo)',data:[{x:-RF_D,y:RF_A,label:'rf'}],backgroundColor:'#1a3f8b',pointStyle:'rect',pointRadius:4,order:2,_labels:true,_dy:11});
+  // recta de la Recomendada: sale del nivel de rentabilidad del Mín. CVaR (objetivo), el punto (0, r0), con pendiente (μ − r0)/CVaR máxima
+  const mR=marks.find(m=>m.ring);
+  if(R && !R.floor && mR){
+    const line=[{x:0,y:r0},{x:mR.x,y:mR.y}];
+    sets.push({type:'line',label:'Recta desde el nivel del Mín. CVaR',data:line,borderColor:'#1a3f8b',borderDash:[7,5],borderWidth:1.5,pointRadius:0,tension:0,fill:false,order:6});
+    sets.push({type:'scatter',label:'r₀ (μ del Mín. CVaR)',data:[{x:0,y:r0,label:'r₀'}],backgroundColor:'#1a3f8b',pointStyle:'rect',pointRadius:4,order:2,_labels:true,_dy:11});
   }
   sets.push({type:'line',label:'Frontera eficiente',data:fr.eff,borderColor:'#1a1a1a',borderWidth:2.4,pointRadius:1.8,pointBackgroundColor:'#1a1a1a',tension:0,fill:false,order:7});
   // un activo que coincide con una cartera destacada (p. ej. 100 % cash = mínimo CVaR global) no se etiqueta dos veces
@@ -530,13 +532,14 @@ function renderFrontier(F){
   if(av.length) sets.push({type:'scatter',label:'Activos (100 %)',data:av,backgroundColor:'#ffffff',borderColor:'#555',borderWidth:1.4,pointStyle:'triangle',pointRadius:5,order:3,_labels:true});
   marks.forEach(m=>{
     sets.push({type:'scatter',label:m.label,data:[{x:m.x,y:m.y,label:m.short}],backgroundColor:m.color,borderColor:m.style==='crossRot'?m.color:'#ffffff',borderWidth:m.style==='crossRot'?2.2:1.5,pointStyle:m.style,pointRadius:m.r||7,pointHoverRadius:(m.r||7)+2,order:1,_labels:true,_dy:m.dy||0,_key:!!m.key});
+    if(m.ring) sets.push({type:'scatter',label:m.label,data:[{x:m.x,y:m.y}],backgroundColor:'rgba(0,0,0,0)',borderColor:m.color,borderWidth:2,pointStyle:'circle',pointRadius:(m.r||7)+5,pointHoverRadius:(m.r||7)+5,order:0,_ring:true});
   });
   charts.push(new Chart(document.getElementById('ef-chart'),{data:{datasets:sets},plugins:[labelPlugin],
     options:{maintainAspectRatio:false,animation:false,
     scales:{x:{type:'linear',min:xMin,max:xMax,title:{display:true,text:'CVaR diario (%)',color:'#555',font:{size:11}},ticks:{color:'#555',stepSize:sx,callback:v=>fmtN(v,sx<0.1?2:1)+'%'},grid:{color:'#eeeeee'}},
             y:{min:yMin,max:yMax,title:{display:true,text:'μ: rentabilidad media anual (%)',color:'#555',font:{size:11}},ticks:{color:'#555',stepSize:sy,callback:v=>fmtN(v,sy<1?1:0)+'%'},grid:{color:'#eeeeee'}}},
-    plugins:{legend:{position:'bottom',labels:{color:'#555',boxWidth:12,usePointStyle:true,font:{size:10.5},generateLabels:ch=>Chart.defaults.plugins.legend.labels.generateLabels(ch).map(l=>{const ds=ch.data.datasets[l.datasetIndex]; if(ds.type==='line'){ l.pointStyle='line'; l.lineWidth=2; l.strokeStyle=ds.borderColor; l.lineDash=ds.borderDash||[]; } return l;})}},
-      tooltip:{filter:c=>!c.dataset._cloud,callbacks:{label:c=>{const p=c.raw; return (p.label&&c.dataset.label!==p.label?p.label+' · ':'')+c.dataset.label+': μ '+fmtN(c.parsed.y,2)+' %, CVaR '+fmtN(c.parsed.x,3)+' %';}}}}}}));
+    plugins:{legend:{position:'bottom',labels:{color:'#555',boxWidth:12,usePointStyle:true,font:{size:10.5},filter:(it,data)=>!data.datasets[it.datasetIndex]._ring,generateLabels:ch=>Chart.defaults.plugins.legend.labels.generateLabels(ch).map(l=>{const ds=ch.data.datasets[l.datasetIndex]; if(ds.type==='line'){ l.pointStyle='line'; l.lineWidth=2; l.strokeStyle=ds.borderColor; l.lineDash=ds.borderDash||[]; } return l;})}},
+      tooltip:{filter:c=>!c.dataset._cloud&&!c.dataset._ring,callbacks:{label:c=>{const p=c.raw; return (p.label&&c.dataset.label!==p.label?p.label+' · ':'')+c.dataset.label+': μ '+fmtN(c.parsed.y,2)+' %, CVaR '+fmtN(c.parsed.x,3)+' %';}}}}}}));
   return assets.filter(a=>!inView(a));
 }
 function saveCustom(sym){
@@ -720,7 +723,12 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const muG=CVaRLP.dot(pr.mu,G.w);
         let wOpt=G.w;
         if(target>muG){ const r=pr.P.minCVaR(Math.min(target,muHi-1e-7),'ge'); wOpt = r ? r.w : wHi; }
-        const T=pr.P.tangency();
+        // «Recomendada»: tangencia de la frontera vista desde (CVaR, μ) = (0, r0), con r0 = μ del Mín. CVaR (objetivo);
+        // maximiza (μ − r0)/CVaR con suelo en el Mín. CVaR: si ninguna cartera supera r0, es el propio Mín. CVaR.
+        const r0=CVaRLP.dot(pr.mu,wOpt);
+        let R=null;
+        if(r0<muHi-1e-6){ const t=pr.P.tangency(1e-7,{d:0,a:r0}); if(t && t.cvar>0 && isFinite(t.ratio) && t.ratio>0) R={w:t.w, ratio:t.ratio, cvar:t.cvar, gap:t.gap, iters:t.iters, floor:false}; }
+        if(!R) R={w:wOpt.slice(), ratio:0, floor:true};
         if(target>0.85*muHi){ const cn=document.getElementById('cur-note'); cn.textContent=(cn.textContent?cn.textContent+' ':'')+'Ojo: este objetivo está cerca del máximo alcanzable ('+fmtN(muHi,1)+' % anual), así que el mínimo CVaR tiene que irse a una mezcla extrema para llegar.'; }
         document.getElementById('res-badge').textContent='objetivo μ = '+fmtN(target,1)+' % anual · CVaR '+(100-alpha*100).toFixed(0)+' % · '+tickers.length+' activos · ventana de '+WINDOW+' años';
         const SETS=[
@@ -728,7 +736,7 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
           {name:'Mín. CVaR global', w:toObj(tickers,G.w), color:'#555555', chart:false, short:'Mín. CVaR global', style:'rect', r:6, dy:-11},
           {name:'Mín. CVaR (objetivo)', w:toObj(tickers,wOpt), color:'#8b1a1a', chart:true, short:'Mín. CVaR (μ = '+fmtN(target,1)+' %)', style:'circle', r:6, dy:-12, key:true},
         ];
-        if(T) SETS.push({name:'Tangente', w:toObj(tickers,T.w), color:'#1a3f8b', chart:true, short:'T (tangente)', style:'circle', r:7, dy:13, key:true});
+        SETS.push({name:'Recomendada', w:toObj(tickers,R.w), color:'#1a3f8b', chart:true, short:'Recomendada', style:'circle', r:7, dy:15, key:true, ring:true});
         SETS.push({name:'Máx. media', w:toObj(tickers,wHi), color:'#2d6a3e', chart:true, short:'Máx. media', style:'rectRot', r:7});
         const LB=solveLBFGSB(pr);
         if(LB.ms) SETS.push({name:'Máx. Sharpe', w:LB.ms.wObj, color:'#6a3d9a', chart:true, short:'Máx. Sharpe', style:'triangle', r:8, dy:13, lb:LB.ms});
@@ -742,26 +750,26 @@ fetch('optimizador.json').then(r=>r.json()).then(d=>{
         const assets=tickers.map((t,i)=>{ const p=pointOf(pr, tickers.map((_,k)=>k===i?1:0)); return {x:p.x,y:p.y,label:t}; });
         computeFrontier(pr,G.w,(k,N)=>{efBadge.textContent='calculando la frontera '+k+'/'+N+'…';},fr=>{
           efBadge.textContent=''; efBadge.style.display='none';
-          const marks=SETS.map(S=>{ const w=tickers.map(t=>S.w[t]||0); const p=pointOf(pr,w); return {x:p.x,y:p.y,label:S.name,short:S.short,color:S.color,style:S.style,r:S.r,dy:S.dy||0,key:!!S.key}; });
-          const out=renderFrontier({fr, cloud, T, marks, assets});
+          const marks=SETS.map(S=>{ const w=tickers.map(t=>S.w[t]||0); const p=pointOf(pr,w); return {x:p.x,y:p.y,label:S.name,short:S.short,color:S.color,style:S.style,r:S.r,dy:S.dy||0,key:!!S.key,ring:!!S.ring}; });
+          const out=renderFrontier({fr, cloud, R, r0, marks, assets});
           // nota con los números de esta ejecución
           const d0=DATA.dates[0], d1=DATA.dates[DATA.dates.length-1];
-          let txt='Ventana: '+d0+' a '+d1+' ('+DATA.dates.length+' días, '+fmtN(DAYS_YR,1)+' días/año). Tipo sin riesgo <b>r<sub>f</sub> = '+fmtN(RF_A,2)+' % anual</b> (media de BIL en la ventana; '+fmtN(RF_D,4)+' % diario). ';
-          if(T){
-            const pT=pointOf(pr,T.w);
-            txt+='Cartera tangente: μ = '+fmtN(pT.y,2)+' %, CVaR = '+fmtN(pT.x,3)+' %, ratio (μ − r<sub>f</sub>)/(CVaR + r<sub>f</sub><sup>d</sup>) = <b>'+fmtN(T.ratio,2)+'</b>. ';
-            // tramo de la frontera que (casi) coincide con la recta: ratio a menos del 0,5 % del máximo
-            const near=fr.eff.filter(p=>(p.y-RF_A)/(p.x+RF_D) >= T.ratio*0.995);
+          let txt='Ventana: '+d0+' a '+d1+' ('+DATA.dates.length+' días, '+fmtN(DAYS_YR,1)+' días/año). Ancla de la recta: <b>r<sub>0</sub> = '+fmtN(r0,2)+' % anual</b>, la μ del Mín. CVaR (objetivo). ';
+          if(!R.floor){
+            const pR=pointOf(pr,R.w);
+            txt+='Recomendada: μ = '+fmtN(pR.y,2)+' %, CVaR = '+fmtN(pR.x,3)+' %, pendiente (μ − r<sub>0</sub>)/CVaR = <b>'+fmtN(R.ratio,2)+'</b>. ';
+            // tramo de la frontera que (casi) coincide con la recta: pendiente a menos del 0,5 % de la máxima
+            const near=fr.eff.filter(p=>p.x>0 && (p.y-r0)/p.x >= R.ratio*0.995);
             if(near.length>=3){ const lo=Math.min(...near.map(p=>p.y)), hi=Math.max(...near.map(p=>p.y));
-              txt+='Entre μ ≈ '+fmtN(lo,1)+' % y '+fmtN(hi,1)+' % la frontera es prácticamente la propia recta'+(tickers.includes('Cash')?': son mezclas de cash con casi la misma cartera de riesgo, así que su ratio apenas cambia':'')+' (ratio a menos del 0,5 % del máximo). ';
+              txt+='Entre μ ≈ '+fmtN(lo,1)+' % y '+fmtN(hi,1)+' % la frontera es prácticamente la propia recta (pendiente a menos del 0,5 % de la máxima). ';
             }
-          } else txt+='Ningún activo supera a r<sub>f</sub> en media: no hay cartera tangente. ';
+          } else txt+='Ninguna cartera de la frontera supera la rentabilidad del Mín. CVaR (objetivo): la Recomendada es el propio Mín. CVaR. ';
           if(fr.eff.length<2) txt+='La frontera eficiente se reduce a un punto: con estos límites, la cartera de mínimo CVaR global es también la de máxima μ. ';
           if(fr.ineff.length<2) txt+='Aquí no hay rama ineficiente: el activo de menor μ es también la cartera de mínimo CVaR global. ';
           if(target<=muG) txt+='Tu objetivo ('+fmtN(target,1)+' %) queda por debajo de la μ del mínimo CVaR global ('+fmtN(muG,2)+' %): la restricción no se activa y ambas carteras coinciden. ';
           if(out.length) txt+='Fuera del gráfico (CVaR demasiado alto para la escala): '+out.map(a=>a.label+' (CVaR '+fmtN(a.x,2)+' %, μ '+fmtN(a.y,1)+' %)').join(', ')+'. ';
           document.getElementById('ef-note').innerHTML=txt;
-          window.__opt={pr, G, T, fr, cloud, SETS, marks, tickers, target, RF_D, RF_A, LB};
+          window.__opt={pr, G, R, r0, wOpt, fr, cloud, SETS, marks, tickers, target, RF_D, RF_A, LB};
         });
         document.getElementById('results').scrollIntoView({behavior:'smooth'});
       }catch(e){
