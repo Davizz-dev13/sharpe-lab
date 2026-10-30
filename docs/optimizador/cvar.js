@@ -49,7 +49,7 @@
     return { g: Array.from(g), val };
   }
 
-  function make(cols, mu, caps, beta, rfd, rfa){
+  function make(cols, mu, caps, beta, rfdDef, rfaDef){
     const n = cols.length;
     const cuts = [];
     const pushCut = c => { cuts.push(c.g); };
@@ -101,11 +101,13 @@
       best.iters = 300; best.gap = NaN; return best;
     }
 
-    // Cartera tangente: max (μ·w - rf_a)/(CVaR(w) + rf_d) sobre la región factible.
-    // Charnes–Cooper: y = κw, κ >= 0 ⇒ LP  min CVaR(y) + rf_d·κ  s.a. (μ - rf_a)·y = 1,
+    // Cartera tangente vista desde el punto (CVaR, μ) = (-d, a): max (μ·w - a)/(CVaR(w) + d) sobre la región factible.
+    // Por defecto (d, a) = (rf_d, rf_a); el optimizador usa el ancla de la «Recomendada»: (0, r0), con r0 = μ del Mín. CVaR (objetivo).
+    // Charnes–Cooper: y = κw, κ >= 0 ⇒ LP  min CVaR(y) + d·κ  s.a. (μ - a)·y = 1,
     // Σy = κ, 0 <= y_i <= c_i·κ  (el CVaR es positivamente homogéneo, así que los mismos cortes valen).
-    function tangency(tol){
+    function tangency(tol, anchor){
       tol = tol || 1e-8;
+      const rfd = anchor ? anchor.d : rfdDef, rfa = anchor ? anchor.a : rfaDef;
       let best = null;
       for(let it=0; it<300; it++){
         const constraints = { exc: { equal: 1 }, sumk: { equal: 0 }, kmax: { max: 1e6 } };
