@@ -210,8 +210,9 @@ fetch('sensibilidad.json').then(r => r.json()).then(d => {
       row('RSI 70 en todos (la regla original)', d.mag7.rsi70),
       row('RSI 85 en todos', d.mag7.rsi85)]);
   }
+  const gen = new Date(d.generated_at);
   document.getElementById('gen').textContent = 'Pruebas de sensibilidad generadas por scripts/sensibilidad.py el ' +
-    new Date(d.generated_at).toLocaleString('es-ES', {timeZone: 'Europe/Madrid', dateStyle: 'short', timeStyle: 'short'}) + ' (hora de Madrid).';
+    gen.toLocaleString('es-ES', {timeZone: 'Europe/Madrid', dateStyle: 'short', timeStyle: 'short'}) + ' (' + (window.SLFresh && SLFresh.utc ? SLFresh.utc(gen) : 'hora peninsular española') + ').';
 }).catch(e => {
   document.getElementById('t-semis').innerHTML = document.getElementById('t-mag7').innerHTML = '<p class="muted">No se pudieron cargar las pruebas (' + e + ').</p>';
 });

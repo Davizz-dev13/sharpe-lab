@@ -15,6 +15,14 @@
     const d = new Date(t);                                           // ISO con zona (+00:00)
     return isNaN(d) ? null : d;
   }
+  function utc(d) {                                                  // desfase de esa fecha: "UTC+1" en invierno, "UTC+2" en verano
+    const p = {};
+    new Intl.DateTimeFormat('en-US', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })
+      .formatToParts(d).forEach(x => { p[x.type] = +x.value; });
+    const min = Math.round((Date.UTC(p.year, p.month - 1, p.day, p.hour % 24, p.minute) - Math.floor(d.getTime() / 60000) * 60000) / 60000);
+    const h = Math.floor(Math.abs(min) / 60), m = Math.abs(min) % 60;
+    return 'UTC' + (min < 0 ? '-' : '+') + h + (m ? ':' + String(m).padStart(2, '0') : '');
+  }
   function ago(ms) {
     const min = Math.round(ms / 60000);
     if (min < 1) return 'hace menos de 1 min';
@@ -29,7 +37,7 @@
     const ms = Date.now() - d.getTime();
     const abs = d.toLocaleString('es-ES', { timeZone: TZ, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     const stale = maxH != null && ms > maxH * 3600e3;
-    return { txt: 'Actualizado ' + ago(Math.max(ms, 0)) + ' · ' + abs + ' (hora de Madrid)' + (stale ? ' · ⚠ datos atrasados' : ''), stale, date: d };
+    return { txt: 'Actualizado ' + ago(Math.max(ms, 0)) + ' · ' + abs + ' (' + utc(d) + ')' + (stale ? ' · ⚠ datos atrasados' : ''), stale, date: d };
   }
   function mount(el, s, maxH) {
     if (!el) return;
@@ -46,6 +54,6 @@
       }).catch(() => { el.textContent = 'No se pudo leer la fecha de actualización'; });
     });
   }
-  window.SLFresh = { parse, text, mount, auto };
+  window.SLFresh = { parse, text, mount, auto, utc };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto); else auto();
 })();
