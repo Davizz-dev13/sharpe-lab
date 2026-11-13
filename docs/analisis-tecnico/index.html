@@ -54,6 +54,7 @@
   figure.ta-fig { margin:14px 0; }
   figure.ta-fig img { width:100%; height:auto; display:block; border:1px solid var(--border); border-radius:6px; }
   figure.ta-fig figcaption { font-size:12.5px; line-height:1.5; color:var(--muted); margin-top:6px; }
+ @media (max-width:700px) { figure.ta-fig { overflow-x:auto; -webkit-overflow-scrolling:touch; } figure.ta-fig img { width:1100px; max-width:none; } figure.ta-fig figcaption { position:sticky; left:0; } figure.ta-fig figcaption::before { content:"Desliza hacia los lados para ver el gráfico a tamaño legible. "; font-weight:bold; } }
 </style>
 <link rel="stylesheet" href="../theme.css">
 <script src="/sharpe-lab/site.js"></script>
