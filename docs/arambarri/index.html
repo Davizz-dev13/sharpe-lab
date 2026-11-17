@@ -183,7 +183,7 @@ fetch('arambarri.json').then(r=>r.json()).then(d=>{
   const lt=document.querySelector('#lb-table tbody');
   Object.entries(d.lb_surface).forEach(([k,x])=>{
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+k.replace('lb','').replace('/top',' meses / top ')+'</td><td>'+fmtPct(x.CAGR)+'</td><td>'+x.Sharpe+'</td><td class="neg">'+x.MaxDD+'%</td>';
+    tr.innerHTML='<td>'+k.replace('lb','').replace('/top',' sesiones / top ')+'</td><td>'+fmtPct(x.CAGR)+'</td><td>'+x.Sharpe+'</td><td class="neg">'+x.MaxDD+'%</td>';
     lt.appendChild(tr);
   });
 
