@@ -77,11 +77,12 @@
 </header>
 <main>
   <div class="panel">
-    <h2>Test hist&oacute;rico, especificaci&oacute;n fija <span class="badge test">en pruebas</span> <span class="badge">2007 - hoy</span></h2>
+    <h2>Test hist&oacute;rico, especificaci&oacute;n fija <span class="badge test">en pruebas</span> <span class="badge">2007 - 17 nov 2026</span></h2>
     <div class="kpis" id="bt-kpis"></div>
     <div class="chartbox"><canvas id="bt-chart"></canvas></div>
-    <div class="sub">Nota de origen: los par&aacute;metros base (6 meses, top 3, umbral 15%) vienen de una especificaci&oacute;n
-    externa publicada, elegida sobre sus propios datos; no constituyen una validaci&oacute;n out-of-sample global.</div>
+    <div class="sub">Sesgo de origen: los par&aacute;metros base (6 meses, top 3, umbral 15%) se eligieron con conocimiento
+    del hist&oacute;rico, y los huecos de implementaci&oacute;n los resolvimos nosotros. El walk-forward valida solo la
+    selecci&oacute;n de variante dentro de esa especificaci&oacute;n; no elimina el sesgo inicial.</div>
   </div>
 
   <div class="panel">
