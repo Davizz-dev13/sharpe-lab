@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sharpe Lab · Satriano (estacionalidad semanal Nasdaq, ensayo exploratorio)</title>
+<meta name="description" content="Satriano: ensayo exploratorio de estacionalidad semanal en futuros Nasdaq con datos diarios. Walk-forward y validación estadística; resultado negativo a esta granularidad.">
+<link rel="icon" type="image/svg+xml" href="/sharpe-lab/favicon.svg">
+<link rel="canonical" href="https://davizz-dev13.github.io/sharpe-lab/satriano/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sharpe Lab">
+<meta property="og:title" content="Sharpe Lab · Satriano (estacionalidad semanal Nasdaq)">
+<meta property="og:description" content="Ensayo exploratorio de estacionalidad semanal en futuros Nasdaq con datos diarios. Walk-forward y validación estadística.">
+<meta property="og:url" content="https://davizz-dev13.github.io/sharpe-lab/satriano/">
+<meta property="og:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sharpe Lab · Satriano (estacionalidad semanal Nasdaq)">
+<meta name="twitter:description" content="Ensayo exploratorio de estacionalidad semanal en futuros Nasdaq con datos diarios. Walk-forward y validación estadística.">
+<meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.font.family="CMU, Georgia, serif";Chart.defaults.font.size=12;Chart.defaults.color="#555";Chart.defaults.borderColor="#e8e8e8";</script>
+<script src="../analytics.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'CMU',Georgia,serif; background:var(--bg); color:var(--fg); }
+  header { padding:24px 28px 8px; }
+  h1 { margin:0 0 4px; font-size:22px; }
+  .sub { color:var(--mut); font-size:13px; line-height:1.5; max-width:900px; }
+  main { padding:8px 28px 40px; max-width:1200px; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin-top:18px; }
+  .panel h2 { margin:0 0 10px; font-size:16px; }
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; border:1px solid var(--border); color:var(--mut); margin-left:8px; vertical-align:middle; }
+  .badge.test { color:#c98a12; border-color:#c98a12; }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  th, td { padding:5px 8px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
+  th { color:var(--mut); font-weight:600; }
+  th:first-child, td:first-child { text-align:left; }
+  .pos { color:var(--green); } .neg { color:var(--red); }
+  .kpis { display:flex; gap:18px; flex-wrap:wrap; font-size:13px; margin:4px 0 12px; }
+  .kpi b { font-size:17px; display:block; }
+  .chartbox { height:280px; margin-bottom:8px; }
+  footer { color:var(--mut); font-size:11.5px; padding:20px 28px 40px; }
+  body{font-family:'CMU',Georgia,serif;}
+  h1,.panel h2{font-family:'CMU',Georgia,serif;font-weight:400;letter-spacing:.02em;}
+  .panel{border:1px solid var(--border);border-radius:14px;}
+  .badge{border-radius:14px;}
+  th{background:var(--fg);color:var(--bg);font-family:'CMU',Georgia,serif;font-weight:400;font-size:10px;letter-spacing:.03em;}
+  th,td{border-bottom:2px solid var(--border);}
+  a{color:var(--acc);}
+</style>
+
+<script src="../frescura.js" defer></script>
+<link rel="stylesheet" href="../theme.css">
+<script src="/sharpe-lab/site.js"></script>
+</head>
+<body class="has-topnav">
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group has-on"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/">RSI 30</a><a href="/sharpe-lab/arambarri/">Arambarri</a><a href="/sharpe-lab/satriano/" class="on" aria-current="page">Satriano</a></div></div><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="https://davizz-dev13.github.io/market-screen/">Market Screen</a><a href="https://davizz-dev13.github.io/big-tech/">Big Tech</a><a href="/sharpe-lab/optimizador/">Optimizador CVaR</a><a href="/sharpe-lab/interes/">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/analisis-tecnico/">Análisis técnico</a><a href="/sharpe-lab/metodologia/">Metodología</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+<header>
+    <h1>Satriano &middot; estacionalidad semanal en Nasdaq (exploratorio)</h1>
+  <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
+  <div class="sub">
+    <b>En pruebas, exploratorio.</b> Ensayo propio de una pauta semanal en futuros Nasdaq (NQ): largo solo los lunes,
+    de apertura a cierre, sin stop, con barrido de objetivos de salida. Datos diarios de Yahoo (front continuo, sin
+    ajuste de roll; la convenci&oacute;n de sesi&oacute;n de sus barras diarias no est&aacute; verificada por una fuente externa).
+    Este ensayo <b>no reproduce ninguna estrategia concreta</b>: cualquier parecido con sistemas de terceros es solo de
+    estructura general, y sus reglas finas (hora exacta de entrada, objetivo, hora de salida) no son p&uacute;blicas.
+    Coste base: 0,01% por lado (estr&eacute;s: 0,05%).
+  </div>
+</header>
+<main>
+  <div class="panel">
+    <h2>Veredicto <span class="badge test">exploratorio</span></h2>
+    <div class="kpis" id="k"></div>
+    <div class="sub">Con datos diarios la pauta no muestra ventaja explotable: el lunes es el mejor d&iacute;a de la semana
+    en t&eacute;rminos relativos, pero el efecto absoluto no cubre costes. Ning&uacute;n objetivo del barrido lo rescata, y con
+    coste de 0,05% por lado el ensayo es negativo. Conclusi&oacute;n limitada a esta proxy y granularidad.</div>
+    <div class="chartbox" style="margin-top:12px"><canvas id="eq-chart"></canvas></div>
+  </div>
+
+  <div class="panel">
+    <h2>Retorno medio apertura &rarr; cierre por d&iacute;a de la semana (NQ, neto 0,01%/lado)</h2>
+    <table id="wd-table"><thead><tr><th>D&iacute;a</th><th>n</th><th>Media</th><th>Desv.</th><th>t</th></tr></thead><tbody></tbody></table>
+    <div class="sub" id="perm" style="margin-top:8px"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Barrido de objetivo fijo (lunes, neto 0,01%/lado)</h2>
+    <div class="sub" style="margin-bottom:8px">Entrada a la apertura del lunes; si el m&aacute;ximo del d&iacute;a alcanza el objetivo,
+    salida al precio objetivo; si no, salida al cierre. Sin stop (la ventaja de la estructura sin stop es que el dato
+    diario basta para saber si el objetivo se toc&oacute;).</div>
+    <table id="sw-table"><thead><tr><th>Objetivo</th><th>Trades</th><th>% aciertos</th><th>Media/trade</th><th>Sharpe sem. anualizado</th><th>% veces tocado</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Walk-forward anual con selecci&oacute;n de objetivo <span class="badge">objetivo elegido solo con datos previos</span></h2>
+    <div class="sub" style="margin-bottom:8px">Cada a&ntilde;o se elige el objetivo (incluido &laquo;sin objetivo&raquo;) que maximizaba el
+    Sharpe semanal con los lunes anteriores (ventana expansiva, 5 a&ntilde;os m&iacute;nimos) y se eval&uacute;a en el a&ntilde;o siguiente.</div>
+    <div class="kpis" id="wf-kpis"></div>
+    <table id="wf-table"><thead><tr><th>A&ntilde;o</th><th>Objetivo elegido</th><th>n</th><th>Retorno</th><th>Media/trade</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>D&oacute;nde falla</h2>
+    <div class="sub">
+      &bull; El efecto lunes es el mejor de la semana en relativo pero insignificante en absoluto (ver test de permutaci&oacute;n).<br>
+      &bull; Con costes realistas para retail (0,05%/lado) todo el barrido es negativo.<br>
+      &bull; A&ntilde;os malos severos: 2008 (-21%) y 2000-2002 negativos; sin stop, un lunes malo solo lo corta el reloj.<br>
+      &bull; Las barras diarias no ven el camino intrad&iacute;a ni la hora real de entrada/salida; har&iacute;an falta datos intrad&iacute;a
+      para un test con mayor granularidad.
+    </div>
+  </div>
+  <p class="pagenote" id="foot"></p>
+</main>
+<footer class="site-foot"><p class="foot-legal"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</p><p class="foot-links"><a href="/sharpe-lab/">Inicio</a><a href="/sharpe-lab/metodologia/">Metodología</a><a href="https://github.com/Davizz-dev13/sharpe-lab">Código en GitHub</a><a href="https://davizz-dev13.github.io/">David Gallardo</a></p><p class="foot-sig">Sharpe Lab &middot; David Gallardo</p></footer>
+
+<script>
+const fmtPct = v => (v==null?'-':(v>0?'+':'')+Number(v).toFixed(2)+'%');
+const cls = v => v==null?'':(v>=0?'pos':'neg');
+fetch('satriano.json').then(r=>r.json()).then(d=>{
+  (window.SLFresh ? SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36) : document.addEventListener('DOMContentLoaded', () => SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36)));
+  document.getElementById('foot').textContent = 'Generado: '+d.generated_at+' · Ventana: '+d.window[0]+' → '+d.window[1];
+
+  const noT = d.sweep['none'];
+  document.getElementById('k').innerHTML =
+    '<div class="kpi"><b>'+d.n_trades+'</b>lunes evaluados</div>'+
+    '<div class="kpi"><b>'+fmtPct(d.mean_trade)+'</b>media/trade (neto)</div>'+
+    '<div class="kpi"><b>'+d.win_rate+'%</b>% aciertos</div>'+
+    '<div class="kpi"><b>'+noT.sharpe_weekly.toFixed(2)+'</b>Sharpe sem. anualizado</div>'+
+    '<div class="kpi"><b class="neg">'+fmtPct(noT.maxdd_at_100pct*100)+'</b>Max DD (100% exp.)</div>';
+
+  new Chart(document.getElementById('eq-chart'), {data:{datasets:[
+    {type:'line', label:'Largo solo lunes open→close (neto, 100% exposición)', data:d.trade_dates.map((x,i)=>({x,y:d.trade_equity[i]})), borderColor:'#1a3f8b', borderWidth:1.6, pointRadius:0},
+  ]}, options:{maintainAspectRatio:false,
+    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:9},grid:{color:'#e8e8e8'}},
+            y:{ticks:{color:'#555'},grid:{color:'#e8e8e8'},title:{display:true,text:'Crecimiento de 1€',color:'#555'}}},
+    plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}}}}});
+
+  const wt=document.querySelector('#wd-table tbody');
+  Object.entries(d.weekday).forEach(([k,x])=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+k+'</td><td>'+x.n+'</td><td class="'+cls(x.mean)+'">'+fmtPct(x.mean*100)+'</td><td>'+fmtPct(x.std*100)+'</td><td>'+x.t.toFixed(2)+'</td>';
+    wt.appendChild(tr);
+  });
+  document.getElementById('perm').innerHTML = 'Test de permutaci&oacute;n (2000 barajas de etiquetas de d&iacute;a, retornos netos): la media del lunes no es distinguible del resto, p = '+d.perm_p.toFixed(3)+'.';
+
+  const st=document.querySelector('#sw-table tbody');
+  Object.entries(d.sweep).forEach(([k,x])=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(k==='none'?'sin objetivo':k)+'</td><td>'+x.trades+'</td><td>'+(x.win_rate*100).toFixed(0)+'%</td><td class="'+cls(x.mean_per_trade)+'">'+fmtPct(x.mean_per_trade*100)+'</td><td>'+x.sharpe_weekly.toFixed(2)+'</td><td>'+(x.target_hit_rate==null?'-':(x.target_hit_rate*100).toFixed(0)+'%')+'</td>';
+    st.appendChild(tr);
+  });
+
+  const wa=d.wf.aggregate;
+  document.getElementById('wf-kpis').innerHTML =
+    '<div class="kpi"><b>'+wa.sharpe_weekly.toFixed(2)+'</b>Sharpe sem. agregado</div>'+
+    '<div class="kpi"><b>'+fmtPct(wa.cagr_at_100pct*100)+'</b>CAGR (100% exp.)</div>'+
+    '<div class="kpi"><b class="neg">'+fmtPct(wa.maxdd_at_100pct*100)+'</b>Max DD</div>';
+  const ft=document.querySelector('#wf-table tbody');
+  d.wf.folds.forEach(f=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+f.year+'</td><td>'+f.target+'</td><td>'+f.n+'</td><td class="'+cls(f.ret)+'">'+fmtPct(f.ret*100)+'</td><td class="'+cls(f.mean)+'">'+fmtPct(f.mean*100)+'</td>';
+    ft.appendChild(tr);
+  });
+});
+</script>
+</body>
+</html>

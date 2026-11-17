@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sharpe Lab · Arambarri (rotación multi-activo mensual)</title>
+<meta name="description" content="Arambarri: rotación mensual multi-activo por momentum de 6 meses con defensa en efectivo. En pruebas: backtest, walk-forward anual y validación estadística.">
+<link rel="icon" type="image/svg+xml" href="/sharpe-lab/favicon.svg">
+<link rel="canonical" href="https://davizz-dev13.github.io/sharpe-lab/arambarri/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sharpe Lab">
+<meta property="og:title" content="Sharpe Lab · Arambarri (rotación multi-activo mensual)">
+<meta property="og:description" content="Arambarri: rotación mensual multi-activo por momentum de 6 meses con defensa en efectivo. En pruebas: backtest, walk-forward anual y validación estadística.">
+<meta property="og:url" content="https://davizz-dev13.github.io/sharpe-lab/arambarri/">
+<meta property="og:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sharpe Lab · Arambarri (rotación multi-activo mensual)">
+<meta name="twitter:description" content="Arambarri: rotación mensual multi-activo por momentum de 6 meses con defensa en efectivo. En pruebas: backtest, walk-forward anual y validación estadística.">
+<meta name="twitter:image" content="https://davizz-dev13.github.io/sharpe-lab/img/og.png">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.font.family="CMU, Georgia, serif";Chart.defaults.font.size=12;Chart.defaults.color="#555";Chart.defaults.borderColor="#e8e8e8";</script>
+<script src="../analytics.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'CMU',Georgia,serif; background:var(--bg); color:var(--fg); }
+  header { padding:24px 28px 8px; }
+  h1 { margin:0 0 4px; font-size:22px; }
+  .sub { color:var(--mut); font-size:13px; line-height:1.5; max-width:900px; }
+  main { padding:8px 28px 40px; max-width:1200px; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin-top:18px; }
+  .panel h2 { margin:0 0 10px; font-size:16px; }
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; border:1px solid var(--border); color:var(--mut); margin-left:8px; vertical-align:middle; }
+  .badge.test { color:#c98a12; border-color:#c98a12; }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  th, td { padding:5px 8px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
+  th { color:var(--mut); font-weight:600; }
+  th:first-child, td:first-child { text-align:left; }
+  .pos { color:var(--green); } .neg { color:var(--red); }
+  .kpis { display:flex; gap:18px; flex-wrap:wrap; font-size:13px; margin:4px 0 12px; }
+  .kpi b { font-size:17px; display:block; }
+  .chartbox { height:280px; margin-bottom:8px; }
+  footer { color:var(--mut); font-size:11.5px; padding:20px 28px 40px; }
+  body{font-family:'CMU',Georgia,serif;}
+  h1,.panel h2{font-family:'CMU',Georgia,serif;font-weight:400;letter-spacing:.02em;}
+  .panel{border:1px solid var(--border);border-radius:14px;}
+  .badge{border-radius:14px;}
+  th{background:var(--fg);color:var(--bg);font-family:'CMU',Georgia,serif;font-weight:400;font-size:10px;letter-spacing:.03em;}
+  th,td{border-bottom:2px solid var(--border);}
+  a{color:var(--acc);}
+</style>
+
+<script src="../frescura.js" defer></script>
+<link rel="stylesheet" href="../theme.css">
+<script src="/sharpe-lab/site.js"></script>
+</head>
+<body class="has-topnav">
+<nav class="topnav" aria-label="Principal"><div class="nav-in"><a class="nav-name" href="/sharpe-lab/">Sharpe Lab</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-burger" aria-hidden="true"></span>Menú</button><div class="nav-links" id="nav-menu"><div class="nav-group has-on"><button class="nav-gbtn" type="button" aria-expanded="false">Estrategias</button><div class="nav-sub"><a href="/sharpe-lab/btc/">Bitcoin</a><a href="/sharpe-lab/semis/">Semis</a><a href="/sharpe-lab/mag7/">Mag7</a><a href="/sharpe-lab/msci/">MSCI World</a><a href="/sharpe-lab/rsi30/">RSI 30</a><a href="/sharpe-lab/arambarri/" class="on" aria-current="page">Arambarri</a><a href="/sharpe-lab/satriano/">Satriano</a></div></div><div class="nav-group"><button class="nav-gbtn" type="button" aria-expanded="false">Herramientas</button><div class="nav-sub"><a href="https://davizz-dev13.github.io/market-screen/">Market Screen</a><a href="https://davizz-dev13.github.io/big-tech/">Big Tech</a><a href="/sharpe-lab/optimizador/">Optimizador CVaR</a><a href="/sharpe-lab/interes/">Interés compuesto</a><a href="/sharpe-lab/deudas/">Deudas BTC</a></div></div><a href="/sharpe-lab/analisis-tecnico/">Análisis técnico</a><a href="/sharpe-lab/metodologia/">Metodología</a><a class="lab" href="https://davizz-dev13.github.io/">David Gallardo</a></div></div></nav>
+<header>
+    <h1>Arambarri &middot; rotaci&oacute;n multi-activo mensual (6M top3)</h1>
+  <p class="fresh" id="fresh" aria-live="polite">Comprobando la fecha de los datos…</p>
+  <div class="sub">
+    <b>En pruebas.</b> Reconstrucci&oacute;n propia de una rotaci&oacute;n mensual multi-activo, con los huecos de
+    implementaci&oacute;n resueltos por nosotros y barridos en superficie de sensibilidad. Sin seguimiento en vivo:
+    solo resultados hist&oacute;ricos de test.<br>
+    Universo: SPY, EFA, EEM, TLT, IEF, GLD, DBC, VNQ (precios ajustados por dividendos).<br>
+    Regla: el &uacute;ltimo d&iacute;a de cada mes, un tercio de cartera para cada uno de los 3 activos con mayor retorno
+    de los &uacute;ltimos 6 meses, solo si est&aacute; en positivo; lo no invertido queda en letras del Tesoro.
+    Freno: si la volatilidad estimada de la cartera supera el 15% anualizado, se reduce la exposici&oacute;n en proporci&oacute;n.<br>
+    Ejecuci&oacute;n: cierre del d&iacute;a siguiente a la se&ntilde;al (conservadora). Coste: 0,05% por lado. Cash remunerado a la letra del Tesoro.
+  </div>
+</header>
+<main>
+  <div class="panel">
+    <h2>Test hist&oacute;rico, especificaci&oacute;n fija <span class="badge test">en pruebas</span> <span class="badge">2007 - hoy</span></h2>
+    <div class="kpis" id="bt-kpis"></div>
+    <div class="chartbox"><canvas id="bt-chart"></canvas></div>
+    <div class="sub">Nota de origen: los par&aacute;metros base (6 meses, top 3, umbral 15%) vienen de una especificaci&oacute;n
+    externa publicada, elegida sobre sus propios datos; no constituyen una validaci&oacute;n out-of-sample global.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Resultado por a&ntilde;os (especificaci&oacute;n fija, descriptivo)</h2>
+    <table id="wf-table"><thead><tr><th>A&ntilde;o</th><th>Arambarri</th><th>B&amp;H SPY</th><th>Sharpe</th><th>Max DD</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Walk-forward anual con selecci&oacute;n de variante <span class="badge">procedimiento distinto de la especificaci&oacute;n fija</span></h2>
+    <div class="sub" style="margin-bottom:8px">Cada a&ntilde;o se elige la variante del freno de volatilidad (7 opciones)
+    usando &uacute;nicamente datos anteriores a ese a&ntilde;o (ventana expansiva, criterio Sharpe) y se eval&uacute;a en el a&ntilde;o
+    siguiente. Mide qu&eacute; habr&iacute;a dado de s&iacute; elegir la variante en vivo.</div>
+    <div class="kpis" id="wf-kpis"></div>
+    <table id="wfs-table"><thead><tr><th>A&ntilde;o</th><th>Variante elegida</th><th>Retorno</th><th>Sharpe</th><th>Max DD</th><th>B&amp;H SPY</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Validaci&oacute;n estad&iacute;stica</h2>
+    <div class="sub" id="valid"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Sensibilidad retrospectiva <span class="badge test">no es out-of-sample</span></h2>
+    <div class="sub" style="margin-bottom:8px">Variantes del freno de volatilidad (hueco de implementaci&oacute;n resuelto por nosotros):</div>
+    <table id="brake-table"><thead><tr><th>Freno</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr></thead><tbody></tbody></table>
+    <div class="sub" style="margin:10px 0 8px">Horizonte de momentum &times; n&uacute;mero de posiciones:</div>
+    <table id="lb-table"><thead><tr><th>Config</th><th>CAGR</th><th>Sharpe</th><th>Max DD</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>D&oacute;nde falla</h2>
+    <div class="sub">
+      &bull; Pierde contra el S&amp;P 500 en los mercados alcistas fuertes (2013, 2019, 2023, 2024) y en 2015 cay&oacute; un -9,9%.<br>
+      &bull; El freno de volatilidad no aporta: sin freno el Sharpe es igual o mejor. La defensa real es la regla de cash
+      por momentum negativo, no el freno.<br>
+      &bull; La ventaja hist&oacute;rica es defensiva (2008: +7,9% frente a -36,8% del S&amp;P), no de rentabilidad: su CAGR a 20 a&ntilde;os
+      es menor que el del &iacute;ndice, con un tercio de su ca&iacute;da m&aacute;xima.<br>
+      &bull; Auditor&iacute;a de ejecuci&oacute;n: <span id="audit"></span>
+    </div>
+  </div>
+  <p class="pagenote" id="foot"></p>
+</main>
+<footer class="site-foot"><p class="foot-legal"><b>Aviso legal.</b> Sharpe Lab es un proyecto personal de aprendizaje. Nada de lo que aparece aquí es asesoramiento financiero ni una recomendación de compra o venta. Los resultados son backtests y seguimiento con dinero ficticio; rentabilidades pasadas, simuladas o no, no garantizan resultados futuros.</p><p class="foot-links"><a href="/sharpe-lab/">Inicio</a><a href="/sharpe-lab/metodologia/">Metodología</a><a href="https://github.com/Davizz-dev13/sharpe-lab">Código en GitHub</a><a href="https://davizz-dev13.github.io/">David Gallardo</a></p><p class="foot-sig">Sharpe Lab &middot; David Gallardo</p></footer>
+
+<script>
+const fmtPct = v => (v==null?'-':(v>0?'+':'')+Number(v).toFixed(2)+'%');
+const fmtPct1 = v => (v==null?'-':(v>0?'+':'')+Number(v).toFixed(1)+'%');
+const cls = v => v==null?'':(v>=0?'pos':'neg');
+fetch('arambarri.json').then(r=>r.json()).then(d=>{
+  (window.SLFresh ? SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36) : document.addEventListener('DOMContentLoaded', () => SLFresh.mount(document.getElementById('fresh'), d.generated_at, 36)));
+  document.getElementById('foot').textContent = 'Generado: '+d.generated_at+' · Ventana: '+d.window[0]+' → '+d.window[1];
+
+  const st=d.stats, bh=d.bh_stats;
+  document.getElementById('bt-kpis').innerHTML =
+    '<div class="kpi"><b>'+fmtPct(st.CAGR)+'</b>CAGR (B&amp;H '+fmtPct(bh.CAGR)+')</div>'+
+    '<div class="kpi"><b>'+st.Sharpe+'</b>Sharpe (B&amp;H '+bh.Sharpe+')</div>'+
+    '<div class="kpi"><b class="neg">'+st.MaxDD+'%</b>Max DD (B&amp;H '+bh.MaxDD+'%)</div>'+
+    '<div class="kpi"><b>'+st.Vol+'%</b>Vol (B&amp;H '+bh.Vol+'%)</div>';
+
+  new Chart(document.getElementById('bt-chart'), {data:{datasets:[
+    {type:'line', label:'Arambarri', data:d.dates.map((x,i)=>({x,y:d.equity[i]})), borderColor:'#1a3f8b', borderWidth:1.6, pointRadius:0},
+    {type:'line', label:'S&P 500 (B&H, dividendos reinvertidos)', data:d.dates.map((x,i)=>({x,y:d.bh_equity[i]})), borderColor:'#555', borderWidth:1.3, borderDash:[4,3], pointRadius:0},
+  ]}, options:{maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:9},grid:{color:'#e8e8e8'}},
+            y:{type:'logarithmic',ticks:{color:'#555'},grid:{color:'#e8e8e8'},title:{display:true,text:'Crecimiento de 1€ (log)',color:'#555'}}},
+    plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}}}}});
+
+  const tb=document.querySelector('#wf-table tbody');
+  d.folds.forEach(f=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+f.year+'</td><td class="'+cls(f.ret)+'">'+fmtPct1(f.ret)+'</td><td class="'+cls(f.spy_ret)+'">'+fmtPct1(f.spy_ret)+'</td><td>'+f.sharpe+'</td><td class="neg">'+f.dd+'%</td>';
+    tb.appendChild(tr);
+  });
+
+  const wa=d.wf_selector.aggregate;
+  document.getElementById('wf-kpis').innerHTML =
+    '<div class="kpi"><b>'+fmtPct(wa.CAGR)+'</b>CAGR agregado</div>'+
+    '<div class="kpi"><b>'+wa.Sharpe+'</b>Sharpe agregado</div>'+
+    '<div class="kpi"><b class="neg">'+wa.MaxDD+'%</b>Max DD</div>';
+  const wt=document.querySelector('#wfs-table tbody');
+  d.wf_selector.folds.forEach(f=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+f.year+'</td><td>'+f.variant+'</td><td class="'+cls(f.ret)+'">'+fmtPct1(f.ret)+'</td><td>'+f.sharpe+'</td><td class="neg">'+f.dd+'%</td><td class="'+cls(f.spy_ret)+'">'+fmtPct1(f.spy_ret)+'</td>';
+    wt.appendChild(tr);
+  });
+
+  const v=d.validation;
+  document.getElementById('valid').innerHTML =
+    '&bull; <b>Permutaci&oacute;n</b> (n='+v.perm_n+'): mismo calendario de rebalance y misma regla de cash, ranking entre activos aleatorizado; las series de cada activo quedan intactas. El ranking real supera al aleatorio en '+v.perm_exceedances+' de '+v.perm_n+' casos &rarr; p = 2/501 &asymp; '+v.perm_p+' (mediana del nulo: Sharpe '+v.perm_null_median+').<br>'+
+    '&bull; <b>Monte Carlo</b> (bootstrap de bloques de 21 d&iacute;as, '+v.mc_n+' caminos): Sharpe &lt; 0,8 en '+v.mc_lt08+'/'+v.mc_n+' casos; Sharpe &lt; 0 en '+v.mc_lt0+'/'+v.mc_n+' casos; peor 5% de drawdowns llega a '+v.mc_dd_p05+'%.';
+
+  const bt=document.querySelector('#brake-table tbody');
+  Object.entries(d.brake_surface).forEach(([k,x])=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+k+'</td><td>'+fmtPct(x.CAGR)+'</td><td>'+x.Sharpe+'</td><td class="neg">'+x.MaxDD+'%</td>';
+    bt.appendChild(tr);
+  });
+  const lt=document.querySelector('#lb-table tbody');
+  Object.entries(d.lb_surface).forEach(([k,x])=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+k.replace('lb','').replace('/top',' meses / top ')+'</td><td>'+fmtPct(x.CAGR)+'</td><td>'+x.Sharpe+'</td><td class="neg">'+x.MaxDD+'%</td>';
+    lt.appendChild(tr);
+  });
+
+  const a=d.audit;
+  document.getElementById('audit').textContent = a.n_rebalances+' rebalanceos mensuales, '+a.months_all_cash+' meses 100% en cash, exposici\u00f3n bruta media '+(a.gross_mean*100).toFixed(0)+'%, '+a.months_braked+' meses con freno activado, rotaci\u00f3n media '+(a.turnover_mean*100).toFixed(0)+'% por rebalance, coste total descontado '+a.total_cost_pct+'% del capital en 20 a\u00f1os.';
+});
+</script>
+</body>
+</html>
