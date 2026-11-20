@@ -162,18 +162,21 @@ fetch('satriano.json').then(r=>r.json()).then(d=>{
     tr.innerHTML='<td>'+f.year+'</td><td>'+f.target+'</td><td>'+f.n+'</td><td class="'+cls(f.ret)+'">'+fmtPct(f.ret*100)+'</td><td class="'+cls(f.mean)+'">'+fmtPct(f.mean*100)+'</td>';
     ft.appendChild(tr);
   });
-  try {
-    if (typeof Chart === 'undefined') throw new Error('chart.js no disponible');
-    new Chart(document.getElementById('eq-chart'), {data:{datasets:[
-    {type:'line', label:'Largo solo lunes open→close (neto, 100% exposición)', data:d.trade_dates.map((x,i)=>({x,y:d.trade_equity[i]})), borderColor:'#1a3f8b', borderWidth:1.6, pointRadius:0},
-  ]}, options:{maintainAspectRatio:false,
-    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:9},grid:{color:'#e8e8e8'}},
-            y:{ticks:{color:'#555'},grid:{color:'#e8e8e8'},title:{display:true,text:'Crecimiento de 1€',color:'#555'}}},
-    plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}}}}});
-  } catch (e) {
-    var cv = document.getElementById('eq-chart'); if (cv) cv.style.display = 'none';
-    var fb = document.getElementById('eq-fallback'); if (fb) fb.style.display = 'block';
-  }
+  window.satrianoDrawChart = function(dd){
+    try {
+      if (typeof Chart === 'undefined') throw new Error('chart.js no disponible');
+      new Chart(document.getElementById('eq-chart'), {data:{datasets:[
+      {type:'line', label:'Largo solo lunes open→close (neto, 100% exposición)', data:dd.trade_dates.map((x,i)=>({x,y:dd.trade_equity[i]})), borderColor:'#1a3f8b', borderWidth:1.6, pointRadius:0},
+    ]}, options:{maintainAspectRatio:false,
+      scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:9},grid:{color:'#e8e8e8'}},
+              y:{ticks:{color:'#555'},grid:{color:'#e8e8e8'},title:{display:true,text:'Crecimiento de 1€',color:'#555'}}},
+      plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}}}}});
+    } catch (e) {
+      var cv = document.getElementById('eq-chart'); if (cv) cv.style.display = 'none';
+      var fb = document.getElementById('eq-fallback'); if (fb) fb.style.display = 'block';
+    }
+  };
+  window.satrianoDrawChart(d);
 });
 </script>
 </body>
