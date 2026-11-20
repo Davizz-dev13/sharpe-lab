@@ -80,7 +80,7 @@
     <div class="sub">Con datos diarios la pauta no muestra ventaja explotable: el lunes es el mejor d&iacute;a de la semana
     en t&eacute;rminos relativos, pero el efecto absoluto no cubre costes. Ning&uacute;n objetivo del barrido lo rescata, y con
     coste de 0,05% por lado el ensayo es negativo. Conclusi&oacute;n limitada a esta proxy y granularidad.</div>
-    <div class="chartbox" style="margin-top:12px"><canvas id="eq-chart"></canvas></div>
+    <div class="chartbox" style="margin-top:12px"><canvas id="eq-chart"></canvas><img id="eq-fallback" src="equity-fallback.png" alt="Gráfica: crecimiento de 1€ de la estrategia Satriano (largo solo lunes, neto)" style="display:none;width:100%;height:100%;object-fit:contain" loading="lazy"><noscript><img src="equity-fallback.png" alt="Gráfica: crecimiento de 1€ de la estrategia Satriano (largo solo lunes, neto)" style="width:100%;height:100%;object-fit:contain"></noscript></div>
   </div>
 
   <div class="panel">
@@ -134,12 +134,7 @@ fetch('satriano.json').then(r=>r.json()).then(d=>{
     '<div class="kpi"><b>'+noT.sharpe_weekly.toFixed(2)+'</b>Sharpe sem. anualizado</div>'+
     '<div class="kpi"><b class="neg">'+fmtPct(noT.maxdd_at_100pct*100)+'</b>Max DD (100% exp.)</div>';
 
-  new Chart(document.getElementById('eq-chart'), {data:{datasets:[
-    {type:'line', label:'Largo solo lunes open→close (neto, 100% exposición)', data:d.trade_dates.map((x,i)=>({x,y:d.trade_equity[i]})), borderColor:'#1a3f8b', borderWidth:1.6, pointRadius:0},
-  ]}, options:{maintainAspectRatio:false,
-    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:9},grid:{color:'#e8e8e8'}},
-            y:{ticks:{color:'#555'},grid:{color:'#e8e8e8'},title:{display:true,text:'Crecimiento de 1€',color:'#555'}}},
-    plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}}}}});
+
 
   const wt=document.querySelector('#wd-table tbody');
   Object.entries(d.weekday).forEach(([k,x])=>{
@@ -167,6 +162,18 @@ fetch('satriano.json').then(r=>r.json()).then(d=>{
     tr.innerHTML='<td>'+f.year+'</td><td>'+f.target+'</td><td>'+f.n+'</td><td class="'+cls(f.ret)+'">'+fmtPct(f.ret*100)+'</td><td class="'+cls(f.mean)+'">'+fmtPct(f.mean*100)+'</td>';
     ft.appendChild(tr);
   });
+  try {
+    if (typeof Chart === 'undefined') throw new Error('chart.js no disponible');
+    new Chart(document.getElementById('eq-chart'), {data:{datasets:[
+    {type:'line', label:'Largo solo lunes open→close (neto, 100% exposición)', data:d.trade_dates.map((x,i)=>({x,y:d.trade_equity[i]})), borderColor:'#1a3f8b', borderWidth:1.6, pointRadius:0},
+  ]}, options:{maintainAspectRatio:false,
+    scales:{x:{type:'time',time:{unit:'year'},ticks:{color:'#555',maxTicksLimit:9},grid:{color:'#e8e8e8'}},
+            y:{ticks:{color:'#555'},grid:{color:'#e8e8e8'},title:{display:true,text:'Crecimiento de 1€',color:'#555'}}},
+    plugins:{legend:{labels:{color:'#555',boxWidth:10,font:{size:10}}}}}});
+  } catch (e) {
+    var cv = document.getElementById('eq-chart'); if (cv) cv.style.display = 'none';
+    var fb = document.getElementById('eq-fallback'); if (fb) fb.style.display = 'block';
+  }
 });
 </script>
 </body>
